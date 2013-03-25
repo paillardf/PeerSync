@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/derby/derby-10.5.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_cs.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_de_DE.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_es.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_fr.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_hu.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_it.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_ja_JP.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_ko_KR.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_pl.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_pt_BR.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_ru.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_zh_CN.jar"/>
+	<classpathentry kind="lib" path="lib/derby/derbyLocale_zh_TW.jar"/>
+	<classpathentry kind="lib" path="lib/bouncycastle/bcprov-jdk15-145.jar"/>
+	<classpathentry kind="lib" path="lib/felix/felix.jar"/>
+	<classpathentry kind="lib" path="lib/h2/h2-1.2.127.jar"/>
+	<classpathentry kind="lib" path="lib/jetty/javax.servlet.jar"/>
+	<classpathentry kind="lib" path="lib/jetty/org.mortbay.jetty.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/cglib-2.1_3-src.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/hamcrest-library-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/jmock-junit3-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/jmock-junit4-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/jmock-2.5.1/jmock-legacy-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/junit/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="lib/netty/httptunnel-0.92.jar"/>
+	<classpathentry kind="lib" path="lib/netty/netty-3.1.5.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jxse-2.6.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/jxse-2.7-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/sql/sqlite-jdbc-3.7.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/sql/sqlite-jdbc-3.7.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
