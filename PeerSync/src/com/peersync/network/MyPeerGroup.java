@@ -1,12 +1,16 @@
-package com.peersync.data;
+package com.peersync.network;
 
 import net.jxta.discovery.DiscoveryService;
+import net.jxta.document.AdvertisementFactory;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
+import net.jxta.protocol.RdvAdvertisement;
 import net.jxta.rendezvous.RendezVousService;
+import net.jxta.rendezvous.RendezvousEvent;
+import net.jxta.rendezvous.RendezvousListener;
 
-import com.peersync.DiscoveryBehaviour;
-import com.peersync.PeerGroupManager;
+import com.peersync.network.behaviour.CommunicationBehaviour;
+import com.peersync.network.behaviour.DiscoveryBehaviour;
 
 public class MyPeerGroup {
 
@@ -17,6 +21,7 @@ public class MyPeerGroup {
 	private PeerGroupManager groupManager;
 	private PeerGroup peerGroup;
 	public String peerGroupName;
+	private CommunicationBehaviour communicationBehaviour;
 
 	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName)  {
 		this.id = psepeergroupid;
@@ -24,6 +29,8 @@ public class MyPeerGroup {
 		this.groupManager = peerGroupManager;
 		this.dicoveryManager = new DiscoveryBehaviour(this);
 		dicoveryManager.start();
+		this.communicationBehaviour = new CommunicationBehaviour(this);
+		
 	}
 
 	public DiscoveryService getNetPeerGroupDiscoveryService() {
@@ -43,8 +50,11 @@ public class MyPeerGroup {
 	}
 	public void setPeerGroup(PeerGroup mPeerGroup) {
 		this.peerGroup = mPeerGroup;
-		if(peerGroup!=null)
-			peerGroup.getRendezVousService().setAutoStart(true, 100000);
+		if(peerGroup!=null){
+			getRendezVousService().setAutoStart(true, 30000);
+			
+			communicationBehaviour.start();
+		}
 	}
 
 	public RendezVousService getRendezVousService() {

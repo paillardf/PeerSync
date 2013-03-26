@@ -1,4 +1,4 @@
-package com.peersync.files;
+package com.peersync.events;
 
 import java.sql.SQLException;
 import java.util.Hashtable;
@@ -11,7 +11,7 @@ import java.util.TimerTask;
 
 public class EventsManager {
 
-	private EventsPile m_EventsStack;
+	private EventsStack m_EventsStack;
 	private Map<String,String> currentStack = new Hashtable<String,String>();
 	
 	List<String> m_directories = new LinkedList<String>();
@@ -22,7 +22,7 @@ public class EventsManager {
 	 public EventsManager()
 	 {
 		 try {
-			m_EventsStack = new EventsPile();
+			m_EventsStack = new EventsStack();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

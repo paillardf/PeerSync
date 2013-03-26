@@ -1,4 +1,4 @@
-package com.peersync;
+package com.peersync.network;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,8 @@ import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 
+import com.peersync.network.advertisment.StackAdvertisement;
+import com.peersync.network.behaviour.DiscoveryBehaviour;
 import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 import com.peersync.tools.Outils;
@@ -21,7 +23,7 @@ import com.peersync.tools.Outils;
 public class PeerManager {
 
 	//DEBUG VAL //TODO
-	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.100" + ":9711");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.2.81" + ":9711");
 	private int PORT = 9799;
 
     
@@ -41,7 +43,7 @@ public class PeerManager {
 	private KeyStoreManager keyStoreManager;
 	private DiscoveryBehaviour peerNetworkManager;
 	private PeerGroupManager peerGroupManager;
-	static PeerID PID_EDGE;
+	public static PeerID PID_EDGE;
 
 	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
 
@@ -88,11 +90,14 @@ public class PeerManager {
 		//globalPeerGroup = manager.getNetPeerGroup();
 		//netPeerGroup.getRendezVousService().setAutoStart(false);
 		
-		 AdvertisementFactory.registerAdvertisementInstance(
-	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv().getAdvType(),
-	                new PeerGroupAdv.Instantiator());
+//		 AdvertisementFactory.registerAdvertisementInstance(
+//	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv().getAdvType(),
+//	                new PeerGroupAdv.Instantiator());
 		
-		
+		// Registering our stack advertisement instance
+			AdvertisementFactory.registerAdvertisementInstance(
+					StackAdvertisement.getAdvertisementType(),
+					new StackAdvertisement.Instantiator());
 		
 		
 		peerGroupManager = new PeerGroupManager(this, netPeerGroup);

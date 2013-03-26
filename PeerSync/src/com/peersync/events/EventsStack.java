@@ -1,4 +1,4 @@
-package com.peersync.files;
+package com.peersync.events;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,7 +12,7 @@ import java.util.Vector;
 
 
 
-public class EventsPile extends DbliteConnection {
+public class EventsStack extends DbliteConnection {
 
 	private Vector<Event> m_Events;
 
@@ -34,7 +34,7 @@ public class EventsPile extends DbliteConnection {
 	private static final int ACTION_UPDATE = 2;
 	private static final int ACTION_DELETE = 3;
 
-	public EventsPile() throws ClassNotFoundException, SQLException {
+	public EventsStack() throws ClassNotFoundException, SQLException {
 		super(DBEVENTSPATH);
 		m_Events = new Vector<Event>();
 		try

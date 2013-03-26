@@ -1,4 +1,4 @@
-package com.peersync;
+package com.peersync.network;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,6 @@ import net.jxta.discovery.DiscoveryService;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 
-import com.peersync.data.MyPeerGroup;
 
 public class PeerGroupManager {
 

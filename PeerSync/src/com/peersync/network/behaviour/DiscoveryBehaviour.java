@@ -1,39 +1,41 @@
-package com.peersync;
+package com.peersync.network.behaviour;
 
+import java.io.IOException;
 import java.util.Enumeration;
 
 import net.jxta.credential.AuthenticationCredential;
 import net.jxta.credential.Credential;
-import net.jxta.discovery.DiscoveryEvent;
-import net.jxta.discovery.DiscoveryListener;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
+import net.jxta.document.AdvertisementFactory;
 import net.jxta.exception.PeerGroupException;
+import net.jxta.impl.endpoint.EndpointUtils;
 import net.jxta.impl.membership.pse.StringAuthenticator;
 import net.jxta.membership.MembershipService;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.Module;
+import net.jxta.protocol.PeerAdvertisement;
 import net.jxta.protocol.PeerGroupAdvertisement;
+import net.jxta.protocol.RdvAdvertisement;
+import net.jxta.protocol.RouteAdvertisement;
 
-import com.peersync.data.MyPeerGroup;
+import com.peersync.network.MyPeerGroup;
+import com.peersync.network.PeerManager;
 import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 import com.peersync.tools.Outils;
 
-public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
+public class DiscoveryBehaviour extends AbstractBehaviour{
 
 
-	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
 
-	private MyPeerGroup myPeerGroup;
+
+
 
 	public DiscoveryBehaviour(MyPeerGroup myPeerGroup) {
-		this.myPeerGroup = myPeerGroup;
-
-
+		super(myPeerGroup);
 	}
-
 
 
 	public void run() {
@@ -56,14 +58,28 @@ public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
 
 				Log.d(myPeerGroup.peerGroupName, "IS RENDEZ VOUS "+ myPeerGroup.getPeerGroup().isRendezvous());
 				Log.d(myPeerGroup.peerGroupName, "IS CONNECT TO RENDEZ VOUS "+ myPeerGroup.getPeerGroup().getRendezVousService().isConnectedToRendezVous());
-				
-				if(!myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-					findRDVAdvertisement();
+
+				if(myPeerGroup.getPeerGroup().isRendezvous()){
+					RdvAdvertisement rdvAdv = (RdvAdvertisement) AdvertisementFactory.newAdvertisement(RdvAdvertisement.getAdvertisementType());
+					PeerAdvertisement padv = myPeerGroup.getPeerGroup().getPeerAdvertisement();
+					rdvAdv.setPeerID(padv.getPeerID());
+					rdvAdv.setGroupID(myPeerGroup.getPeerGroup().getPeerGroupID());
+					rdvAdv.setServiceName(myPeerGroup.getNetPeerGroup().getPeerGroupName());
+					rdvAdv.setName(padv.getName());
+					RouteAdvertisement ra = EndpointUtils.extractRouteAdv(padv);
+					rdvAdv.setRouteAdv(ra);
+					try {
+						myPeerGroup.getNetPeerGroupDiscoveryService().publish(rdvAdv);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					myPeerGroup.getNetPeerGroupDiscoveryService().remotePublish(rdvAdv);
 				}
-				
+
 			}
 
-			
+
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -72,25 +88,25 @@ public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
 	}
 
 
-	private void findRDVAdvertisement() {
-		String searchKey = "Name";
-		Log.d(myPeerGroup.peerGroupName,"Trying to find RDV advertisement...");
+	//	private void findRDVAdvertisement() {
+	//		String searchKey = "Name";
+	//		Log.d(myPeerGroup.peerGroupName,"Trying to find RDV advertisement...");
+	//
+	////		try {
+	////			parseAdvertisement(myPeerGroup.getDiscoveryService().getLocalAdvertisements
+	////					(DiscoveryService.ADV, null, null));
+	////			if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
+	////				
+	////				Log.d(myPeerGroup.peerGroupName,"Launching Remote Discovery Service for RDV...");
+	////				myPeerGroup.getNetPeerGroupDiscoveryService().getRemoteAdvertisements(null,
+	////						DiscoveryService.ADV, null, null, 1, this);
+	////			}
+	////		} catch (Exception e) {
+	////			Log.e(myPeerGroup.peerGroupName, "Error during advertisement search");
+	////		}
+	//	}
 
-//		try {
-//			parseAdvertisement(myPeerGroup.getDiscoveryService().getLocalAdvertisements
-//					(DiscoveryService.ADV, null, null));
-//			if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-//				
-//				Log.d(myPeerGroup.peerGroupName,"Launching Remote Discovery Service for RDV...");
-//				myPeerGroup.getNetPeerGroupDiscoveryService().getRemoteAdvertisements(null,
-//						DiscoveryService.ADV, null, null, 1, this);
-//			}
-//		} catch (Exception e) {
-//			Log.e(myPeerGroup.peerGroupName, "Error during advertisement search");
-//		}
-	}
-		
-	
+
 
 
 
@@ -102,7 +118,7 @@ public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
 			parseAdvertisement(myPeerGroup.getNetPeerGroupDiscoveryService().getLocalAdvertisements
 					(DiscoveryService.GROUP, searchKey, myPeerGroup.peerGroupName));
 			if(myPeerGroup.getPeerGroup()==null){
-				
+
 				Log.d(myPeerGroup.peerGroupName,"Launching Remote Discovery Service...");
 				myPeerGroup.getNetPeerGroupDiscoveryService().getRemoteAdvertisements(null,
 						DiscoveryService.GROUP, searchKey, myPeerGroup.peerGroupName, 1, this);
@@ -112,7 +128,7 @@ public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
 		}
 	}
 
-	
+
 
 
 	private PeerGroup createNewPeerGroup(PeerGroupID myPeerGroupID, String myPeerGroupName, String myPeerGroupDescription) {
@@ -176,17 +192,12 @@ public class DiscoveryBehaviour extends Thread implements DiscoveryListener{
 
 
 
-	@Override
-	public void discoveryEvent(DiscoveryEvent event) {
-		parseAdvertisement(event.getSearchResults());
 
-	}
-	
-	private void parseAdvertisement(Enumeration<Advertisement> advertisementsEnum) {
+	protected void parseAdvertisement(Enumeration<Advertisement> advertisementsEnum) {
 
 		// PEER GROUP ADVENTISEMENT
 		if ((advertisementsEnum != null) && advertisementsEnum.hasMoreElements()) {
-			
+
 			PeerGroupAdvertisement myFoundPGA = null;
 			while (advertisementsEnum.hasMoreElements()) {
 				myFoundPGA = (PeerGroupAdvertisement) advertisementsEnum.nextElement();

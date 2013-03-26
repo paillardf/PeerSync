@@ -1,4 +1,4 @@
-package com.peersync.data;
+package com.peersync.models;
 
 public class StackVersion {
 	

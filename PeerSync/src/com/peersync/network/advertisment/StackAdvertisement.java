@@ -38,7 +38,7 @@
  *  
  */
 
-package com.peersync.advertissement;
+package com.peersync.network.advertisment;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,7 +56,7 @@ import net.jxta.document.TextElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
 
-import com.peersync.data.StackVersion;
+import com.peersync.models.StackVersion;
 
 public class StackAdvertisement extends Advertisement {
     
@@ -171,14 +171,14 @@ public class StackAdvertisement extends Advertisement {
         for (StackVersion stackVersion : stackList) {
         	Element stackValue;
         	Element stackElement  = TheResult.createElement(StackTAG, stackVersion.getUID());;
-        	
+        	TheResult.appendChild(stackElement);
         	stackValue= TheResult.createElement(UIDTAG, stackVersion.getUID());
         	stackElement.appendChild(stackValue);
         	
-        	stackValue= TheResult.createElement(LastUpdateTAG, stackVersion.getLastUpdate());
+        	stackValue= TheResult.createElement(LastUpdateTAG, ""+stackVersion.getLastUpdate());
         	stackElement.appendChild(stackValue);
         	
-        	TheResult.appendChild(stackElement);
+        	
        
 		}
      

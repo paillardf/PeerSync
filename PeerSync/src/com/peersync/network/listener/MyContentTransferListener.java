@@ -1,4 +1,4 @@
-package com.peersync.listener;
+package com.peersync.network.listener;
 
 import net.jxta.content.ContentTransferEvent;
 import net.jxta.content.ContentTransferListener;

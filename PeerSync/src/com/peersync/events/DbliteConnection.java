@@ -1,4 +1,4 @@
-package com.peersync.files;
+package com.peersync.events;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

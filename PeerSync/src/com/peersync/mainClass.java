@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.peersync.files.EventsManager;
+import com.peersync.events.EventsManager;
 
 public class mainClass {
 	public static void main(String[] args){

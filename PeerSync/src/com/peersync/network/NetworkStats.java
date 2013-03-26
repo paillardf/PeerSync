@@ -1,4 +1,4 @@
-package com.peersync;
+package com.peersync.network;
 
 import java.util.Observable;
 
