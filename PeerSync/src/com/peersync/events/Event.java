@@ -4,7 +4,6 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 public class Event extends DbliteConnection{
 
 	private long m_date;
@@ -43,7 +42,7 @@ public class Event extends DbliteConnection{
 	
 	public Event(String filepath,String hash,int action,String owner,String uuidShareFolder) throws Exception {
 		super(DBEVENTSPATH);
-		setDate(Calendar.getInstance().getTime().getTime());
+		setDate(System.currentTimeMillis());
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);

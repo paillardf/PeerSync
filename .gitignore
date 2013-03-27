@@ -1,0 +1,8 @@
+
+
+.project
+# Java class files
+*.class
+
+# generated files
+/PeerSync/bin/

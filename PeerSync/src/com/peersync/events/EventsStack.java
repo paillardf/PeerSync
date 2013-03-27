@@ -3,7 +3,6 @@ package com.peersync.events;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -163,7 +162,7 @@ public class EventsStack extends DbliteConnection {
 
 	public void save()
 	{
-		save(Calendar.getInstance().getTime().getTime());
+		save(System.currentTimeMillis());
 
 	}
 
