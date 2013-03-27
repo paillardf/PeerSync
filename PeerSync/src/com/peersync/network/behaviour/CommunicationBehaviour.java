@@ -48,8 +48,8 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 		try {
 			while(true){
 
-				sleep(3000);
-				if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
+				sleep(5000);
+				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
 					if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 30000){
 						publishStackVersionAdvertisement();
 
@@ -61,7 +61,7 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 					myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
 							null, null, 1, this);
 
-				}
+				//}
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -84,7 +84,7 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 
 			if (TheAdv.getAdvType().compareTo(StackAdvertisement.class.getName())==0) {
 
-				// We found StackVersion Advertisemen
+				// We found StackVersion Advertisement
 				Log.d("Communication", "new StackAvertisement found");
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
 				//TODO

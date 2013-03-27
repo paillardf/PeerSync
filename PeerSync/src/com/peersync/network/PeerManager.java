@@ -14,6 +14,7 @@ import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 
+import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
 import com.peersync.tools.KeyStoreManager;
@@ -43,6 +44,7 @@ public class PeerManager {
 	private KeyStoreManager keyStoreManager;
 	private DiscoveryBehaviour peerNetworkManager;
 	private PeerGroupManager peerGroupManager;
+	NetworkConfigurator conf;
 	public static PeerID PID_EDGE;
 
 	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
@@ -70,10 +72,10 @@ public class PeerManager {
 			manager = new NetworkManager(
 					NetworkManager.ConfigMode.EDGE, "PeerClient",
 					ConfigurationFile_RDV.toURI());
-			NetworkConfigurator conf = manager.getConfigurator();
+			conf = manager.getConfigurator();
 			conf.addSeedRendezvous(RendezVousSeedURI);
 			conf.setTcpPort(PORT);
-			conf.setUseMulticast(true);
+			conf.setUseMulticast(false);
 			conf.setTcpEnabled(true);
 			conf.setTcpIncoming(true);
 			conf.setTcpOutgoing(true);
@@ -90,15 +92,18 @@ public class PeerManager {
 		//globalPeerGroup = manager.getNetPeerGroup();
 		//netPeerGroup.getRendezVousService().setAutoStart(false);
 		
-//		 AdvertisementFactory.registerAdvertisementInstance(
-//	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv().getAdvType(),
-//	                new PeerGroupAdv.Instantiator());
+		 AdvertisementFactory.registerAdvertisementInstance(
+	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv().getAdvType(),
+	                new PeerGroupAdv.Instantiator());
 		
 		// Registering our stack advertisement instance
 			AdvertisementFactory.registerAdvertisementInstance(
 					StackAdvertisement.getAdvertisementType(),
 					new StackAdvertisement.Instantiator());
-		
+			AdvertisementFactory.registerAdvertisementInstance(
+            		RendezVousAdvertisement.getAdvertisementType(),
+            		new RendezVousAdvertisement.Instantiator()
+					);
 		
 		peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 		peerGroupManager.addPeerGroupToManage(PsePeerGroupID, PsePeerGroupName);

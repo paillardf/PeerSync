@@ -1,5 +1,9 @@
 package com.peersync.tools;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -43,7 +47,6 @@ public class Log {
 			Onglets = new JTabbedPane();
 			JTextPane txt = new JTextPane();
 			JScrollPane jsp = new JScrollPane(txt);
-
 			Onglets.addTab(DEFAULT, null, jsp, null); 
 
 			this.getContentPane().add(Onglets);
@@ -55,7 +58,9 @@ public class Log {
 			for (int i =0; i< Onglets.getComponentCount(); i++) {
 				if(Onglets.getTitleAt(i).compareTo(tag)==0){
 					JTextPane pane = (JTextPane) ((JScrollPane) Onglets.getComponent(i)).getViewport().getView();
-					pane.setText(pane.getText()+v+"\n" );
+					DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - ");
+					Date date = new Date();
+					pane.setText(dateFormat.format(date) + v+"\n"+pane.getText());
 					return;
 				}
 

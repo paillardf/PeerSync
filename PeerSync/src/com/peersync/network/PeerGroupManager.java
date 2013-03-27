@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
+import net.jxta.platform.NetworkConfigurator;
 
 
 public class PeerGroupManager {
@@ -32,6 +33,11 @@ public class PeerGroupManager {
 
 	public PeerGroup getNetPeerGroup() {
 		return netPeerGroup;
+	}
+
+	public NetworkConfigurator getConfig() {
+		return peer.conf;
+		
 	}
 
 }

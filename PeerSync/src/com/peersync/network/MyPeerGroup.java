@@ -26,7 +26,7 @@ public class MyPeerGroup {
 	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName)  {
 		this.id = psepeergroupid;
 		this.peerGroupName = peerGroupName;
-		this.groupManager = peerGroupManager;
+		this.setGroupManager(peerGroupManager);
 		this.dicoveryManager = new DiscoveryBehaviour(this);
 		dicoveryManager.start();
 		this.communicationBehaviour = new CommunicationBehaviour(this);
@@ -34,11 +34,11 @@ public class MyPeerGroup {
 	}
 
 	public DiscoveryService getNetPeerGroupDiscoveryService() {
-		return groupManager.getNetDiscoveryService();
+		return getGroupManager().getNetDiscoveryService();
 	}
 
 	public PeerGroup getNetPeerGroup() {
-		return groupManager.getNetPeerGroup();
+		return getGroupManager().getNetPeerGroup();
 	}
 	
 	public DiscoveryService getPeerGroupDiscoveryService() {
@@ -51,9 +51,9 @@ public class MyPeerGroup {
 	public void setPeerGroup(PeerGroup mPeerGroup) {
 		this.peerGroup = mPeerGroup;
 		if(peerGroup!=null){
-			getRendezVousService().setAutoStart(true, 30000);
+			getRendezVousService().setAutoStart(true,10000);
 			
-			communicationBehaviour.start();
+			//communicationBehaviour.start();
 		}
 	}
 
@@ -63,6 +63,14 @@ public class MyPeerGroup {
 	
 	public DiscoveryService getDiscoveryService() {
 		return peerGroup.getDiscoveryService();
+	}
+
+	public PeerGroupManager getGroupManager() {
+		return groupManager;
+	}
+
+	public void setGroupManager(PeerGroupManager groupManager) {
+		this.groupManager = groupManager;
 	}
 	
 

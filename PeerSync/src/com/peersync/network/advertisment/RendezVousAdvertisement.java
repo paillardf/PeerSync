@@ -44,7 +44,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 
 import net.jxta.document.Advertisement;
@@ -55,47 +54,37 @@ import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.TextElement;
+import net.jxta.endpoint.EndpointAddress;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
+import net.jxta.peer.PeerID;
 import net.jxta.peergroup.PeerGroupID;
-import net.jxta.protocol.RouteAdvertisement;
 
-import com.peersync.models.StackVersion;
-
-public class StackAdvertisement extends Advertisement {
+public class RendezVousAdvertisement extends Advertisement {
     
-    public static final String Name = "FilesVersionAdvertisement";
+    public static final String Name = "RendezVousAdvertisement";
 
     // Advertisement elements, tags and indexables
-    public final static String AdvertisementType = "jxta:FilesVersionAdvertisement";
+    public final static String AdvertisementType = "jxta:RendezVousAdvertisement";
     
     private ID AdvertisementID = ID.nullID;
+
+	private PeerGroupID peerGroupId;
+
+	private PeerID peerId;
+
+	private long startDate;
     
-    private final static String IDTag = "advID";
-    private final static String StackTAG = "Stack";
-    private final static String UIDTAG = "UID";
-    private final static String LastUpdateTAG = "LastUpdate";
+    private final static String IDTAG = "advID";
+    public final static String PeerGroupIdTAG = "PeerGroupId";
+    private final static String PeerIDTAG = "PeerID";
+    private final static String StartDateTAG = "StartDate";
 
-	private ArrayList<StackVersion> stackList;
-
-   //private ArrayList<StackVersion> stackList;
-    
-    private final static String[] IndexableFields = { IDTag };
-
-    public StackAdvertisement(ArrayList<StackVersion> stackList) {
-    	this.stackList = stackList;
-
-    }
-
-    
-    public StackAdvertisement() {
-    	stackList = new ArrayList<StackVersion>();
-	}
-
-    
-    public StackAdvertisement(Element Root) {
-        this();
-        // Retrieving the elements
+	   
+    private final static String[] IndexableFields = { IDTAG , PeerGroupIdTAG };
+ 
+    public RendezVousAdvertisement(Element Root) {
+       // Retrieving the elements
         TextElement MyTextElement = (TextElement) Root;
 
         Enumeration TheElements = MyTextElement.getChildren();
@@ -107,32 +96,31 @@ public class StackAdvertisement extends Advertisement {
             
             
             String TheElementName = TheElement.getName();
-            if(TheElementName.compareTo(StackTAG)==0){
-            	Enumeration stackEnum = (Enumeration) TheElement.getChildren();
-            	long lastUpdate = 0;
-            	String UID = null;
-            	while (stackEnum.hasMoreElements()) {
-            		
-            		TextElement stackElement = (TextElement) stackEnum.nextElement();
-            		String theElementName = stackElement.getName();
-            		String value = stackElement.getTextValue();
-            		
-            		 if (theElementName.compareTo(UIDTAG)==0) {
-            			 UID = theElementName;
-            			 UID = theElementName;
-            		 }else if(theElementName.compareTo(LastUpdateTAG)==0){
-            			 lastUpdate = Long.parseLong(value);
-            		 }
-            		
-            	}
-            	if(lastUpdate!=0&&UID!=null){
-            		stackList.add(new StackVersion(UID, lastUpdate));
-            	}
-            	
-            	
-            	
-            	
-            }else if(TheElementName.compareTo(IDTag)==0){
+            if(TheElementName.compareTo(PeerGroupIdTAG)==0){
+            	 URI ReadID;
+				try {
+					ReadID = new URI(TheElement.getValue());
+				
+            	 //this.peerGroupId = (PeerGroupID) IDFactory.fromURI(ReadID);
+            	this.peerGroupId = net.jxta.impl.id.UUID.PeerGroupID.create((URI) ReadID);
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }else if(TheElementName.compareTo(PeerIDTAG)==0){
+            	URI ReadID;
+				try {
+					ReadID = new URI(TheElement.getValue());
+				
+            	//this.peerGroupId = (PeerGroupID) IDFactory.fromURI(ReadID);
+            	this.setPeerId(net.jxta.impl.id.CBID.PeerID.create((URI) ReadID));
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }else if(TheElementName.compareTo(StartDateTAG)==0){
+                this.setStartDate(Long.parseLong(TheElement.getValue()));
+            }else if(TheElementName.compareTo(IDTAG)==0){
 
                 try {
                     
@@ -154,17 +142,18 @@ public class StackAdvertisement extends Advertisement {
             }
             
         }  
-        
 
     }
     
-    public void addStackVersion(StackVersion stackVersion){
-    	this.stackList.add(stackVersion);
+    public EndpointAddress getRendezVousAddress(){
+    	return new EndpointAddress("jxta", getPeerId().getUniqueValue().toString(), null, null);
     }
-    
-    public ArrayList<StackVersion> getStackVersionArray(){
-    	return stackList;
-    }
+	
+	public RendezVousAdvertisement() {
+		
+	}
+
+
 	@Override
     public Document getDocument(MimeMediaType TheMimeMediaType) {
         
@@ -172,21 +161,15 @@ public class StackAdvertisement extends Advertisement {
         StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
                 TheMimeMediaType, AdvertisementType);
         
+        Element e  = TheResult.createElement(PeerGroupIdTAG, peerGroupId.toString());
+    	TheResult.appendChild(e);
+    	e  = TheResult.createElement(PeerIDTAG, getPeerId().toString());
+    	TheResult.appendChild(e);
+    	e  = TheResult.createElement(StartDateTAG, getStartDate()+"");
+    	TheResult.appendChild(e);
+    	
         
-        for (StackVersion stackVersion : stackList) {
-        	Element stackValue;
-        	Element stackElement  = TheResult.createElement(StackTAG, stackVersion.getUID());;
-        	TheResult.appendChild(stackElement);
-        	stackValue= TheResult.createElement(UIDTAG, stackVersion.getUID());
-        	stackElement.appendChild(stackValue);
-        	
-        	stackValue= TheResult.createElement(LastUpdateTAG, ""+stackVersion.getLastUpdate());
-        	stackElement.appendChild(stackValue);
-        	
-        	
-       
-		}
-     
+      
         return TheResult;
         
     }
@@ -195,28 +178,24 @@ public class StackAdvertisement extends Advertisement {
         AdvertisementID = TheID;
     }
 
+
     @Override
-    public ID getID() {
-    	
+    public synchronized ID getID() {
+    	if (AdvertisementID == ID.nullID) {
+            try {
+                // We have not yet built it. Do it now
+                byte[] seed = getAdvertisementType().getBytes("UTF-8");
+                InputStream in = new ByteArrayInputStream(getPeerId().toString().getBytes("UTF-8"));
+
+                AdvertisementID = IDFactory.newCodatID((PeerGroupID) peerGroupId, seed, in);
+            } catch (Exception ez) {
+                return ID.nullID;
+            }
+        }
         return AdvertisementID;
     }
-    
-//    @Override
-//    public synchronized ID getID() {
-//    	if (AdvertisementID == ID.nullID) {
-//            try {
-//                // We have not yet built it. Do it now
-//                byte[] seed = getAdvertisementType().getBytes("UTF-8");
-//                InputStream in = new ByteArrayInputStream(StackAdvertisement.this..getPeerID().toString().getBytes("UTF-8"));
-//
-//                hashID = IDFactory.newCodatID((PeerGroupID) getPeerID(), seed, in);
-//            } catch (Exception ez) {
-//                return ID.nullID;
-//            }
-//        }
-//        return hashID;
-//    }
 
+    
     @Override
     public String[] getIndexFields() {
         return IndexableFields;
@@ -224,13 +203,15 @@ public class StackAdvertisement extends Advertisement {
 
    
     @Override
-    public StackAdvertisement clone() throws CloneNotSupportedException {
+    public RendezVousAdvertisement clone() throws CloneNotSupportedException {
         
-        StackAdvertisement Result =
-                (StackAdvertisement) super.clone();
+        RendezVousAdvertisement Result =
+                (RendezVousAdvertisement) super.clone();
 
         Result.AdvertisementID = this.AdvertisementID;
-        Result.stackList = (ArrayList<StackVersion>) this.stackList.clone();
+        Result.peerGroupId = this.peerGroupId;
+        Result.setPeerId(this.getPeerId());
+        Result.setStartDate(this.getStartDate());
         
         return Result;
         
@@ -247,25 +228,46 @@ public class StackAdvertisement extends Advertisement {
         return AdvertisementType;
     }    
     
-    public static class Instantiator implements AdvertisementFactory.Instantiator {
+    public PeerID getPeerId() {
+		return peerId;
+	}
+
+	public void setPeerId(PeerID peerId) {
+		this.peerId = peerId;
+	}
+
+	public static class Instantiator implements AdvertisementFactory.Instantiator {
 
         public String getAdvertisementType() {
-            return StackAdvertisement.getAdvertisementType();
+            return RendezVousAdvertisement.getAdvertisementType();
         }
 
-        public Advertisement newInstance(ArrayList<StackVersion> stackVersioList) {
-            return new StackAdvertisement(stackVersioList);
-        }
+      
 
         public Advertisement newInstance(net.jxta.document.Element root) {
-            return new StackAdvertisement(root);
+            return new RendezVousAdvertisement(root);
         }
 
 		@Override
 		public Advertisement newInstance() {
-			 return new StackAdvertisement();
+			 return new RendezVousAdvertisement();
 		}
         
     }
 
+	public void setPeerGroupId(PeerGroupID peerGroupID2) {
+		peerGroupId = peerGroupID2;;
+		
+	}
+
+	public long getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(long startDate) {
+		this.startDate = startDate;
+	}
+	
+	
+	
 }

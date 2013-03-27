@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import net.jxta.document.AdvertisementFactory;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.id.IDFactory;
+import net.jxta.impl.protocol.PeerGroupAdv;
 import net.jxta.peer.PeerID;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
@@ -14,6 +16,10 @@ import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 import Examples.Z_Tools_And_Others.DelayedJxtaNetworkStopper;
+
+import com.peersync.network.advertisment.RendezVousAdvertisement;
+import com.peersync.network.advertisment.StackAdvertisement;
+import com.peersync.tools.Outils;
 
 /**
  * Simple RENDEZVOUS peer connecting via the NetPeerGroup.
@@ -44,7 +50,7 @@ public class RendezVous_Mya {
 
             // Retrieving the network configurator
             NetworkConfigurator MyNetworkConfigurator = MyNetworkManager.getConfigurator();
-
+            
             // Setting Configuration
             MyNetworkConfigurator.setUseMulticast(false);
 
@@ -55,7 +61,24 @@ public class RendezVous_Mya {
 
             // Setting the Peer ID
             MyNetworkConfigurator.setPeerID(PID_RDV);
-
+            AdvertisementFactory.registerAdvertisementInstance(
+	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv().getAdvType(),
+	                new PeerGroupAdv.Instantiator());
+//		
+//            AdvertisementFactory.registerAdvertisementInstance(
+//            		PeerRDVAdvertisement.getAdvertisementType(),
+//            		new PeerAdv.Instantiator()
+//					);
+            
+		// Registering our stack advertisement instance
+			AdvertisementFactory.registerAdvertisementInstance(
+					StackAdvertisement.getAdvertisementType(),
+					new StackAdvertisement.Instantiator());
+			
+			AdvertisementFactory.registerAdvertisementInstance(
+            		RendezVousAdvertisement.getAdvertisementType(),
+            		new RendezVousAdvertisement.Instantiator()
+					);
             // Starting the JXTA network
             PeerGroup NetPeerGroup = MyNetworkManager.startNetwork();
 
