@@ -8,13 +8,14 @@ import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
 import net.jxta.document.AdvertisementFactory;
+import net.jxta.id.ID;
 import net.jxta.protocol.RdvAdvertisement;
 import net.jxta.rendezvous.RendezvousEvent;
 import net.jxta.rendezvous.RendezvousListener;
 
 import com.peersync.models.StackVersion;
-import com.peersync.network.MyPeerGroup;
 import com.peersync.network.advertisment.StackAdvertisement;
+import com.peersync.network.group.MyPeerGroup;
 import com.peersync.tools.Log;
 
 
@@ -50,16 +51,16 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 
 				sleep(5000);
 				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-					if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 30000){
-						publishStackVersionAdvertisement();
+				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 30000){
+					publishStackVersionAdvertisement();
 
-						
-					}
-					Enumeration<Advertisement> TheAdvEnum;
-					TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, null, null);
-					parseAdvertisement(TheAdvEnum);
-					myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
-							null, null, 1, this);
+
+				}
+				Enumeration<Advertisement> TheAdvEnum;
+				TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, null, null);
+				parseAdvertisement(TheAdvEnum);
+				myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
+						null, null, 1, this);
 
 				//}
 			}
@@ -96,6 +97,18 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 
 		}
 
+
+	}
+
+	@Override
+	public void notifyNetPeerGroupRDVConnection(ID id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void notifyPeerGroupRDVConnection(ID id) {
+	//TODO
 
 	}
 
