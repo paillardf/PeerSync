@@ -55,12 +55,11 @@ public class Log {
 		}
 
 		public void addLog(String tag, String v){
-			
-			DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - ");
-			Date date = new Date();
 			for (int i =0; i< Onglets.getComponentCount(); i++) {
 				if(Onglets.getTitleAt(i).compareTo(tag)==0){
 					JTextPane pane = (JTextPane) ((JScrollPane) Onglets.getComponent(i)).getViewport().getView();
+					DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - ");
+					Date date = new Date();
 					pane.setText(dateFormat.format(date) + v+"\n"+pane.getText());
 					return;
 				}
@@ -69,7 +68,7 @@ public class Log {
 
 			JTextPane txt = new JTextPane();
 			JScrollPane jsp = new JScrollPane(txt);
-			txt.setText(dateFormat.format(date) +v+"\n");
+			txt.setText(v+"\n");
 			Onglets.addTab(tag, null, jsp, null); 
 		}
 
