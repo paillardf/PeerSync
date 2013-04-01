@@ -1,30 +1,22 @@
 package com.peersync.models;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
-import com.peersync.events.DbliteConnection;
+import com.peersync.events.DataBaseManager;
 
-public class ShareFolder extends DbliteConnection{
+public class ShareFolder {
 
 	private final String UID;
 	private final String asbolutePath;
 	private ArrayList<StackVersion> stackVersionList;
 
-	private static final String DBEVENTSPATH = "./dblite.db";
 
-	private static final String DBSHAREDFOLDERSTABLE = "sharedFolder";
-	private static final String UUIDFIELD = "uuid";
-	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 
 
 	public ShareFolder(String UID) {
-		super(DBEVENTSPATH);
 		this.UID = UID;
 		stackVersionList = new ArrayList<StackVersion>();
-		asbolutePath = getSharedFolderRootPath();
+		asbolutePath = DataBaseManager.getDataBaseManager().getSharedFolderRootPath(UID);
 	}
 
 	public ArrayList<StackVersion> getStackVersionList(){
@@ -55,34 +47,7 @@ public class ShareFolder extends DbliteConnection{
 		return asbolutePath;
 	}
 
-	private String getSharedFolderRootPath()
-	{
-		String res = new String();
-		try
-		{
-			Statement statement = getConnection().createStatement();
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-
-			ResultSet rs = statement.executeQuery("select sf."+ROOTPATHFIELD+
-					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" ='"+UID+"'");
-
-			while(rs.next())
-			{
-				// read the result set
-				res = rs.getString(ROOTPATHFIELD);
-				//		        System.out.println("name = " + rs.getString(FILEPATHFIELD));
-				//		        System.out.println("id = " + rs.getString(HASHFIELD));
-			}
-		}
-		catch(SQLException e)
-		{
-			// if the error message is "out of memory", 
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		}
-		return res;
-
-	}
+	
 
 	
 

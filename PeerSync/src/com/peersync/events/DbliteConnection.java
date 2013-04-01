@@ -14,6 +14,13 @@ public class DbliteConnection {
 		openConnection(dbPath);
 
 	}
+	
+	public DbliteConnection() 
+	{
+
+
+
+	}
 
 	public Connection getConnection() {
 		return m_connection;
@@ -21,7 +28,7 @@ public class DbliteConnection {
 
 
 
-	private void openConnection(String dbPath) throws ClassNotFoundException, SQLException
+	public void openConnection(String dbPath) throws ClassNotFoundException, SQLException
 	{
 		Class.forName("org.sqlite.JDBC");
 		if(m_dbPath!=dbPath)

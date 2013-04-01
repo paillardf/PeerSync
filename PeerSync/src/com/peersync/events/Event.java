@@ -1,12 +1,9 @@
 package com.peersync.events;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import com.peersync.models.ShareFolder;
-public class Event extends DbliteConnection{
+public class Event {
 
 	private long m_date;
 	private String m_filepath;
@@ -17,38 +14,28 @@ public class Event extends DbliteConnection{
 	private String m_hash;
 	private ShareFolder m_sharedFolder;
 
-	private static final String DBEVENTSPATH = "./dblite.db";
-	private static final String DBEVENTSTABLE = "events";
-	private static final String DATEFIELD = "date";
-	private static final String FILEPATHFIELD = "filepath";
-	private static final String HASHFIELD = "hash";
-	private static final String ACTIONFIELD = "action";
-	private static final String PARAMETERSFIELD = "parameters";
-	private static final String OWNERFIELD = "owner";
-	private static final String SHAREDFOLDERFIELD = "sharedFolder";
-	private static final String ISFILEFIELD = "isFile";
-	private static final String UUIDFIELD = "uuid";
-	private static final String DBSHAREDFOLDERSTABLE = "sharedFolder";
-	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 
-	public Event(long d,String filepath,int action,String owner,String uuidShareFolder) throws Exception {
-		super(DBEVENTSPATH);
+
+	public Event(long d,String filepath,int action,String owner,String uuidShareFolder) throws Exception 
+	{
+
 		setDate(d);
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolder = new ShareFolder(uuidShareFolder,"");
+		m_sharedFolder = new ShareFolder(uuidShareFolder);
 		openFile();
 
 	}
 
-	public Event(String filepath,String hash,int action,String owner,String uuidShareFolder) throws Exception {
-		super(DBEVENTSPATH);
+	public Event(String filepath,String hash,int action,String owner,String uuidShareFolder) 
+	{
+
 		setDate(System.currentTimeMillis());
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolder = new ShareFolder(uuidShareFolder,"");
+		m_sharedFolder = new ShareFolder(uuidShareFolder);
 		setHash(hash);
 		m_file = new File(getFilepath());
 
@@ -59,27 +46,21 @@ public class Event extends DbliteConnection{
 
 	public void save()
 	{
-		try
-		{
-			Statement statement = getConnection().createStatement();
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
-			//if(e.getDate().after(d))
-			int isFile = m_file.isFile()? 1 : 0;
-			String relFilePath = ShareFolder.RelativeFromAbsolutePath(m_filepath,m_sharedFolder.getAbsFolderRootPath());
-			statement.executeUpdate("Insert into events ("+DATEFIELD+","+FILEPATHFIELD+","+HASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+") VALUES('"+m_date+"','"+relFilePath+"','"+m_hash+"',"+m_action+",'"+m_parameters+"','"+m_owner+"','"+m_sharedFolder.getUID()+"',"+isFile+")");
-
-		}
-		catch(SQLException e)
-		{
-			// if the error message is "out of memory", 
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		}
+		DataBaseManager.getDataBaseManager().saveEvent(this);
 
 	}
 
+	public int isFile()
+	{
+		return m_file.isFile()? 1 : 0;
+		
+	}
 
-
+	public String getRelPath()
+	{
+		return ShareFolder.RelativeFromAbsolutePath(m_filepath,m_sharedFolder.getAbsFolderRootPath());
+		
+	}
 	private void openFile() throws Exception
 	{
 		m_file = new File(getFilepath());

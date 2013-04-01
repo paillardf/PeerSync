@@ -1,0 +1,23 @@
+create table events 
+(
+date numeric,
+filepath text,
+hash text,
+action numeric,
+parameters text,
+owner text,
+isFile numeric,
+sharedFolder numeric,
+PRIMARY KEY (date,filepath,sharedFolder,hash)
+)
+
+create table sharedFolder 
+(
+uuid text,
+rootAbsolutePath text,
+peerGroup text,
+PRIMARY KEY (uuid)
+)
+
+
+
