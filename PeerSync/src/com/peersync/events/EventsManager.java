@@ -20,7 +20,17 @@ public class EventsManager extends DbliteConnection{
 
 	List<ShareFolder> m_directories = new LinkedList<ShareFolder>();
 
-	DirectoryReader m_directoryReader = new DirectoryReader();
+
+
+	private static EventsManager instance;
+
+	public static EventsManager getEventsManager() throws ClassNotFoundException, SQLException
+	{
+		if(instance==null)
+			instance = new EventsManager();
+		return instance;
+
+	}
 
 	private static final String DBEVENTSPATH = "./dblite.db";
 	private static final String DBEVENTSTABLE = "events";
@@ -32,7 +42,7 @@ public class EventsManager extends DbliteConnection{
 	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 	private static final String OWNERFIELD = "owner";
 
-	public EventsManager() throws ClassNotFoundException, SQLException
+	private EventsManager() throws ClassNotFoundException, SQLException
 	{
 		super(DBEVENTSPATH);
 		try {
@@ -107,8 +117,8 @@ public class EventsManager extends DbliteConnection{
 				for(ShareFolder dir : m_directories)
 				{
 					currentStack = m_EventsStack.toMap(dir.getUID());
-					m_directoryReader.scanDifferences(currentStack,dir);
-					m_EventsStack.createEventsFromScan(dir.getUID(), m_directoryReader.getNewFilesMap(),m_directoryReader.getUpdatedFilesMap(),m_directoryReader.getDeletedFilesSet());
+					DirectoryReader.getDirectoryReader().scanDifferences(currentStack,dir);
+					m_EventsStack.createEventsFromScan(dir.getUID(), DirectoryReader.getDirectoryReader().getNewFilesMap(),DirectoryReader.getDirectoryReader().getUpdatedFilesMap(),DirectoryReader.getDirectoryReader().getDeletedFilesSet());
 				}
 			}
 		}, 0, 20000);

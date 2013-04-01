@@ -25,8 +25,16 @@ public class DirectoryReader {
 	private Map<String,String> m_updatedFiles = new Hashtable<String,String>();
 	private Set<String> m_deletedFiles = new HashSet<String>();
 
-
-	public DirectoryReader() {
+	private static DirectoryReader instance;
+	
+	public static DirectoryReader getDirectoryReader()
+	{
+		if(instance==null)
+			instance = new DirectoryReader();
+		return instance;
+		
+	}
+	private DirectoryReader() {
 
 	}
 
@@ -45,6 +53,12 @@ public class DirectoryReader {
 		return m_deletedFiles;
 	}
 
+	/**
+	 *  Calcule le Hash Sha-1 du ficher passé en paramètre.
+	 * 	Pour un dossier, ce n'est pas le hash qui est retourné mais sa date de modification.
+	 * 	@param f : fichier à hasher
+	 * 	@return hash (ou date de modification pour un dossier) 
+	 */
 	public static String calculateHash(File f)
 	{
 		String res = new String();
