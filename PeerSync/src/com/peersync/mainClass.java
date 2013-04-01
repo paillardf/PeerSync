@@ -7,22 +7,21 @@ import com.peersync.events.EventsManagerThread;
 
 public class mainClass {
 	public static void main(String[] args){
-		//		EventsManagerThread et;
-		//		try {
-		//			et = new EventsManagerThread();
-		//			et.start();
-		//		} catch (ClassNotFoundException | SQLException e) {
-		//			// TODO Auto-generated catch block
-		//			e.printStackTrace();
-		//		}
-		EventsManager et;
+
 		try {
-			et = new EventsManager();
-			et.getStackVersionList("UUID1");
+
+			EventsManagerThread.getEventsManagerThread().start();
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+//		try {
+//			EventsManager.getEventsManager().getStackVersionList("UUID2");
+//		} catch (ClassNotFoundException | SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 
 

@@ -87,12 +87,19 @@ public class EventsStack extends DbliteConnection {
 		}
 		save();
 	}
-
+	
+	
 	public void addEvent(Event e)
 	{
 		m_Events.add(e);
 	}
 
+	/**
+	 *  Retourne les derniers événements en base de données, pour chaque fichier.
+	 *  Ne prends pas en compte les événements "Suppression"
+	 *  @param UID : UID du dossier que l'on veut "Mappifier"
+	 * 	@return  Map nom_de_fichier,hash
+	 */
 	public Map<String,String> toMap(String UID)
 	{
 		Map<String,String> res = new Hashtable<String,String>();
