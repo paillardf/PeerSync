@@ -17,6 +17,7 @@ import net.jxta.platform.NetworkManager;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
+import com.peersync.network.group.PeerGroupManager;
 import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 import com.peersync.tools.Outils;
@@ -24,7 +25,7 @@ import com.peersync.tools.Outils;
 public class PeerManager {
 
 	//DEBUG VAL //TODO
-	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.2.81" + ":9711");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "127.0.0.1" + ":9711");
 	private int PORT = 9799;
 
     
@@ -38,13 +39,12 @@ public class PeerManager {
 	NetworkManager manager = null;
 	//PeerGroup netPeerGroup = null;
 	//PeerGroup myPeerGroup = null;
-	NetworkStats networkStats;
 	//DiscoveryService netDiscoveryService;
 	//DiscoveryService myDiscoveryService;
 	private KeyStoreManager keyStoreManager;
 	private DiscoveryBehaviour peerNetworkManager;
 	private PeerGroupManager peerGroupManager;
-	NetworkConfigurator conf;
+	public NetworkConfigurator conf;
 	public static PeerID PID_EDGE;
 
 	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
@@ -57,7 +57,6 @@ public class PeerManager {
 		
 		
 		final File ConfigurationFile_RDV = new File(configFolder+"jxta.conf");
-		networkStats = new NetworkStats();
 		
 		PeerGroup netPeerGroup = null;
 		DiscoveryService netDiscoveryService = null;
