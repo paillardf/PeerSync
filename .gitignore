@@ -5,4 +5,8 @@
 *.class
 
 # generated files
-/PeerSync/bin/
+bin/
+
+client1/
+client2/
+client3/
