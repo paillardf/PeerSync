@@ -13,27 +13,31 @@ import net.jxta.protocol.RdvAdvertisement;
 import net.jxta.rendezvous.RendezvousEvent;
 import net.jxta.rendezvous.RendezvousListener;
 
+import com.peersync.models.ShareFolder;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
 import com.peersync.tools.Log;
 
 
-public class CommunicationBehaviour extends AbstractBehaviour{
+public class StackSyncBehaviour extends AbstractBehaviour{
 
 	private long lastStackVersionAdvertismentEvent=0;
 
-	public CommunicationBehaviour(MyPeerGroup peerGroup){
+	public StackSyncBehaviour(MyPeerGroup peerGroup){
 		super(peerGroup);
 
 
 	}
 
 	public void publishStackVersionAdvertisement(){
-		ArrayList<StackVersion> stackList = new ArrayList<StackVersion>();
-		stackList.add(new StackVersion("100", System.currentTimeMillis()));
-		stackList.add(new StackVersion("101", System.currentTimeMillis()));
-		StackAdvertisement adv = new StackAdvertisement(stackList);
+		ArrayList<ShareFolder> shareFolders = new ArrayList<ShareFolder>();
+		ShareFolder shareFolder = new ShareFolder("0320230");
+		shareFolder.addStackVersion(new StackVersion("100", System.currentTimeMillis()));
+		shareFolder.addStackVersion(new StackVersion("101", System.currentTimeMillis()));
+		shareFolders.add(shareFolder);
+		StackAdvertisement adv = new StackAdvertisement(shareFolders);
+
 		//peer.myPeerGroup.getPipeService().
 		try {
 			myPeerGroup.getDiscoveryService().publish(adv);
@@ -41,6 +45,7 @@ public class CommunicationBehaviour extends AbstractBehaviour{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Log.d("StackBehaviour", adv.toString());
 		lastStackVersionAdvertismentEvent = System.currentTimeMillis();
 	}
 

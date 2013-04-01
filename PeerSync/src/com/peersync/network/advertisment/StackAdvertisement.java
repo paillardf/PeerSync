@@ -40,10 +40,6 @@
 
 package com.peersync.network.advertisment;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -56,216 +52,178 @@ import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.TextElement;
 import net.jxta.id.ID;
-import net.jxta.id.IDFactory;
-import net.jxta.peergroup.PeerGroupID;
-import net.jxta.protocol.RouteAdvertisement;
 
+import com.peersync.models.ShareFolder;
 import com.peersync.models.StackVersion;
+import com.peersync.network.PeerManager;
 
 public class StackAdvertisement extends Advertisement {
-    
-    public static final String Name = "FilesVersionAdvertisement";
 
-    // Advertisement elements, tags and indexables
-    public final static String AdvertisementType = "jxta:FilesVersionAdvertisement";
-    
-    private ID AdvertisementID = ID.nullID;
-    
-    private final static String IDTag = "advID";
-    private final static String StackTAG = "Stack";
-    private final static String UIDTAG = "UID";
-    private final static String LastUpdateTAG = "LastUpdate";
+	public static final String Name = "FilesVersionAdvertisement";
 
-	private ArrayList<StackVersion> stackList;
+	// Advertisement elements, tags and indexables
+	public final static String AdvertisementType = "jxta:FilesVersionAdvertisement";
 
-   //private ArrayList<StackVersion> stackList;
-    
-    private final static String[] IndexableFields = { IDTag };
+	private ID AdvertisementID = ID.nullID;
 
-    public StackAdvertisement(ArrayList<StackVersion> stackList) {
-    	this.stackList = stackList;
+	private final static String IDTag = "advID";
+	private final static String ShareFolderTAG = "sharefolderID";
+	private final static String StackTAG = "stackID";
+	private final static String StackLastUpdateTAG = "last_update";
 
-    }
+	private ArrayList<ShareFolder> shareFolderList;
 
-    
-    public StackAdvertisement() {
-    	stackList = new ArrayList<StackVersion>();
+	//private ArrayList<StackVersion> stackList;
+
+	private final static String[] IndexableFields = { IDTag };
+
+	public StackAdvertisement(ArrayList<ShareFolder> shareFolder) {
+		this.shareFolderList = shareFolder;
+
 	}
 
-    
-    public StackAdvertisement(Element Root) {
-        this();
-        // Retrieving the elements
-        TextElement MyTextElement = (TextElement) Root;
 
-        Enumeration TheElements = MyTextElement.getChildren();
-        
-        
-        while (TheElements.hasMoreElements()) {
-            
-            TextElement TheElement = (TextElement) TheElements.nextElement();
-            
-            
-            String TheElementName = TheElement.getName();
-            if(TheElementName.compareTo(StackTAG)==0){
-            	Enumeration stackEnum = (Enumeration) TheElement.getChildren();
-            	long lastUpdate = 0;
-            	String UID = null;
-            	while (stackEnum.hasMoreElements()) {
-            		
-            		TextElement stackElement = (TextElement) stackEnum.nextElement();
-            		String theElementName = stackElement.getName();
-            		String value = stackElement.getTextValue();
-            		
-            		 if (theElementName.compareTo(UIDTAG)==0) {
-            			 UID = theElementName;
-            			 UID = theElementName;
-            		 }else if(theElementName.compareTo(LastUpdateTAG)==0){
-            			 lastUpdate = Long.parseLong(value);
-            		 }
-            		
-            	}
-            	if(lastUpdate!=0&&UID!=null){
-            		stackList.add(new StackVersion(UID, lastUpdate));
-            	}
-            	
-            	
-            	
-            	
-            }else if(TheElementName.compareTo(IDTag)==0){
+	public StackAdvertisement() {
+		shareFolderList = new ArrayList<ShareFolder>();
+	}
 
-                try {
-                    
-                    URI ReadID = new URI(TheElement.getValue());
-                    AdvertisementID = IDFactory.fromURI(ReadID);
-                    return;
-                    
-                } catch (URISyntaxException Ex) {
-                    
-                    // Issue with ID format
-                    Ex.printStackTrace();
-                    
-                } catch (ClassCastException Ex) {
-                    
-                    // Issue with ID type
-                    Ex.printStackTrace();
-                    
-                }
-            }
-            
-        }  
-        
 
-    }
-    
-    public void addStackVersion(StackVersion stackVersion){
-    	this.stackList.add(stackVersion);
-    }
-    
-    public ArrayList<StackVersion> getStackVersionArray(){
-    	return stackList;
-    }
-	@Override
-    public Document getDocument(MimeMediaType TheMimeMediaType) {
-        
-        // Creating document
-        StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
-                TheMimeMediaType, AdvertisementType);
-        
-        
-        for (StackVersion stackVersion : stackList) {
-        	Element stackValue;
-        	Element stackElement  = TheResult.createElement(StackTAG, stackVersion.getUID());;
-        	TheResult.appendChild(stackElement);
-        	stackValue= TheResult.createElement(UIDTAG, stackVersion.getUID());
-        	stackElement.appendChild(stackValue);
-        	
-        	stackValue= TheResult.createElement(LastUpdateTAG, ""+stackVersion.getLastUpdate());
-        	stackElement.appendChild(stackValue);
-        	
-        	
-       
+	public StackAdvertisement(Element Root) {
+		this();
+		// Retrieving the elements
+		TextElement MyTextElement = (TextElement) Root;
+		Enumeration folderList = MyTextElement.getChildren();
+
+
+		while (folderList.hasMoreElements()) {
+
+			TextElement folderElement = (TextElement) folderList.nextElement();
+
+
+			if(folderElement.getName().compareTo(ShareFolderTAG)==0){
+				ShareFolder shareFolder = new ShareFolder(folderElement.getValue());
+
+				Enumeration stackList = (Enumeration) folderElement.getChildren();
+
+				while (stackList.hasMoreElements()) {
+					TextElement stackElement = (TextElement) stackList.nextElement();
+
+					if(stackElement.getName().compareTo(StackTAG)==0){
+
+						long lastUpdate = Long.parseLong(((TextElement) stackElement.getChildren(StackLastUpdateTAG).nextElement()).getValue());
+
+						shareFolder.addStackVersion(new StackVersion(stackElement.getValue(), lastUpdate));
+					}
+				}
+			}
 		}
-     
-        return TheResult;
-        
-    }
+	}
 
-    public void SetID(ID TheID) {
-        AdvertisementID = TheID;
-    }
+	public void addShareFolder(ShareFolder shareFolder){
+		this.shareFolderList.add(shareFolder);
+	}
 
-    @Override
-    public ID getID() {
-    	
-        return AdvertisementID;
-    }
-    
-//    @Override
-//    public synchronized ID getID() {
-//    	if (AdvertisementID == ID.nullID) {
-//            try {
-//                // We have not yet built it. Do it now
-//                byte[] seed = getAdvertisementType().getBytes("UTF-8");
-//                InputStream in = new ByteArrayInputStream(StackAdvertisement.this..getPeerID().toString().getBytes("UTF-8"));
+	public ArrayList<ShareFolder> getShareFolderList(){
+		return shareFolderList;
+	}
+	@Override
+	public Document getDocument(MimeMediaType TheMimeMediaType) {
+
+		// Creating document
+		StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
+				TheMimeMediaType, AdvertisementType);
+
+
+		for (ShareFolder shareFolder : shareFolderList) {
+			Element shareFolderElement  = TheResult.createElement(ShareFolderTAG, shareFolder.getUID());
+			TheResult.appendChild(shareFolderElement);
+
+			for (StackVersion stackVersion : shareFolder.getStackVersionList()) {
+
+				Element stackElement = TheResult.createElement(StackTAG, stackVersion.getUID());
+				shareFolderElement.appendChild(stackElement);
+				Element stackLastUpdate = TheResult.createElement(StackLastUpdateTAG, stackVersion.getLastUpdate());
+				stackElement.appendChild(stackLastUpdate);
+			}
+		}
+
+		return TheResult;
+
+	}
+
+	public void SetID(ID TheID) {
+		AdvertisementID = TheID;
+	}
+
+	
+
+	@Override
+	public synchronized ID getID() {
+		if (AdvertisementID == ID.nullID) {
+			try {
+				
+				AdvertisementID  = PeerManager.getInstance().getPeerId();
+//				// We have not yet built it. Do it now
+//				byte[] seed = getAdvertisementType().getBytes("UTF-8");
+//				InputStream in = new ByteArrayInputStream(PeerManager.getInstance().getPeerId().toString().getBytes("UTF-8"));
 //
-//                hashID = IDFactory.newCodatID((PeerGroupID) getPeerID(), seed, in);
-//            } catch (Exception ez) {
-//                return ID.nullID;
-//            }
-//        }
-//        return hashID;
-//    }
+//				hashID = IDFactory.newCodatID((PeerGroupID) getPeerID(), seed, in);
+			} catch (Exception ez) {
+				return ID.nullID;
+			}
+		}
+		return AdvertisementID;
+	}
 
-    @Override
-    public String[] getIndexFields() {
-        return IndexableFields;
-    }
+	@Override
+	public String[] getIndexFields() {
+		return IndexableFields;
+	}
 
-   
-    @Override
-    public StackAdvertisement clone() throws CloneNotSupportedException {
-        
-        StackAdvertisement Result =
-                (StackAdvertisement) super.clone();
 
-        Result.AdvertisementID = this.AdvertisementID;
-        Result.stackList = (ArrayList<StackVersion>) this.stackList.clone();
-        
-        return Result;
-        
-    }
-    
-    @Override
-    public String getAdvType() {
-        
-        return AdvertisementType;
-        
-    }
-    
-    public static String getAdvertisementType() {
-        return AdvertisementType;
-    }    
-    
-    public static class Instantiator implements AdvertisementFactory.Instantiator {
+	@Override
+	public StackAdvertisement clone() throws CloneNotSupportedException {
 
-        public String getAdvertisementType() {
-            return StackAdvertisement.getAdvertisementType();
-        }
+		StackAdvertisement Result =
+				(StackAdvertisement) super.clone();
 
-        public Advertisement newInstance(ArrayList<StackVersion> stackVersioList) {
-            return new StackAdvertisement(stackVersioList);
-        }
+		Result.AdvertisementID = this.AdvertisementID;
+		Result.shareFolderList = (ArrayList<ShareFolder>) this.shareFolderList.clone();
 
-        public Advertisement newInstance(net.jxta.document.Element root) {
-            return new StackAdvertisement(root);
-        }
+		return Result;
+
+	}
+
+	@Override
+	public String getAdvType() {
+
+		return AdvertisementType;
+
+	}
+
+	public static String getAdvertisementType() {
+		return AdvertisementType;
+	}    
+
+	public static class Instantiator implements AdvertisementFactory.Instantiator {
+
+		public String getAdvertisementType() {
+			return StackAdvertisement.getAdvertisementType();
+		}
+
+		public Advertisement newInstance(ArrayList<ShareFolder> shareFolderList) {
+			return new StackAdvertisement(shareFolderList);
+		}
+
+		public Advertisement newInstance(net.jxta.document.Element root) {
+			return new StackAdvertisement(root);
+		}
 
 		@Override
 		public Advertisement newInstance() {
-			 return new StackAdvertisement();
+			return new StackAdvertisement();
 		}
-        
-    }
+
+	}
 
 }

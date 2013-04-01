@@ -11,7 +11,7 @@ import net.jxta.rendezvous.RendezvousEvent;
 import net.jxta.rendezvous.RendezvousListener;
 
 import com.peersync.network.behaviour.AbstractBehaviour;
-import com.peersync.network.behaviour.CommunicationBehaviour;
+import com.peersync.network.behaviour.StackSyncBehaviour;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
 
 public class MyPeerGroup {
@@ -29,7 +29,7 @@ public class MyPeerGroup {
 		
 		DiscoveryBehaviour db = new DiscoveryBehaviour(this);
 		behaviourList.add(db);
-		behaviourList.add(new CommunicationBehaviour(this));
+		behaviourList.add(new StackSyncBehaviour(this));
 		
 		//DiscoveryBehaviour had to be start before the others in order to initialize the peerGroup.
 		db.start();

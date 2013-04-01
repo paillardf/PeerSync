@@ -45,12 +45,31 @@ public class PeerManager {
 	private DiscoveryBehaviour peerNetworkManager;
 	private PeerGroupManager peerGroupManager;
 	public NetworkConfigurator conf;
+	private static PeerManager instance;
 	public static PeerID PID_EDGE;
 
 	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
 
+	public static PeerManager getInstance(){
+		if(instance==null)
+			getInstance(0, "0");
+		
+		return instance;
+	}
+	
+	public static PeerManager getInstance(int port, String name){
+		if(instance==null){
+			try {
+				instance = new PeerManager(port, name);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+		return instance;
+	}
 
-	public PeerManager(int port, String name) throws IOException {
+	private PeerManager(int port, String name) throws IOException {
 		PORT = port;
 		PID_EDGE = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, name.getBytes());
 		String configFolder = "." + System.getProperty("file.separator") + name +System.getProperty("file.separator");
@@ -113,6 +132,10 @@ public class PeerManager {
 	}
 	
 	public void run() {
+	}
+
+	public PeerID getPeerId() {
+		return PID_EDGE;
 	}
 
 }

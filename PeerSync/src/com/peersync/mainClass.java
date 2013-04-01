@@ -3,7 +3,6 @@ package com.peersync;
 import java.sql.SQLException;
 
 import com.peersync.events.EventsManager;
-import com.peersync.events.EventsManagerThread;
 
 public class mainClass {
 	public static void main(String[] args){

@@ -10,8 +10,8 @@ import com.peersync.events.DbliteConnection;
 public class ShareFolder extends DbliteConnection{
 
 	private final String UID;
-	private final String peerGroupUID;
 	private final String asbolutePath;
+	private ArrayList<StackVersion> stackVersionList;
 
 	private static final String DBEVENTSPATH = "./dblite.db";
 
@@ -20,23 +20,23 @@ public class ShareFolder extends DbliteConnection{
 	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 
 
-	public ShareFolder(String UID, String peerGroupUID) throws ClassNotFoundException, SQLException {
+	public ShareFolder(String UID) {
 		super(DBEVENTSPATH);
 		this.UID = UID;
-		this.peerGroupUID = peerGroupUID;
+		stackVersionList = new ArrayList<StackVersion>();
 		asbolutePath = getSharedFolderRootPath();
 	}
 
 	public ArrayList<StackVersion> getStackVersionList(){
 		return null;//TODO 
 	}
+	public void addStackVersion(StackVersion stackVersion) {
+		this.stackVersionList.add(stackVersion);
+		
+	}
 
 	public String getUID() {
 		return UID;
-	}
-
-	public String getPeerGroupUID() {
-		return peerGroupUID;
 	}
 
 	public static String AbsoluteFromRelativePath(String relative,String baseDir)
@@ -83,6 +83,8 @@ public class ShareFolder extends DbliteConnection{
 		return res;
 
 	}
+
+	
 
 
 }

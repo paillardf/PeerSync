@@ -8,12 +8,8 @@ public class main {
 
 	
 	public static void main(String[] args) {
-		try {
-			new PeerManager(9789, "client1");
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			PeerManager.getInstance(9789, "client1");
+		
 		
 	}
 

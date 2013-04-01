@@ -9,13 +9,7 @@ public class main2 {
 
 	
 	public static void main(String[] args) {
-		try {
-			new PeerManager(9786, "client3");
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+		PeerManager.getInstance(9786, "client3");
 	}
 
 }

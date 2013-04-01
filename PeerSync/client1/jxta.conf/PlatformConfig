@@ -43,7 +43,7 @@
 			urn:jxta:uuid-DEADBEEFDEAFBABAFEEDBABE0000000605
 		</MCID>
 		<Parm type="jxta:RdvConfig" xmlns:jxta="http://jxta.org" xml:space="preserve" config="client">
-<seeds><addr>tcp://192.168.2.81:9711</addr></seeds>		</Parm>
+<seeds><addr>tcp://127.0.0.1:9711</addr></seeds>		</Parm>
 	</Svc>
 	<Svc>
 		<MCID>

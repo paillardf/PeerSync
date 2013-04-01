@@ -10,6 +10,7 @@ public class StackVersion {
 		this.UID = UID;
 	}
 
+
 	public String getUID() {
 		return UID;
 	}
