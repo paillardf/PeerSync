@@ -7,13 +7,9 @@ import java.util.Enumeration;
 import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
-import net.jxta.document.AdvertisementFactory;
 import net.jxta.id.ID;
-import net.jxta.protocol.RdvAdvertisement;
-import net.jxta.rendezvous.RendezvousEvent;
-import net.jxta.rendezvous.RendezvousListener;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
@@ -22,8 +18,11 @@ import com.peersync.tools.Log;
 
 public class StackSyncBehaviour extends AbstractBehaviour{
 
+	private static final String NAME = "StackSyncBehaviour";
 	private long lastStackVersionAdvertismentEvent=0;
-
+	private static final long UPDATE_RDV_DELAY = 8*60*1000;
+	private static final long VALIDITY_RDV_ADV = 10*60*1000;
+	
 	public StackSyncBehaviour(MyPeerGroup peerGroup){
 		super(peerGroup);
 
@@ -31,21 +30,21 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	}
 
 	public void publishStackVersionAdvertisement(){
-		ArrayList<ShareFolder> shareFolders = new ArrayList<ShareFolder>();
-		ShareFolder shareFolder = new ShareFolder("0320230");
-		shareFolder.addStackVersion(new StackVersion("100", System.currentTimeMillis()));
+		ArrayList<SharedFolderVersion> shareFolders = new ArrayList<SharedFolderVersion>();
+		SharedFolderVersion shareFolder = new SharedFolderVersion("0320230");
+		shareFolder.addStackVersion(new StackVersion(""+System.currentTimeMillis(), System.currentTimeMillis()));
 		shareFolder.addStackVersion(new StackVersion("101", System.currentTimeMillis()));
 		shareFolders.add(shareFolder);
 		StackAdvertisement adv = new StackAdvertisement(shareFolders);
 
 		//peer.myPeerGroup.getPipeService().
 		try {
-			myPeerGroup.getDiscoveryService().publish(adv);
-			myPeerGroup.getDiscoveryService().remotePublish(adv);
+			myPeerGroup.getDiscoveryService().publish(adv, 30000, 30000);
+			myPeerGroup.getDiscoveryService().remotePublish(adv, 30000);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Log.d("StackBehaviour", adv.toString());
+		Log.d(NAME, "Advertisement Send" +adv);
 		lastStackVersionAdvertismentEvent = System.currentTimeMillis();
 	}
 
@@ -53,19 +52,18 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	public void run() {
 		try {
 			while(true){
-
 				sleep(5000);
 				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 30000){
+				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 10000){
 					publishStackVersionAdvertisement();
 
 
 				}
 				Enumeration<Advertisement> TheAdvEnum;
-				TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, null, null);
+				TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, StackAdvertisement.ShareFolderTAG, null);
 				parseAdvertisement(TheAdvEnum);
 				myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
-						null, null, 1, this);
+						null, null,  100, this);
 
 				//}
 			}
@@ -73,7 +71,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		} 
 
 	}
 	@Override
@@ -84,15 +82,15 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 	protected void parseAdvertisement(Enumeration<Advertisement> TheAdvEnum) {
 		while (TheAdvEnum.hasMoreElements()) { 
-
+			
 			Advertisement TheAdv = TheAdvEnum.nextElement();
-			Log.d("Communication", "new Advertisement found type:" +TheAdv.getAdvType());
-
-			if (TheAdv.getAdvType().compareTo(StackAdvertisement.class.getName())==0) {
-
+			
+			if (TheAdv.getAdvType().compareTo(StackAdvertisement.AdvertisementType)==0) {
+				Log.d(NAME, "Adv recu");
 				// We found StackVersion Advertisement
-				Log.d("Communication", "new StackAvertisement found");
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
+				System.out.println(stackVersionAdvertisement.toString());
+			//	Log.d(NAME, stackVersionAdvertisement.toString());
 				//TODO
 
 				// Flushing advertisement
@@ -113,8 +111,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 	@Override
 	public void notifyPeerGroupRDVConnection(ID id) {
-	//TODO
-
+		lastStackVersionAdvertismentEvent = 0;
 	}
 
 }

@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.models.Event;
+import com.peersync.models.SharedFolder;
+import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 
 public class DataBaseManager extends DbliteConnection{
@@ -94,7 +96,7 @@ public class DataBaseManager extends DbliteConnection{
 				// read the result set
 				if(rs.getString(ROOTPATHFIELD)!=null)
 				{
-					String absolutePath = ShareFolder.AbsoluteFromRelativePath(rs.getString(FILEPATHFIELD), rs.getString(ROOTPATHFIELD)) ;
+					String absolutePath = SharedFolder.AbsoluteFromRelativePath(rs.getString(FILEPATHFIELD), rs.getString(ROOTPATHFIELD)) ;
 					res.put(absolutePath, rs.getString(HASHFIELD));
 
 				}
@@ -168,7 +170,13 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 	
-	public ArrayList<StackVersion> getStackVersionList(String UID){
+	// get Active group () ret (id, mdp???)
+	// get last event since (ShareFolderVersion) ret (List EventsStack)
+	// add event (List EventsStack, UID folder) ret ();
+	// get file to download (UID folder) ret (list Hash);
+	
+	
+	public SharedFolderVersion getStackVersionList(String UID){
 		ArrayList<StackVersion> res = new ArrayList<StackVersion>();
 		Statement statement;
 

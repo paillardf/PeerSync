@@ -40,6 +40,7 @@
 
 package com.peersync.network.advertisment;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -52,8 +53,9 @@ import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.TextElement;
 import net.jxta.id.ID;
+import net.jxta.id.IDFactory;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.PeerManager;
 
@@ -66,25 +68,23 @@ public class StackAdvertisement extends Advertisement {
 
 	private ID AdvertisementID = ID.nullID;
 
-	private final static String IDTag = "advID";
-	private final static String ShareFolderTAG = "sharefolderID";
+	public final static String ShareFolderTAG = "sharefolderID";
 	private final static String StackTAG = "stackID";
 	private final static String StackLastUpdateTAG = "last_update";
 
-	private ArrayList<ShareFolder> shareFolderList;
+	private ArrayList<SharedFolderVersion> shareFolderList;
 
-	//private ArrayList<StackVersion> stackList;
 
-	private final static String[] IndexableFields = { IDTag };
+	private final static String[] IndexableFields = { ShareFolderTAG , StackTAG};
 
-	public StackAdvertisement(ArrayList<ShareFolder> shareFolder) {
+	public StackAdvertisement(ArrayList<SharedFolderVersion> shareFolder) {
 		this.shareFolderList = shareFolder;
 
 	}
 
 
 	public StackAdvertisement() {
-		shareFolderList = new ArrayList<ShareFolder>();
+		shareFolderList = new ArrayList<SharedFolderVersion>();
 	}
 
 
@@ -99,13 +99,14 @@ public class StackAdvertisement extends Advertisement {
 
 			TextElement folderElement = (TextElement) folderList.nextElement();
 
-
+			
 			if(folderElement.getName().compareTo(ShareFolderTAG)==0){
-				ShareFolder shareFolder = new ShareFolder(folderElement.getValue());
+				SharedFolderVersion shareFolder = new SharedFolderVersion(folderElement.getValue());
 
 				Enumeration stackList = (Enumeration) folderElement.getChildren();
 
 				while (stackList.hasMoreElements()) {
+				
 					TextElement stackElement = (TextElement) stackList.nextElement();
 
 					if(stackElement.getName().compareTo(StackTAG)==0){
@@ -115,15 +116,16 @@ public class StackAdvertisement extends Advertisement {
 						shareFolder.addStackVersion(new StackVersion(stackElement.getValue(), lastUpdate));
 					}
 				}
+				this.shareFolderList.add(shareFolder);
 			}
 		}
 	}
 
-	public void addShareFolder(ShareFolder shareFolder){
+	public void addShareFolder(SharedFolderVersion shareFolder){
 		this.shareFolderList.add(shareFolder);
 	}
 
-	public ArrayList<ShareFolder> getShareFolderList(){
+	public ArrayList<SharedFolderVersion> getShareFolderList(){
 		return shareFolderList;
 	}
 	@Override
@@ -132,9 +134,8 @@ public class StackAdvertisement extends Advertisement {
 		// Creating document
 		StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
 				TheMimeMediaType, AdvertisementType);
-
-
-		for (ShareFolder shareFolder : shareFolderList) {
+		
+		for (SharedFolderVersion shareFolder : shareFolderList) {
 			Element shareFolderElement  = TheResult.createElement(ShareFolderTAG, shareFolder.getUID());
 			TheResult.appendChild(shareFolderElement);
 
@@ -142,7 +143,7 @@ public class StackAdvertisement extends Advertisement {
 
 				Element stackElement = TheResult.createElement(StackTAG, stackVersion.getUID());
 				shareFolderElement.appendChild(stackElement);
-				Element stackLastUpdate = TheResult.createElement(StackLastUpdateTAG, stackVersion.getLastUpdate());
+				Element stackLastUpdate = TheResult.createElement(StackLastUpdateTAG, ""+stackVersion.getLastUpdate());
 				stackElement.appendChild(stackLastUpdate);
 			}
 		}
@@ -161,13 +162,7 @@ public class StackAdvertisement extends Advertisement {
 	public synchronized ID getID() {
 		if (AdvertisementID == ID.nullID) {
 			try {
-				
-				AdvertisementID  = PeerManager.getInstance().getPeerId();
-//				// We have not yet built it. Do it now
-//				byte[] seed = getAdvertisementType().getBytes("UTF-8");
-//				InputStream in = new ByteArrayInputStream(PeerManager.getInstance().getPeerId().toString().getBytes("UTF-8"));
-//
-//				hashID = IDFactory.newCodatID((PeerGroupID) getPeerID(), seed, in);
+				AdvertisementID = IDFactory.fromURI(new URI(PeerManager.getInstance().getPeerId().toString()+AdvertisementType));
 			} catch (Exception ez) {
 				return ID.nullID;
 			}
@@ -188,7 +183,7 @@ public class StackAdvertisement extends Advertisement {
 				(StackAdvertisement) super.clone();
 
 		Result.AdvertisementID = this.AdvertisementID;
-		Result.shareFolderList = (ArrayList<ShareFolder>) this.shareFolderList.clone();
+		Result.shareFolderList = (ArrayList<SharedFolderVersion>) this.shareFolderList.clone();
 
 		return Result;
 
@@ -211,7 +206,7 @@ public class StackAdvertisement extends Advertisement {
 			return StackAdvertisement.getAdvertisementType();
 		}
 
-		public Advertisement newInstance(ArrayList<ShareFolder> shareFolderList) {
+		public Advertisement newInstance(ArrayList<SharedFolderVersion> shareFolderList) {
 			return new StackAdvertisement(shareFolderList);
 		}
 

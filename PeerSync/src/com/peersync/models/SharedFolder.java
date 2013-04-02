@@ -4,27 +4,17 @@ import java.util.ArrayList;
 
 import com.peersync.events.DataBaseManager;
 
-public class ShareFolder {
+public class SharedFolder {
 
 	private final String UID;
 	private final String asbolutePath;
-	private ArrayList<StackVersion> stackVersionList;
 
 
 
 
-	public ShareFolder(String UID) {
+	public SharedFolder(String UID) {
 		this.UID = UID;
-		stackVersionList = new ArrayList<StackVersion>();
 		asbolutePath = DataBaseManager.getDataBaseManager().getSharedFolderRootPath(UID);
-	}
-
-	public ArrayList<StackVersion> getStackVersionList(){
-		return null;//TODO 
-	}
-	public void addStackVersion(StackVersion stackVersion) {
-		this.stackVersionList.add(stackVersion);
-		
 	}
 
 	public String getUID() {

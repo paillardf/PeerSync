@@ -9,14 +9,15 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.models.EventsStack;
+import com.peersync.models.SharedFolder;
 
 public class EventsManager {
 
 	private EventsStack m_EventsStack;
 	private Map<String,String> currentStack = new Hashtable<String,String>();
 
-	List<ShareFolder> m_directories = new LinkedList<ShareFolder>();
+	List<SharedFolder> m_directories = new LinkedList<SharedFolder>();
 
 
 
@@ -47,7 +48,7 @@ public class EventsManager {
 		ArrayList<String> sharedDirectories = DataBaseManager.getDataBaseManager().getAllSharedDirectories();
 		for(String sd : sharedDirectories)
 		{
-			Iterator<ShareFolder> it = m_directories.iterator();
+			Iterator<SharedFolder> it = m_directories.iterator();
 
 			boolean toAdd=true;
 			while(toAdd && it.hasNext())
@@ -65,7 +66,7 @@ public class EventsManager {
 
 
 			if(toAdd)
-				m_directories.add(new ShareFolder(sd));
+				m_directories.add(new SharedFolder(sd));
 
 
 		}
@@ -87,7 +88,7 @@ public class EventsManager {
 			public void run()
 			{
 
-				for(ShareFolder dir : m_directories)
+				for(SharedFolder dir : m_directories)
 				{
 					currentStack = DataBaseManager.getDataBaseManager().getLastEvents(dir.getUID());
 					DirectoryReader.getDirectoryReader().scanDifferences(currentStack,dir);

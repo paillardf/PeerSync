@@ -261,11 +261,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 	@Override
 	public void notifyPeerGroupRDVConnection(ID id) {
-
-
-
-
-
+		//TODO
 	}
 
 

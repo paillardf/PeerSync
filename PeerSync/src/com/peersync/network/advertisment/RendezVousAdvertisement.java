@@ -75,13 +75,13 @@ public class RendezVousAdvertisement extends Advertisement {
 
 	private long startDate;
     
-    private final static String IDTAG = "advID";
+   // private final static String IDTAG = "advID";
     public final static String PeerGroupIdTAG = "PeerGroupId";
     private final static String PeerIDTAG = "PeerID";
     private final static String StartDateTAG = "StartDate";
 
 	   
-    private final static String[] IndexableFields = { IDTAG , PeerGroupIdTAG };
+    private final static String[] IndexableFields = { PeerGroupIdTAG , PeerIDTAG};
  
     public RendezVousAdvertisement(Element Root) {
        // Retrieving the elements
@@ -104,7 +104,6 @@ public class RendezVousAdvertisement extends Advertisement {
             	 //this.peerGroupId = (PeerGroupID) IDFactory.fromURI(ReadID);
             	this.peerGroupId = net.jxta.impl.id.UUID.PeerGroupID.create((URI) ReadID);
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }else if(TheElementName.compareTo(PeerIDTAG)==0){
@@ -115,31 +114,31 @@ public class RendezVousAdvertisement extends Advertisement {
             	//this.peerGroupId = (PeerGroupID) IDFactory.fromURI(ReadID);
             	this.setPeerId(net.jxta.impl.id.CBID.PeerID.create((URI) ReadID));
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }else if(TheElementName.compareTo(StartDateTAG)==0){
                 this.setStartDate(Long.parseLong(TheElement.getValue()));
-            }else if(TheElementName.compareTo(IDTAG)==0){
-
-                try {
-                    
-                    URI ReadID = new URI(TheElement.getValue());
-                    AdvertisementID = IDFactory.fromURI(ReadID);
-                    return;
-                    
-                } catch (URISyntaxException Ex) {
-                    
-                    // Issue with ID format
-                    Ex.printStackTrace();
-                    
-                } catch (ClassCastException Ex) {
-                    
-                    // Issue with ID type
-                    Ex.printStackTrace();
-                    
-                }
             }
+//            else if(TheElementName.compareTo(IDTAG)==0){
+//
+//                try {
+//                    
+//                    URI ReadID = new URI(TheElement.getValue());
+//                    AdvertisementID = IDFactory.fromURI(ReadID);
+//                    return;
+//                    
+//                } catch (URISyntaxException Ex) {
+//                    
+//                    // Issue with ID format
+//                    Ex.printStackTrace();
+//                    
+//                } catch (ClassCastException Ex) {
+//                    
+//                    // Issue with ID type
+//                    Ex.printStackTrace();
+//                    
+//                }
+//            }
             
         }  
 

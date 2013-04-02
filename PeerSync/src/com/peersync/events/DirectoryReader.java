@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.models.SharedFolder;
 
 public class DirectoryReader {
 
@@ -94,7 +94,7 @@ public class DirectoryReader {
 	}
 
 
-	public void scanDifferences(Map<String,String> om,ShareFolder directory)
+	public void scanDifferences(Map<String,String> om,SharedFolder directory)
 	{
 		m_oldMap = om;
 		m_filesOk.clear();
@@ -146,7 +146,7 @@ public class DirectoryReader {
 
 	}
 
-	private List<File> listAllFiles(ShareFolder dir)
+	private List<File> listAllFiles(SharedFolder dir)
 	{
 		List<File> files = new LinkedList<File>();
 

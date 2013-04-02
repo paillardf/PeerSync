@@ -1,8 +1,9 @@
-package com.peersync.events;
+package com.peersync.models;
 
 import java.io.File;
 
-import com.peersync.models.ShareFolder;
+import com.peersync.events.DataBaseManager;
+import com.peersync.events.DirectoryReader;
 public class Event {
 
 	private long m_date;
@@ -12,7 +13,7 @@ public class Event {
 	private File m_file;
 	private String m_owner;
 	private String m_hash;
-	private ShareFolder m_sharedFolder;
+	private SharedFolder m_sharedFolder;
 
 
 
@@ -23,7 +24,7 @@ public class Event {
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolder = new ShareFolder(uuidShareFolder);
+		m_sharedFolder = new SharedFolder(uuidShareFolder);
 		openFile();
 
 	}
@@ -35,7 +36,7 @@ public class Event {
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolder = new ShareFolder(uuidShareFolder);
+		m_sharedFolder = new SharedFolder(uuidShareFolder);
 		setHash(hash);
 		m_file = new File(getFilepath());
 
@@ -58,7 +59,7 @@ public class Event {
 
 	public String getRelPath()
 	{
-		return ShareFolder.RelativeFromAbsolutePath(m_filepath,m_sharedFolder.getAbsFolderRootPath());
+		return SharedFolder.RelativeFromAbsolutePath(m_filepath,m_sharedFolder.getAbsFolderRootPath());
 		
 	}
 	private void openFile() throws Exception
@@ -138,7 +139,7 @@ public class Event {
 		this.m_hash = m_hash;
 	}
 
-	public ShareFolder getShareFolder() {
+	public SharedFolder getShareFolder() {
 		return m_sharedFolder;
 	}
 
