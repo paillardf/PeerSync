@@ -21,6 +21,8 @@ public class SharedFolder {
 
 	public static String AbsoluteFromRelativePath(String relative,String baseDir)
 	{
+		if(relative == null || baseDir == null || relative.isEmpty() || baseDir.isEmpty()	)
+			return null;
 		if(relative.equals("\\"))
 			return baseDir;
 		return baseDir.concat(relative);
@@ -28,6 +30,8 @@ public class SharedFolder {
 
 	public static String RelativeFromAbsolutePath(String absolute,String baseDir)
 	{
+		if(absolute == null || baseDir == null || absolute.isEmpty() || baseDir.isEmpty()	)
+			return null;
 		String res = absolute.replace(baseDir, "");
 		if(res.length()==0)
 			res="\\";

@@ -80,8 +80,10 @@ public class DataBaseManager extends DbliteConnection{
 				{
 					Statement statementUpdate = getConnection().createStatement();
 					statementUpdate.setQueryTimeout(30);  // set timeout to 30 sec.
-					statementUpdate.executeUpdate("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
-					
+					if(newRelFilepath != null && newFolderUID!=null)
+						statementUpdate.executeUpdate("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+					else // joue de la role du on delete cascade sur les sharedFolders
+						statementUpdate.executeUpdate("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
 				}
 					//
 					
@@ -102,12 +104,20 @@ public class DataBaseManager extends DbliteConnection{
 		
 	}
 	
+	/** Raccourcis pour appeler {@link #getLastEventOfAFile(String, String)} avec uniquement un chemin absolu de fichier
+	 * @param absFilePath : Chemin absolu du fichier dont on veut récupérer le dernier événement
+	 */
 	public Event getLastEventOfAFile(String absFilePath)
 	{
 		String uid = getSharedFolderOfAFile(absFilePath);
 		return getLastEventOfAFile(SharedFolder.RelativeFromAbsolutePath(absFilePath, getSharedFolderRootPath(uid) ),uid);
 	}
-
+	
+	/** Récupère le dernier événement pour un fichier donné
+	 * 	@param relFilePath : Chemin relatif du fichier dont on veut récupérer le dernier événement
+	 * 	@param dirUID : UID du Shared Folder où se trouve le fichier en question
+	 * 	@return le dernier event concernant le fichier
+	 */
 	public Event getLastEventOfAFile(String relFilePath,String dirUID)
 	{
 		Event res = null;
@@ -150,7 +160,9 @@ public class DataBaseManager extends DbliteConnection{
 		
 	}
 	
-	
+	/** Récupère le dernier événement pour un fichier donné
+	 * 	@param e : Event à sauvegarder
+	 */
 	public void saveEvent(Event e)
 	{
 		try
@@ -172,17 +184,43 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 	
+	/** Obtient la liste de tous les événements dont on dispose
+	 * 	Appel {@link #loadEventsStack(String,long, String)}
+	 * 	@return EventsStack
+	 */
+	public EventsStack loadEventsStack()
+	{
+		return loadEventsStack("*",-1,"*");
+	}
 	
+	/** Obtient la liste des événements d'un Shared Folder donné
+	 * 	Appel {@link #loadEventsStack(String,long, String)}
+	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
+	 * 	@return EventsStack
+	 */
 	public EventsStack loadEventsStack(String UIDFolder)
 	{
 		return loadEventsStack(UIDFolder,-1,"*");
 	}
 	
+	
+	/** Obtient la liste des événements d'un Shared Folder donné depuis une date donnée
+	 * 	Appel {@link #loadEventsStack(String,long, String)}
+	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
+	 * 	@param date : date (en ms depuis l'epoch) à partir de laquelle on veut récupérer les événements
+	 * 	@return EventsStack
+	 */
 	public EventsStack loadEventsStack(String UIDFolder,long date)
 	{
 		return loadEventsStack(UIDFolder,date,"*");
 	}
 	
+	/** Obtient la liste des événements d'un Shared Folder donné depuis une date donnée et pour un propriétaire donné
+	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements. Joker possible : "*"
+	 * 	@param date : date (en ms depuis l'epoch) à partir de laquelle on veut récupérer les événements. Joker possible : -1
+	 *  @param owner : pour ne récupérer que les events dont l'"actionneur" est "owner". Joker possible : "*"
+	 * 	@return EventsStack
+	 */
 	public EventsStack loadEventsStack(String UIDFolder,long date,String owner)
 	{
 		EventsStack res = new EventsStack();
@@ -278,6 +316,10 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
+	/** Obtient le chemin (absolu) d'un dossier de partage 
+	 * 	@param UID : UID du Shared Folder dont on veut récupérer le chemin absolu
+	 * 	@return chemin absolu du dossier de partage 
+	 */
 	public String getSharedFolderRootPath(String UID)
 	{
 		String res = new String();
@@ -308,6 +350,8 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 
+	/** Obtient l'ensemble des dossiers de partage 
+	 */
 	public ArrayList<String> getAllSharedDirectories()
 	{
 		ArrayList<String> res = new ArrayList<String>();
@@ -338,7 +382,23 @@ public class DataBaseManager extends DbliteConnection{
 	// add event (List EventsStack, UID folder) ret ();
 	// get file to download (UID folder) ret (list Hash);
 	
+	public EventsStack getEventsToSync(SharedFolderVersion sfv)
+	{
+		EventsStack res = new EventsStack();
+		for(StackVersion sv : sfv.getStackVersionList())
+		{
+			res.addAll(loadEventsStack(sfv.getUID(),sv.getLastUpdate(),sv.getUID()));
+		}
+		res.setAllEventsToSync();
+		return res;
+		
+	}
 	
+	
+	/** Récupère la version de pile pour chaque owner pour un dossier donné
+	 * 	@param UID: UID du SharedFolder que l'on veut analyser
+	 * 	@return SharedFolderVersion
+	 */
 	public SharedFolderVersion getSharedFolderVersion(String UID){
 		SharedFolderVersion res = new SharedFolderVersion(UID);
 		Statement statement;

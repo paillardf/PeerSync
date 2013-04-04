@@ -18,9 +18,9 @@ public class Event {
 	private String m_oldHash;
 	private int m_isFile;
 	
-	private static final int STATUS_OK = 0;
-	private static final int STATUS_UNSYNC = 1;
-	private static final int STATUS_CONFLICT= 2;
+	public static final int STATUS_OK = 0;
+	public static final int STATUS_UNSYNC = 1;
+	public static final int STATUS_CONFLICT= 2;
 	
 	public static final int ACTION_CREATE = 1;
 	public static final int ACTION_UPDATE = 2;
