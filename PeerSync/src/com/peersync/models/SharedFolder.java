@@ -1,7 +1,5 @@
 package com.peersync.models;
 
-import java.util.ArrayList;
-
 import com.peersync.events.DataBaseManager;
 
 public class SharedFolder {
@@ -23,12 +21,17 @@ public class SharedFolder {
 
 	public static String AbsoluteFromRelativePath(String relative,String baseDir)
 	{
+		if(relative.equals("\\"))
+			return baseDir;
 		return baseDir.concat(relative);
 	}
 
 	public static String RelativeFromAbsolutePath(String absolute,String baseDir)
 	{
-		return absolute.replace(baseDir, "");
+		String res = absolute.replace(baseDir, "");
+		if(res.length()==0)
+			res="\\";
+		return res;
 	}
 
 	public String getAbsFolderRootPath()

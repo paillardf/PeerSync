@@ -12,55 +12,106 @@ public class Event {
 	private String m_parameters;
 	private File m_file;
 	private String m_owner;
-	private String m_hash;
+	private String m_newHash;
 	private SharedFolder m_sharedFolder;
+	private int m_status;
+	private String m_oldHash;
+	private int m_isFile;
+	
+	private static final int STATUS_OK = 0;
+	private static final int STATUS_UNSYNC = 1;
+	private static final int STATUS_CONFLICT= 2;
+	
+	public static final int ACTION_CREATE = 1;
+	public static final int ACTION_UPDATE = 2;
+	public static final int ACTION_DELETE = 3;
 
 
 
-	public Event(long d,String filepath,int action,String owner,String uuidShareFolder) throws Exception 
-	{
-
-		setDate(d);
-		setFilepath(filepath);
-		setAction(action);
-		setOwner(owner);
-		m_sharedFolder = new SharedFolder(uuidShareFolder);
-		openFile();
-
-	}
-
-	public Event(String filepath,String hash,int action,String owner,String uuidShareFolder) 
+	// Désormais, se base toujours sur le chemin absolu pour en débuire le sharedFolder auquel il appartient
+	// Cela est possible car nous avons décidé que chaque fichier ne peut appartenir qu'a un seul dossier de partage
+	// Todo : requete d'update en cas d'apparition d'un nouveau sous dossier de partage dans un dossier de partage (retagger les events avc le new sharedfolder)
+	public Event(String filepath,String newHash,String oldHash,int action,String owner) 
 	{
 
 		setDate(System.currentTimeMillis());
 		setFilepath(filepath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolder = new SharedFolder(uuidShareFolder);
-		setHash(hash);
+		m_sharedFolder = new SharedFolder(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile(filepath));
+		setNewHash(newHash);
+		setOldHash(oldHash);
+		setStatus(STATUS_OK);
 		m_file = new File(getFilepath());
+		m_isFile = m_file.isFile()? 1 : 0;
+
 
 
 	}
+	
+	public Event(String filepath,String newHash,String oldHash,int action,String owner,int status) 
+	{
+
+		setDate(System.currentTimeMillis());
+		setFilepath(filepath);
+		setAction(action);
+		setOwner(owner);
+		m_sharedFolder = new SharedFolder(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile(filepath));
+		setNewHash(newHash);
+		setOldHash(oldHash);
+		setStatus(status);
+		m_file = new File(getFilepath());
+		m_isFile = m_file.isFile()? 1 : 0;
+
+	}
+
+	public Event(long date,String filepath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
+	{
+
+		setDate(date);
+		setFilepath(filepath);
+		setAction(action);
+		setOwner(owner);
+		m_sharedFolder = new SharedFolder(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile(filepath));
+		setNewHash(newHash);
+		setOldHash(oldHash);
+		setStatus(status);
+		m_file = new File(getFilepath());
+		m_isFile = isFile; 
+
+	}
+	
 
 
-
+	public void checkConflict()
+	{
+		if(getAction()!=ACTION_CREATE)
+		{
+			Event e = DataBaseManager.getDataBaseManager().getLastEventOfAFile(m_filepath);
+			if(e.getNewHash()!=getOldHash())
+			{
+				setStatus(STATUS_CONFLICT);
+			}
+		}
+		
+	}
 	public void save()
 	{
+		checkConflict();
 		DataBaseManager.getDataBaseManager().saveEvent(this);
 
 	}
 
 	public int isFile()
 	{
-		return m_file.isFile()? 1 : 0;
-		
+		return m_isFile;
+
 	}
 
 	public String getRelPath()
 	{
 		return SharedFolder.RelativeFromAbsolutePath(m_filepath,m_sharedFolder.getAbsFolderRootPath());
-		
+
 	}
 	private void openFile() throws Exception
 	{
@@ -68,7 +119,7 @@ public class Event {
 
 		if(m_file.exists() && (m_file.isFile() || m_file.isDirectory()))
 		{
-			setHash(DirectoryReader.calculateHash(m_file));
+			setNewHash(DirectoryReader.calculateHash(m_file));
 
 
 		}
@@ -131,16 +182,40 @@ public class Event {
 		this.m_owner = owner;
 	}
 
-	public String getHash() {
-		return m_hash;
+	public String getNewHash() {
+		return m_newHash;
 	}
 
-	private void setHash(String m_hash) {
-		this.m_hash = m_hash;
+	private void setNewHash(String m_hash) {
+		this.m_newHash = m_hash;
 	}
 
 	public SharedFolder getShareFolder() {
 		return m_sharedFolder;
+	}
+
+
+
+	public int getStatus() {
+		return m_status;
+	}
+
+
+
+	public void setStatus(int m_status) {
+		this.m_status = m_status;
+	}
+
+
+
+	public String getOldHash() {
+		return m_oldHash;
+	}
+
+
+
+	public void setOldHash(String m_oldHash) {
+		this.m_oldHash = m_oldHash;
 	}
 
 

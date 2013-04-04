@@ -2,13 +2,15 @@ create table events
 (
 date numeric,
 filepath text,
-hash text,
+newhash text,
+oldhash text,
 action numeric,
 parameters text,
 owner text,
 isFile numeric,
 sharedFolder numeric,
-PRIMARY KEY (date,filepath,sharedFolder,hash)
+status numeric,
+PRIMARY KEY (date,filepath,sharedFolder,newhash)
 )
 
 create table sharedFolder 
