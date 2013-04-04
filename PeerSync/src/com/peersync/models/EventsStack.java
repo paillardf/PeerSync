@@ -1,5 +1,6 @@
 package com.peersync.models;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ArrayList;
@@ -16,10 +17,11 @@ public class EventsStack  {
 
 
 
-
-	private static final int ACTION_CREATE = 1;
-	private static final int ACTION_UPDATE = 2;
-	private static final int ACTION_DELETE = 3;
+	
+	
+	
+	
+	
 
 	public EventsStack() 
 	{
@@ -28,12 +30,22 @@ public class EventsStack  {
 
 
 	}
+	
+	public ArrayList<Event> getEvents()
+	{
+		return m_Events;
+	}
+
+	
+	public void clear()
+	{
+		m_Events.clear();
+	}
 
 
 
 
-
-	public void createEventsFromScan(String UUID,Map<String,String> createdFiles,Map<String,String> updatedFiles,Set<String> deletedFiles)
+	/*public void createEventsFromScan(String UUID,Map<String,String> createdFiles,Map<String,String> updatedFiles,Set<String> deletedFiles)
 	{
 		m_Events.clear();
 		for (String t : deletedFiles)
@@ -71,8 +83,22 @@ public class EventsStack  {
 			}
 		}
 		save();
+	}*/
+	
+	
+	public void addAll(EventsStack es)
+	{
+		m_Events.addAll(es.getEvents());
 	}
 	
+	public void setAllEventsToSync()
+	{
+		for (Event e : m_Events)
+		{
+			e.setStatus(Event.STATUS_UNSYNC);
+
+		}
+	}
 	
 	public void addEvent(Event e)
 	{

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,7 +18,7 @@ public class EventsManager {
 	private EventsStack m_EventsStack;
 	private Map<String,String> currentStack = new Hashtable<String,String>();
 
-	List<SharedFolder> m_directories = new LinkedList<SharedFolder>();
+	ArrayList<SharedFolder> m_directories = new ArrayList<SharedFolder>();
 
 
 
@@ -62,11 +63,14 @@ public class EventsManager {
 
 
 
+
 			}
 
 
 			if(toAdd)
+			{
 				m_directories.add(new SharedFolder(sd));
+			}
 
 
 		}
@@ -87,13 +91,13 @@ public class EventsManager {
 		timer.schedule (new TimerTask() {
 			public void run()
 			{
-
-				for(SharedFolder dir : m_directories)
-				{
-					currentStack = DataBaseManager.getDataBaseManager().getLastEvents(dir.getUID());
-					DirectoryReader.getDirectoryReader().scanDifferences(currentStack,dir);
-					m_EventsStack.createEventsFromScan(dir.getUID(), DirectoryReader.getDirectoryReader().getNewFilesMap(),DirectoryReader.getDirectoryReader().getUpdatedFilesMap(),DirectoryReader.getDirectoryReader().getDeletedFilesSet());
-				}
+				currentStack = DataBaseManager.getDataBaseManager().getLastEvents();
+				
+					DirectoryReader.getDirectoryReader().scanDifferences(currentStack,m_directories);
+					
+					//m_EventsStack.createEventsFromScan(dir.getUID(), DirectoryReader.getDirectoryReader().getNewFilesMap(),DirectoryReader.getDirectoryReader().getUpdatedFilesMap(),DirectoryReader.getDirectoryReader().getDeletedFilesSet());
+				
+				DirectoryReader.getDirectoryReader().getEventsStack().save();
 			}
 		}, 0, 20000);
 	}

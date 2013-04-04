@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.peersync.models.Event;
+import com.peersync.models.EventsStack;
 import com.peersync.models.SharedFolder;
 
 public class DirectoryReader {
@@ -24,15 +27,17 @@ public class DirectoryReader {
 	private Map<String,String> m_newFiles = new Hashtable<String,String>();
 	private Map<String,String> m_updatedFiles = new Hashtable<String,String>();
 	private Set<String> m_deletedFiles = new HashSet<String>();
+	private EventsStack m_EventsStack = new EventsStack();
+
 
 	private static DirectoryReader instance;
-	
+
 	public static DirectoryReader getDirectoryReader()
 	{
 		if(instance==null)
 			instance = new DirectoryReader();
 		return instance;
-		
+
 	}
 	private DirectoryReader() {
 
@@ -94,7 +99,7 @@ public class DirectoryReader {
 	}
 
 
-	public void scanDifferences(Map<String,String> om,SharedFolder directory)
+	public void scanDifferences(Map<String,String> om,ArrayList<SharedFolder> directory)
 	{
 		m_oldMap = om;
 		m_filesOk.clear();
@@ -102,6 +107,7 @@ public class DirectoryReader {
 		m_updatedFiles.clear();
 		m_deletedFiles.clear();
 		m_directoriesOk.clear();
+		m_EventsStack.clear();
 		listAllFiles(directory);
 		searchDeletedFiles();
 
@@ -117,7 +123,8 @@ public class DirectoryReader {
 				Iterator<String> it = m_directoriesOk.iterator();
 				while(!found && it.hasNext())
 				{
-					if(entry.getKey().contains(it.next()))
+					String tmp = it.next();
+					if(entry.getKey().contains(tmp))
 					{
 						found = true;
 						m_filesOk.add(entry.getKey());
@@ -127,6 +134,7 @@ public class DirectoryReader {
 				{
 					m_deletedFiles.add(entry.getKey());
 					System.out.println("A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
+					m_EventsStack.addEvent(new Event(entry.getKey(),null,entry.getValue(),Event.ACTION_DELETE,"Nicolas"));
 				}
 			}
 		}
@@ -146,13 +154,17 @@ public class DirectoryReader {
 
 	}
 
-	private List<File> listAllFiles(SharedFolder dir)
+
+	private List<File> listAllFiles(ArrayList<SharedFolder> dir)
 	{
 		List<File> files = new LinkedList<File>();
 
+		for(SharedFolder sf : dir)
+		{
+			File dirFile = new File(sf.getAbsFolderRootPath());
 
-		File dirFile = new File(dir.getAbsFolderRootPath());
-		files.addAll(listAllFilesInADir(dirFile.getAbsolutePath()));
+			files.addAll(listAllFilesInADir(dirFile.getAbsolutePath()));
+		}
 
 
 		return files;
@@ -166,46 +178,77 @@ public class DirectoryReader {
 
 		File dir = new File(dirString);
 
+
 		if(dir.exists())
 		{
-
-			File[] content = dir.listFiles();
-			if(content != null)
+			String hashDir = DirectoryReader.calculateHash(dir);
+			boolean toScan = false;
+			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
 			{
-				for (File file : content)
+				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
+				m_EventsStack.addEvent(new Event(dir.getAbsolutePath(),hashDir,null,Event.ACTION_UPDATE,"Nicolas"));
+				toScan = true;
+			}
+			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
+			{
+				m_newFiles.put(dir.getAbsolutePath(),hashDir);
+				m_EventsStack.addEvent(new Event(dir.getAbsolutePath(),hashDir,null,Event.ACTION_CREATE,"Nicolas"));
+				toScan = true;
+			}
+			if(toScan)
+			{
+				File[] content = dir.listFiles();
+				if(content != null)
 				{
-					String hash = DirectoryReader.calculateHash(file);
-					if(m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+					for (File file : content)
 					{
-						if(file.isDirectory())
-							m_directoriesOk.add(file.getAbsolutePath());
-						else
-							m_filesOk.add(file.getAbsolutePath());
-					}
-					else
-					{
-						if(!m_oldMap.containsKey(file.getAbsolutePath()))
+						String hash = DirectoryReader.calculateHash(file);
+						if(m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
 						{
-							m_newFiles.put(file.getAbsolutePath(),hash);
+							if(file.isDirectory())
+								m_directoriesOk.add(file.getAbsolutePath());
+							else
+								m_filesOk.add(file.getAbsolutePath());
 						}
 						else
 						{
-							m_updatedFiles.put(file.getAbsolutePath(),hash);
-						}
-						if(file.isDirectory())
-						{
-							files.add(file);
-							files.addAll(listAllFilesInADir(file.getAbsolutePath()));
-						}
-						else 
-						{
-							files.add(file);
+							if(file.isDirectory())
+							{
+								files.add(file);
+								files.addAll(listAllFilesInADir(file.getAbsolutePath()));
+							}
+							else 
+							{
+								files.add(file);
+
+								if(!m_oldMap.containsKey(file.getAbsolutePath()))
+								{
+									m_newFiles.put(file.getAbsolutePath(),hash);
+									m_EventsStack.addEvent(new Event(file.getAbsolutePath(),hash,null,Event.ACTION_CREATE,"Nicolas"));
+								}
+								else
+								{
+									m_updatedFiles.put(file.getAbsolutePath(),hash);
+									m_EventsStack.addEvent(new Event(file.getAbsolutePath(),hash,m_oldMap.get(file.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas"));
+								}
+							}
+
 						}
 					}
 				}
 			}
+			else
+			{
+				System.out.println("On skip "+dir.getAbsolutePath());
+				m_filesOk.add(dir.getAbsolutePath());
+				m_directoriesOk.add(dir.getAbsolutePath());
+			}
+
 		}
 		return files;
+	}
+	public EventsStack getEventsStack() {
+		return m_EventsStack;
 	}
 
 
