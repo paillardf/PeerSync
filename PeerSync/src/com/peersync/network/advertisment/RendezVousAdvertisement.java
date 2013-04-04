@@ -57,6 +57,7 @@ import net.jxta.document.TextElement;
 import net.jxta.endpoint.EndpointAddress;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
+import net.jxta.impl.id.CBID.CodatID;
 import net.jxta.peer.PeerID;
 import net.jxta.peergroup.PeerGroupID;
 
@@ -185,7 +186,6 @@ public class RendezVousAdvertisement extends Advertisement {
                 // We have not yet built it. Do it now
                 byte[] seed = getAdvertisementType().getBytes("UTF-8");
                 InputStream in = new ByteArrayInputStream(getPeerId().toString().getBytes("UTF-8"));
-
                 AdvertisementID = IDFactory.newCodatID((PeerGroupID) peerGroupId, seed, in);
             } catch (Exception ez) {
                 return ID.nullID;

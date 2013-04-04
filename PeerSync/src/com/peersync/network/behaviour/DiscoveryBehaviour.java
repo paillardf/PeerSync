@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.jxta.credential.AuthenticationCredential;
 import net.jxta.credential.Credential;
+import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
 import net.jxta.document.AdvertisementFactory;
@@ -264,6 +265,8 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 		//TODO
 	}
 
+
+	
 
 
 

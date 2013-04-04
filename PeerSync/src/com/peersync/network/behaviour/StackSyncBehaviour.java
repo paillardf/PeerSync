@@ -13,6 +13,7 @@ import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.query.StackVersionQuery;
 import com.peersync.tools.Log;
 
 
@@ -20,12 +21,13 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 	private static final String NAME = "StackSyncBehaviour";
 	private long lastStackVersionAdvertismentEvent=0;
+	private StackVersionQuery queryHandler;
 	private static final long UPDATE_RDV_DELAY = 8*60*1000;
 	private static final long VALIDITY_RDV_ADV = 10*60*1000;
 	
 	public StackSyncBehaviour(MyPeerGroup peerGroup){
 		super(peerGroup);
-
+		queryHandler = new StackVersionQuery(myPeerGroup);
 
 	}
 
@@ -35,7 +37,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		shareFolder.addStackVersion(new StackVersion(""+System.currentTimeMillis(), System.currentTimeMillis()));
 		shareFolder.addStackVersion(new StackVersion("101", System.currentTimeMillis()));
 		shareFolders.add(shareFolder);
-		StackAdvertisement adv = new StackAdvertisement(shareFolders);
+		StackAdvertisement adv = new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID());
 
 		//peer.myPeerGroup.getPipeService().
 		try {
@@ -52,7 +54,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	public void run() {
 		try {
 			while(true){
-				sleep(5000);
+				sleep(20000);
 				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
 				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 10000){
 					publishStackVersionAdvertisement();
@@ -74,11 +76,6 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		} 
 
 	}
-	@Override
-	public void discoveryEvent(DiscoveryEvent event) {
-		parseAdvertisement(event.getSearchResults());
-
-	}
 
 	protected void parseAdvertisement(Enumeration<Advertisement> TheAdvEnum) {
 		while (TheAdvEnum.hasMoreElements()) { 
@@ -89,12 +86,12 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 				Log.d(NAME, "Adv recu");
 				// We found StackVersion Advertisement
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
-				System.out.println(stackVersionAdvertisement.toString());
-			//	Log.d(NAME, stackVersionAdvertisement.toString());
-				//TODO
-
+				//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
+				//queryHandler.sendQuery(stackVersionAdvertisement.getShareFolderList(), stackVersionAdvertisement.getPeerId());
+				//System.out.println(stackVersionAdvertisement.toString());
 				// Flushing advertisement
 				//TheDiscoveryService.flushAdvertisement(TheAdv);
+				//}
 			} 
 
 

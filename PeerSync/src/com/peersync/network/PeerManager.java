@@ -42,7 +42,6 @@ public class PeerManager {
 	//DiscoveryService netDiscoveryService;
 	//DiscoveryService myDiscoveryService;
 	private KeyStoreManager keyStoreManager;
-	private DiscoveryBehaviour peerNetworkManager;
 	private PeerGroupManager peerGroupManager;
 	public NetworkConfigurator conf;
 	private static PeerManager instance;

@@ -26,7 +26,6 @@ public class MyPeerGroup {
 	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName)  {
 		this.peerGroupName = peerGroupName;
 		this.groupManager=peerGroupManager;
-		
 		DiscoveryBehaviour db = new DiscoveryBehaviour(this);
 		behaviourList.add(db);
 		behaviourList.add(new StackSyncBehaviour(this));

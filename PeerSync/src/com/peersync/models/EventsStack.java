@@ -2,6 +2,7 @@ package com.peersync.models;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
@@ -10,7 +11,7 @@ import java.util.Vector;
 
 public class EventsStack  {
 
-	private Vector<Event> m_Events = new Vector<Event>();
+	private ArrayList<Event> m_Events = new ArrayList<Event>();
 
 
 
@@ -87,6 +88,10 @@ public class EventsStack  {
 
 	}
 
+	public ArrayList<Event> getEvents(){
+		return m_Events;
+	}
+	
 	public void save(long d) {
 
 
