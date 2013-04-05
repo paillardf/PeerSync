@@ -3,6 +3,8 @@ package com.peersync;
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
 import com.peersync.models.Event;
+import com.peersync.models.FileToSync;
+import com.peersync.models.FileToSyncList;
 
 public class mainClass {
 	public static void main(String[] args){
@@ -10,7 +12,20 @@ public class mainClass {
 
 		//EventsManagerThread.getEventsManagerThread().start();
 		
-		DataBaseManager.getDataBaseManager().checkEventsIntegrity();
+		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();
+		
+		FileToSyncList fsl = new FileToSyncList();
+		fsl.reload();
+		for (FileToSync fs : fsl.getFilesWithLocalSource())
+		{
+			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+		}
+		System.out.println("Down");
+		for (FileToSync fs : fsl.getFilesToDownload())
+		{
+			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+		}
+		
 
 		//DataBaseManager.getDataBaseManager().getStackVersionList("UUID2");
 

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
+import com.peersync.models.FileToSync;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
@@ -287,7 +288,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 			ResultSet rs = statement.executeQuery("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> 3 and  e1."+DATEFIELD+" = " +
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
 
 
@@ -456,6 +457,80 @@ public class DataBaseManager extends DbliteConnection{
 		}
 		return res;
 	}
+	
+	public ArrayList<FileToSync> getFilesToDownload()
+	{
+		ArrayList<FileToSync> res = new ArrayList<FileToSync>();
+		try {
+			openConnection(DBEVENTSPATH);
+			Statement statement = getConnection().createStatement();
+
+
+			statement.setQueryTimeout(30);  // set timeout to 30 sec
+			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+" "+
+					"from "+DBEVENTSTABLE+" e1 where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
+							" and e1."+NEWHASHFIELD+" NOT IN (select e2."+NEWHASHFIELD+
+					" from "+DBEVENTSTABLE+" e2  where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" and e2."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+"))";
+
+			ResultSet rs = statement.executeQuery(sqlQuery);
+			
+			while(rs.next())
+			{
+				String relFilePath = rs.getString(FILEPATHFIELD);
+				String fileHash = rs.getString(NEWHASHFIELD);
+				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
+				res.add(new FileToSync(relFilePath, fileHash, sharedFolderUID));
+				
+
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	
+	public ArrayList<FileToSync> getFilesWithLocalSource()
+	{
+		ArrayList<FileToSync> res = new ArrayList<FileToSync>();
+		try {
+			openConnection(DBEVENTSPATH);
+			Statement statement = getConnection().createStatement();
+
+
+			statement.setQueryTimeout(30);  // set timeout to 30 sec
+			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
+					" from "+DBEVENTSTABLE+" e2 left join "+DBSHAREDFOLDERSTABLE+" sf on (e2."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" " +
+					" and e2."+NEWHASHFIELD+" = e1."+NEWHASHFIELD+
+					" and e2."+DATEFIELD+" = " +
+					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+")) as localSource "+
+					" from "+DBEVENTSTABLE+" e1 where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
+					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
+							" and localSource NOT NULL";
+			
+			ResultSet rs = statement.executeQuery(sqlQuery);
+			
+			while(rs.next())
+			{
+				
+				String relFilePath = rs.getString(FILEPATHFIELD);
+				String fileHash = rs.getString(NEWHASHFIELD);
+				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
+				String localSource = rs.getString("localsource");
+				res.add(new FileToSync(relFilePath, fileHash, sharedFolderUID,localSource));
+
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	
 
 
 }
