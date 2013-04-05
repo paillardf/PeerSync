@@ -31,12 +31,7 @@ public class EventsStack  {
 
 	}
 	
-	public ArrayList<Event> getEvents()
-	{
-		return m_Events;
-	}
 
-	
 	public void clear()
 	{
 		m_Events.clear();

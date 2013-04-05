@@ -1,4 +1,4 @@
-package com.peersync.events;
+package com.peersync.data;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

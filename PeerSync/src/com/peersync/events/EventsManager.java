@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.peersync.data.DataBaseManager;
 import com.peersync.models.EventsStack;
 import com.peersync.models.SharedFolder;
 

@@ -2,8 +2,6 @@ package com.peersync.models;
 
 import java.util.ArrayList;
 
-import com.peersync.events.DataBaseManager;
-
 public class SharedFolderVersion {
 
 	private final String UID;
@@ -29,6 +27,18 @@ public class SharedFolderVersion {
 		return UID;
 	}
 
+	public StackVersion getStackVersion(String stackVersionUID){
+		for (StackVersion stackVersion : stackVersionList) {
+			if(stackVersion.getUID().compareTo(stackVersionUID)==0)
+				return stackVersion;
+		}
+		
+		return new StackVersion(UID, 0);
+	}
+
+	public int size() {
+		return stackVersionList.size();
+	}
 	
 	
 

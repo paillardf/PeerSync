@@ -2,7 +2,7 @@ package com.peersync.models;
 
 import java.io.File;
 
-import com.peersync.events.DataBaseManager;
+import com.peersync.data.DataBaseManager;
 import com.peersync.events.DirectoryReader;
 public class Event {
 

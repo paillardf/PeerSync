@@ -9,6 +9,8 @@ import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
 import net.jxta.id.ID;
 
+import com.peersync.data.DataBaseManager;
+import com.peersync.data.SyncUtils;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
@@ -86,6 +88,15 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 				Log.d(NAME, "Adv recu");
 				// We found StackVersion Advertisement
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
+				
+				;
+				ArrayList<SharedFolderVersion> shareFolderVersion = 
+						SyncUtils.getInstance().compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
+				if(shareFolderVersion.size()>0){
+					//ENVOYER UNE REQUETE
+					//TODO
+				}
+				
 				//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 				//queryHandler.sendQuery(stackVersionAdvertisement.getShareFolderList(), stackVersionAdvertisement.getPeerId());
 				//System.out.println(stackVersionAdvertisement.toString());

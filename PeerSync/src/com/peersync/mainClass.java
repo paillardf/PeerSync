@@ -1,6 +1,6 @@
 package com.peersync;
 
-import com.peersync.events.DataBaseManager;
+import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
 import com.peersync.models.Event;
 

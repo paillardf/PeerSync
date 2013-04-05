@@ -1,6 +1,6 @@
 package com.peersync.models;
 
-import com.peersync.events.DataBaseManager;
+import com.peersync.data.DataBaseManager;
 
 public class SharedFolder {
 
