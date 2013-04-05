@@ -116,10 +116,10 @@ public class DataBaseManager extends DbliteConnection{
 	
 	/** Récupère le dernier événement pour un fichier donné
 	 * 	@param relFilePath : Chemin relatif du fichier dont on veut récupérer le dernier événement
-	 * 	@param dirUID : UID du Shared Folder où se trouve le fichier en question
+	 * 	@param sharedFolderUID : UID du Shared Folder où se trouve le fichier en question
 	 * 	@return le dernier event concernant le fichier
 	 */
-	public Event getLastEventOfAFile(String relFilePath,String dirUID)
+	public Event getLastEventOfAFile(String relFilePath,String sharedFolderUID)
 	{
 		Event res = null;
 		try
@@ -130,8 +130,8 @@ public class DataBaseManager extends DbliteConnection{
 			
 		
 			ResultSet rs = statement.executeQuery("select e."+DATEFIELD+",e."+FILEPATHFIELD+",e."+NEWHASHFIELD+",e."+OLDHASHFIELD+",e."+ACTIONFIELD+",e."+PARAMETERSFIELD+",e."+OWNERFIELD+",e."+SHAREDFOLDERFIELD+",e."+ISFILEFIELD+",e."+STATUSFIELD+" from "+DBEVENTSTABLE+" e"
-					+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+dirUID+"'"
-					+" and "+DATEFIELD+" = (select max("+DATEFIELD+") from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+dirUID+"')"
+					+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"'"
+					+" and "+DATEFIELD+" = (select max("+DATEFIELD+") from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"')"
 					);
 			while(rs.next())
 			{
@@ -146,7 +146,7 @@ public class DataBaseManager extends DbliteConnection{
 
 				
 				
-				res = new Event(date,filepath,isFile,newHash,oldHash,action,owner,st);
+				res = new Event(sharedFolderUID , date, filepath,isFile,newHash,oldHash,action,owner,st);
 			}
 
 		}
@@ -172,7 +172,7 @@ public class DataBaseManager extends DbliteConnection{
 			Statement statement = getConnection().createStatement();
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-			statement.executeUpdate("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getRelPath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolder().getUID()+"',"+e.isFile()+","+e.getStatus()+")");
+			statement.executeUpdate("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getRelPath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
 
 		}
 		catch(SQLException | ClassNotFoundException ex)
@@ -217,12 +217,12 @@ public class DataBaseManager extends DbliteConnection{
 	}
 	
 	/** Obtient la liste des événements d'un Shared Folder donné depuis une date donnée et pour un propriétaire donné
-	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements. Joker possible : "*"
+	 * 	@param sharedFolderUID : UID du Shared Folder dont on veut récupérer les événements. Joker possible : "*"
 	 * 	@param date : date (en ms depuis l'epoch) à partir de laquelle on veut récupérer les événements. Joker possible : -1
 	 *  @param owner : pour ne récupérer que les events dont l'"actionneur" est "owner". Joker possible : "*"
 	 * 	@return EventsStack
 	 */
-	public EventsStack loadEventsStack(String UIDFolder,long date,String owner)
+	public EventsStack loadEventsStack(String sharedFolderUID,long date,String owner)
 	{
 		EventsStack res = new EventsStack();
 		try
@@ -233,9 +233,9 @@ public class DataBaseManager extends DbliteConnection{
 			
 			String sqlQuery = "select e."+DATEFIELD+",e."+FILEPATHFIELD+",e."+NEWHASHFIELD+",e."+OLDHASHFIELD+",e."+ACTIONFIELD+",e."+PARAMETERSFIELD+",e."+OWNERFIELD+",e."+SHAREDFOLDERFIELD+",e."+ISFILEFIELD+",e."+STATUSFIELD+" from "+DBEVENTSTABLE+" e"
 					+" where 1 ";
-			if(!UIDFolder.equals("*"))
-				sqlQuery += " and "+SHAREDFOLDERFIELD+"='"+UIDFolder+"'";
-			if(!UIDFolder.equals("*"))
+			if(!sharedFolderUID.equals("*"))
+				sqlQuery += " and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"'";
+			if(!sharedFolderUID.equals("*"))
 				sqlQuery += " and "+OWNERFIELD+"='"+owner+"'";
 			if(date!=-1)
 					sqlQuery += " and "+DATEFIELD+" > "+date;
@@ -254,7 +254,7 @@ public class DataBaseManager extends DbliteConnection{
 
 				
 				
-				res.addEvent(new Event(dateEvent,filepath,isFile,newHash,oldHash,action,ownerEvent,st));
+				res.addEvent(new Event(sharedFolderUID , dateEvent, filepath,isFile,newHash,oldHash,action,ownerEvent,st));
 			}
 
 		}
@@ -271,9 +271,10 @@ public class DataBaseManager extends DbliteConnection{
 	/**
 	 *  Retourne les derniers événements en base de données, pour chaque fichier.
 	 *  Ne prends pas en compte les événements "Suppression"
+	 * @param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
-	public Map<String,String> getLastEvents()
+	public Map<String,String> getLastEvents(String shareFolderUID)
 	{
 		Map<String,String> res = new Hashtable<String,String>();
 
@@ -289,7 +290,7 @@ public class DataBaseManager extends DbliteConnection{
 
 			ResultSet rs = statement.executeQuery("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
 					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+" AND "+SHAREDFOLDERFIELD+"="+shareFolderUID+")");
 
 
 			while(rs.next())

@@ -24,8 +24,9 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	private static final String NAME = "StackSyncBehaviour";
 	private long lastStackVersionAdvertismentEvent=0;
 	private StackVersionQuery queryHandler;
-	private static final long UPDATE_RDV_DELAY = 8*60*1000;
-	private static final long VALIDITY_RDV_ADV = 10*60*1000;
+	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
+	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-30*1000;
+	
 	
 	public StackSyncBehaviour(MyPeerGroup peerGroup){
 		super(peerGroup);
@@ -43,8 +44,8 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 		//peer.myPeerGroup.getPipeService().
 		try {
-			myPeerGroup.getDiscoveryService().publish(adv, 30000, 30000);
-			myPeerGroup.getDiscoveryService().remotePublish(adv, 30000);
+			myPeerGroup.getDiscoveryService().publish(adv, VALIDITY_STACKVERSION_ADV, VALIDITY_STACKVERSION_ADV);
+			myPeerGroup.getDiscoveryService().remotePublish(adv, VALIDITY_STACKVERSION_ADV);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -58,7 +59,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 			while(true){
 				sleep(20000);
 				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > 10000){
+				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > PUBLISH_ADVERTISEMENT_DELAY){
 					publishStackVersionAdvertisement();
 
 
@@ -94,7 +95,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 						SyncUtils.getInstance().compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
 				if(shareFolderVersion.size()>0){
 					//ENVOYER UNE REQUETE
-					//TODO
+					queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
 				}
 				
 				//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){

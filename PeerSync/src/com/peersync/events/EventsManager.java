@@ -1,12 +1,8 @@
 package com.peersync.events;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,7 +13,7 @@ import com.peersync.models.SharedFolder;
 public class EventsManager {
 
 	private EventsStack m_EventsStack;
-	private Map<String,String> currentStack = new Hashtable<String,String>();
+	
 
 	ArrayList<SharedFolder> m_directories = new ArrayList<SharedFolder>();
 
@@ -92,13 +88,16 @@ public class EventsManager {
 		timer.schedule (new TimerTask() {
 			public void run()
 			{
-				currentStack = DataBaseManager.getDataBaseManager().getLastEvents();
+				DataBaseManager db = DataBaseManager.getDataBaseManager();
 				
-					DirectoryReader.getDirectoryReader().scanDifferences(currentStack,m_directories);
+				DirectoryReader dr = DirectoryReader.getDirectoryReader(m_directories);
+				
+				for (SharedFolder shareFolder : m_directories) {
+					Map<String,String> currentStack = DataBaseManager.getDataBaseManager().getLastEvents(shareFolder.getUID());
+					dr.scanDifferences(currentStack,shareFolder);
+					dr.getEventsStack().save();
+				}
 					
-					//m_EventsStack.createEventsFromScan(dir.getUID(), DirectoryReader.getDirectoryReader().getNewFilesMap(),DirectoryReader.getDirectoryReader().getUpdatedFilesMap(),DirectoryReader.getDirectoryReader().getDeletedFilesSet());
-				
-				DirectoryReader.getDirectoryReader().getEventsStack().save();
 			}
 		}, 0, 20000);
 	}

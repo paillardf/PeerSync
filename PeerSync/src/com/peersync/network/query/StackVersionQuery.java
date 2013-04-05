@@ -11,17 +11,17 @@ import net.jxta.document.StructuredTextDocument;
 import net.jxta.document.TextElement;
 import net.jxta.impl.protocol.ResolverQuery;
 import net.jxta.impl.protocol.ResolverResponse;
-import net.jxta.peergroup.PeerGroup;
 import net.jxta.protocol.ResolverQueryMsg;
 import net.jxta.protocol.ResolverResponseMsg;
 import net.jxta.resolver.QueryHandler;
 import net.jxta.resolver.ResolverService;
 
+import com.peersync.data.DataBaseManager;
+import com.peersync.data.SyncUtils;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
-import com.peersync.network.PeerManager;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
 import com.peersync.tools.Log;
@@ -103,23 +103,28 @@ public class StackVersionQuery implements QueryHandler{
 			}
 		}
 		
-		//TODO
-		//recupere la EventsStack avec shareFolderList
-		EventsStack eventsStack =null;
 		
 		// Build the response
 		
 		StructuredDocument resp = (StructuredTextDocument)
 		StructuredDocumentFactory.newStructuredDocument(new MimeMediaType( "text/xml" ),QueryType);
-		for (Event e : eventsStack.getEvents()) {
-			Element eventElement;
+		DataBaseManager db = DataBaseManager.getDataBaseManager();
+		for (SharedFolderVersion sharedFolderVersion : shareFolderList) {
 			
-			e.getAction();
+			EventsStack eventsStack = db.getEventsToSync(sharedFolderVersion);
+			if(eventsStack.getEvents().size()>0){
+				Element shareFolderElement = resp.createElement(ShareFolderTAG, sharedFolderVersion.getUID());
+				resp.appendChild(shareFolderElement);
+				for (Event e : eventsStack.getEvents()) {
+					e.attacheToXml(shareFolderElement, resp);
+				}
+			}
+			
+			
 		}
+				
 		
-		
-		
-		responseMsg = new ResolverResponse(doc);
+		responseMsg = new ResolverResponse(resp);
 		responseMsg.setHandlerName(NAME);
 		responseMsg.setQueryId(query.getQueryId());
 		myPeerGroup.getPeerGroup().getResolverService().sendResponse(query.getSrcPeer().toString(), responseMsg);
@@ -133,10 +138,34 @@ public class StackVersionQuery implements QueryHandler{
 			StructuredTextDocument doc = (StructuredTextDocument)
 					StructuredDocumentFactory.newStructuredDocument(new MimeMediaType("text/xml"),	response.getResponse() );
 			Enumeration elements = doc.getChildren();
+			
+			EventsStack eventsStack = new EventsStack();
 			while (elements.hasMoreElements()) {
-				TextElement element = (TextElement)
-						elements.nextElement();
-				System.out.println(element.getName());
+				TextElement shareFolderElement = (TextElement)	elements.nextElement();
+				
+				if(shareFolderElement.getName()==ShareFolderTAG){
+					String shareFolderId = shareFolderElement.getValue();
+					Enumeration eventElements = shareFolderElement.getChildren();
+					
+					while (eventElements.hasMoreElements()) {
+						TextElement eventElement = (TextElement)	eventElements.nextElement();
+						if(eventElement.getName().compareTo(Event.EVENTID_TAG)==0){
+							//new Event(shareFolderId, date, filepath, isFile, newHash, oldHash, action, owner, status)
+							eventsStack.addEvent(
+								new Event(shareFolderId,
+								Long.parseLong(((TextElement) eventElement.getChildren(Event.DATE_TAG).nextElement()).getValue()),
+								((TextElement) eventElement.getChildren(Event.PATH_TAG).nextElement()).getValue(),
+								Integer.parseInt(((TextElement) eventElement.getChildren(Event.ISFILE_TAG).nextElement()).getValue()),
+								((TextElement) eventElement.getChildren(Event.NEWHASH_TAG).nextElement()).getValue(), 
+								((TextElement) eventElement.getChildren(Event.OLDHASH_TAG).nextElement()).getValue(),
+								Integer.parseInt(((TextElement) eventElement.getChildren(Event.ACTION_TAG).nextElement()).getValue()),
+								((TextElement) eventElement.getChildren(Event.OWNER_TAG).nextElement()).getValue(),
+								Integer.parseInt(((TextElement) eventElement.getChildren(Event.STATUS_UNSYNC).nextElement()).getValue())));
+						}
+					}
+					
+					eventsStack.save();
+				}
 			}
 		}
 		catch (Exception e){
