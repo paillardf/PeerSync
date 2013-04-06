@@ -271,7 +271,7 @@ public class DataBaseManager extends DbliteConnection{
 	/**
 	 *  Retourne les derniers événements en base de données, pour chaque fichier.
 	 *  Ne prends pas en compte les événements "Suppression"
-	 * @param shareFolderUID 
+	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
 	public Map<String,String> getLastEvents(String shareFolderUID)
@@ -289,8 +289,8 @@ public class DataBaseManager extends DbliteConnection{
 
 
 			ResultSet rs = statement.executeQuery("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+" AND "+SHAREDFOLDERFIELD+"="+shareFolderUID+")");
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
 
 
 			while(rs.next())

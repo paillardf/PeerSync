@@ -181,36 +181,40 @@ public class DirectoryReader {
 
 		File dir = new File(dirString);
 
-
+		// Pour l'instant, on retire l'optimisation basée sur la date de modif d'un dossier
+		// Quand on modifie un fichier dans un dossier, ça modifie bien la date du dossier parent, mais pas les dates des dossiers parents du parent
+		// --> Optimisation impossible
 		if(dir.exists())
 		{
 			String hashDir = DirectoryReader.calculateHash(dir);
-			boolean toScan = false;
+			//boolean toScan = false;
 			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
 			{
 				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
 				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), dir.getAbsolutePath(),hashDir,null,Event.ACTION_UPDATE,"Nicolas"));
-				toScan = true;
+				//toScan = true;
 			}
 			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
 			{
 				m_newFiles.put(dir.getAbsolutePath(),hashDir);
 				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), dir.getAbsolutePath(),hashDir,null,Event.ACTION_CREATE,"Nicolas"));
-				toScan = true;
+				//toScan = true;
 			}
-			if(toScan)
-			{
+			else
+				m_filesOk.add(dir.getAbsolutePath());
+			//if(toScan)
+			//{
 				File[] content = dir.listFiles();
 				if(content != null)
 				{
 					for (File file : content)
 					{
 						String hash = DirectoryReader.calculateHash(file);
-						if(m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+						if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
 						{
-							if(file.isDirectory())
-								m_directoriesOk.add(file.getAbsolutePath());
-							else
+//							if(file.isDirectory())
+//								m_directoriesOk.add(file.getAbsolutePath());
+//							else
 								m_filesOk.add(file.getAbsolutePath());
 						}
 						else
@@ -247,13 +251,13 @@ public class DirectoryReader {
 						}
 					}
 				}
-			}
-			else
-			{
-				System.out.println("On skip "+dir.getAbsolutePath());
-				m_filesOk.add(dir.getAbsolutePath());
-				m_directoriesOk.add(dir.getAbsolutePath());
-			}
+//			}
+//			else
+//			{
+//				System.out.println("On skip "+dir.getAbsolutePath());
+//				m_filesOk.add(dir.getAbsolutePath());
+//				m_directoriesOk.add(dir.getAbsolutePath());
+//			}
 
 		}
 		return files;

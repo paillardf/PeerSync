@@ -10,21 +10,21 @@ public class mainClass {
 	public static void main(String[] args){
 
 
-		//EventsManagerThread.getEventsManagerThread().start();
+		EventsManagerThread.getEventsManagerThread().start();
 		
 		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();
 		
-		FileToSyncList fsl = new FileToSyncList();
-		fsl.reload();
-		for (FileToSync fs : fsl.getFilesWithLocalSource())
-		{
-			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
-		}
-		System.out.println("Down");
-		for (FileToSync fs : fsl.getFilesToDownload())
-		{
-			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
-		}
+//		FileToSyncList fsl = new FileToSyncList();
+//		fsl.reload();
+//		for (FileToSync fs : fsl.getFilesWithLocalSource())
+//		{
+//			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+//		}
+//		System.out.println("Down");
+//		for (FileToSync fs : fsl.getFilesToDownload())
+//		{
+//			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+//		}
 		
 
 		//DataBaseManager.getDataBaseManager().getStackVersionList("UUID2");

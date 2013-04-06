@@ -46,28 +46,28 @@ public class EventsManager {
 		ArrayList<String> sharedDirectories = DataBaseManager.getDataBaseManager().getAllSharedDirectories();
 		for(String sd : sharedDirectories)
 		{
-			Iterator<SharedFolder> it = m_directories.iterator();
-
-			boolean toAdd=true;
-			while(toAdd && it.hasNext())
-			{
-
-				String tmp = it.next().getAbsFolderRootPath(); //Pour éviter les embrouilles du genre deux dossiers test et test1 cote à cote, on fait +"\\"
-				if(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd).contains(tmp+"\\"))
-					toAdd=false;
-				else if( tmp.contains(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd)+"\\"))
-					it.remove();
-
-
-
-
-			}
-
-
-			if(toAdd)
-			{
+//			Iterator<SharedFolder> it = m_directories.iterator();
+//
+//			boolean toAdd=true;
+//			while(toAdd && it.hasNext())
+//			{
+//
+//				String tmp = it.next().getAbsFolderRootPath(); //Pour éviter les embrouilles du genre deux dossiers test et test1 cote à cote, on fait +"\\"
+//				if(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd).contains(tmp+"\\"))
+//					toAdd=false;
+//				else if( tmp.contains(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd)+"\\"))
+//					it.remove();
+//
+//
+//
+//
+//			}
+//
+//
+//			if(toAdd)
+//			{
 				m_directories.add(new SharedFolder(sd));
-			}
+//			}
 
 
 		}

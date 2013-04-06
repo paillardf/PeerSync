@@ -38,9 +38,8 @@ public class Event {
 	public static final String NEWHASH_TAG = "new_hash";
 	public static final String OLDHASH_TAG = "old_hash";
 	public static final String ISFILE_TAG = "isfile";
-	// Désormais, se base toujours sur le chemin absolu pour en débuire le sharedFolder auquel il appartient
-	// Cela est possible car nous avons décidé que chaque fichier ne peut appartenir qu'a un seul dossier de partage
-	// Todo : requete d'update en cas d'apparition d'un nouveau sous dossier de partage dans un dossier de partage (retagger les events avc le new sharedfolder)
+
+	
 	public Event(String shareFolderUID, String filepath,  String newHash,String oldHash,int action,String owner) 
 	{
 
