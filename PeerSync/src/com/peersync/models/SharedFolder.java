@@ -14,6 +14,11 @@ public class SharedFolder {
 		this.UID = UID;
 		asbolutePath = DataBaseManager.getDataBaseManager().getSharedFolderRootPath(UID);
 	}
+	
+	public SharedFolder(String UID,String absDirPath) {
+		this.UID = UID;
+		asbolutePath = absDirPath;
+	}
 
 	public String getUID() {
 		return UID;

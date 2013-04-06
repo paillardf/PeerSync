@@ -10,10 +10,9 @@ import com.peersync.events.DirectoryReader;
 public class Event {
 
 	private long m_date;
-	private String m_filepath;
+	private String m_relFilePath;
 	private int m_action;
 	private String m_parameters;
-	private File m_file;
 	private String m_owner;
 	private String m_newHash;
 	private String m_sharedFolderUID;
@@ -40,19 +39,18 @@ public class Event {
 	public static final String ISFILE_TAG = "isfile";
 
 	
-	public Event(String shareFolderUID, String filepath,  String newHash,String oldHash,int action,String owner) 
+	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(System.currentTimeMillis());
-		setFilepath(filepath);
+		setFilepath(relFilePath);
 		setAction(action);
 		setOwner(owner);
 		m_sharedFolderUID = shareFolderUID;
 		setNewHash(newHash);
 		setOldHash(oldHash);
-		setStatus(STATUS_OK);
-		m_file = new File(getFilepath());
-		m_isFile = m_file.isFile()? 1 : 0;
+		setStatus(status);
+		m_isFile = is_file;
 
 
 
@@ -74,18 +72,17 @@ public class Event {
 //
 //	}
 
-	public Event(String shareFolderId,long date, String filepath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
+	public Event(String shareFolderId,long date, String relFilePath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(date);
-		setFilepath(filepath);
+		setFilepath(relFilePath);
 		setAction(action);
 		setOwner(owner);
 		m_sharedFolderUID = shareFolderId;
 		setNewHash(newHash);
 		setOldHash(oldHash);
 		setStatus(status);
-		m_file = new File(getFilepath());
 		m_isFile = isFile; 
 
 	}
@@ -96,8 +93,9 @@ public class Event {
 	{
 		if(getAction()!=ACTION_CREATE)
 		{
-			Event e = DataBaseManager.getDataBaseManager().getLastEventOfAFile(m_filepath);
-			if(e.getNewHash()!=getOldHash())
+			Event e = DataBaseManager.getDataBaseManager().getLastEventOfAFile(m_relFilePath,m_sharedFolderUID);
+			//TODO : vérifier le bien fondée de la propagation des conflits ( || e.getStatus()==STATUS_CONFLICT )
+			if(e!=null &&  (e.getNewHash()!=getOldHash() || e.getStatus()==STATUS_CONFLICT))
 			{
 				setStatus(STATUS_CONFLICT);
 			}
@@ -116,33 +114,14 @@ public class Event {
 		return m_isFile;
 
 	}
-
-	public String getRelPath()
+	
+	
+	//On sait jamais, ça peut peut être utile^^
+	public String getAbsFilePath()
 	{
-		return SharedFolder.RelativeFromAbsolutePath(m_filepath,
-				DataBaseManager.getDataBaseManager().getSharedFolderRootPath(m_sharedFolderUID));
-
+		return SharedFolder.AbsoluteFromRelativePath(m_relFilePath,DataBaseManager.getDataBaseManager().getSharedFolderRootPath(m_sharedFolderUID) );
 	}
-	private void openFile() throws Exception
-	{
-		m_file = new File(getFilepath());
-
-		if(m_file.exists() && (m_file.isFile() || m_file.isDirectory()))
-		{
-			setNewHash(DirectoryReader.calculateHash(m_file));
-
-
-		}
-		else
-		{
-			throw new Exception("File Error");
-
-		}
-
-
-
-
-	}
+	
 	public long getDate() {
 		return m_date;
 	}
@@ -164,12 +143,12 @@ public class Event {
 
 
 	public String getFilepath() {
-		return m_filepath;
+		return m_relFilePath;
 	}
 
 
 	public void setFilepath(String m_filepath) {
-		this.m_filepath = m_filepath;
+		this.m_relFilePath = m_filepath;
 	}
 
 

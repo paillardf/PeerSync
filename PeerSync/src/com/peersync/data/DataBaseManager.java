@@ -172,7 +172,7 @@ public class DataBaseManager extends DbliteConnection{
 			Statement statement = getConnection().createStatement();
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-			statement.executeUpdate("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getRelPath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
+			statement.executeUpdate("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getFilepath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
 
 		}
 		catch(SQLException | ClassNotFoundException ex)
@@ -354,22 +354,22 @@ public class DataBaseManager extends DbliteConnection{
 
 	/** Obtient l'ensemble des dossiers de partage 
 	 */
-	public ArrayList<String> getAllSharedDirectories()
+	public ArrayList<SharedFolder> getAllSharedDirectories()
 	{
-		ArrayList<String> res = new ArrayList<String>();
+		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
 		try {
 			openConnection(DBEVENTSPATH);
 			Statement statement = getConnection().createStatement();
 
 			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-			ResultSet rs = statement.executeQuery("select sf."+UUIDFIELD+
+			ResultSet rs = statement.executeQuery("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBSHAREDFOLDERSTABLE+" sf");
 
 
 			while(rs.next())
 			{
-				res.add(rs.getString(UUIDFIELD));
+				res.add(new SharedFolder(rs.getString(UUIDFIELD),rs.getString(ROOTPATHFIELD)));
 
 			}
 		} catch (SQLException | ClassNotFoundException e) {
