@@ -1,87 +1,59 @@
 package com.peersync;
 
+import net.jxta.id.IDFactory;
+import net.jxta.peergroup.PeerGroupID;
+
 import com.peersync.data.DataBaseManager;
-
-
 import com.peersync.events.EventsManagerThread;
-import com.peersync.models.Event;
-import com.peersync.models.FileToSync;
-import com.peersync.models.FileToSyncList;
+import com.peersync.models.SharedFolder;
+import com.peersync.network.PeerManager;
+import com.peersync.tools.Constants;
+import com.peersync.tools.PreferencesManager;
 
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 public class mainClass {
-    public static void main(String[] args) throws Exception {
-        Class.forName("org.sqlite.JDBC");
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");
-        Statement stat = conn.createStatement();
-        stat.executeUpdate("drop table if exists people;");
-        stat.executeUpdate("create table people (name, occupation);");
-        PreparedStatement prep = conn.prepareStatement(
-            "insert into people values (?, ?);");
+	public static void main(String[] args){
+		Constants.getInstance().PEERNAME = "client2";
+		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
-        prep.setString(1, "Gandhi");
-        prep.setString(2, "politics");
-        prep.addBatch();
-        prep.setString(1, "Turing");
-        prep.setString(2, "computers");
-        prep.addBatch();
-        prep.setString(1, "Wittgenstein");
-        prep.setString(2, "smartypants");
-        prep.addBatch();
+		DataBaseManager db = DataBaseManager.getInstance();
+		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
+		
+		db.saveSharedFolder(new SharedFolder("5001", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
+		db.saveSharedFolder(new SharedFolder("5002", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
+		PreferencesManager pref = PreferencesManager.getInstance();
+		pref.setPort(9788);
+		EventsManagerThread.getEventsManagerThread().start();
+		//PeerManager.getInstance();
+		
+		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();
+		
+//		FileToSyncList fsl = new FileToSyncList();
+//		fsl.reload();
+//		for (FileToSync fs : fsl.getFilesWithLocalSource())
+//		{
+//			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+//		}
+//		System.out.println("Down");
+//		for (FileToSync fs : fsl.getFilesToDownload())
+//		{
+//			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
+//		}
+		
 
-        conn.setAutoCommit(false);
-        prep.executeBatch();
-        conn.setAutoCommit(true);
+		//DataBaseManager.getDataBaseManager().getStackVersionList("UUID2");
 
-        ResultSet rs = stat.executeQuery("select * from people;");
-        while (rs.next()) {
-            System.out.println("name = " + rs.getString("name"));
-            System.out.println("job = " + rs.getString("occupation"));
-        }
-        rs.close();
-        conn.close();
-    }
-  }
-//
-//public class mainClass {
-//	public static void main(String[] args){
-//
-//
-//		EventsManagerThread.getEventsManagerThread().start();
-//		
-//		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();
-//		
-////		FileToSyncList fsl = new FileToSyncList();
-////		fsl.reload();
-////		for (FileToSync fs : fsl.getFilesWithLocalSource())
-////		{
-////			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
-////		}
-////		System.out.println("Down");
-////		for (FileToSync fs : fsl.getFilesToDownload())
-////		{
-////			System.out.println(fs.getRelFilePath()+"  "+fs.getLocalSource());
-////		}
-//		
-//
-//		//DataBaseManager.getDataBaseManager().getStackVersionList("UUID2");
-//
-//		//System.out.println(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\truc\\trez\\1"));
-//
-////		Event e = new Event("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\bele.png","newhash","oldhash",2,"Toto");
-////		e.save();
-//		
-//		
-////		Event ret = DataBaseManager.getDataBaseManager().getLastEventOfAFile("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\bele.png");
-////		if (ret!=null)
-////			System.out.println(ret.getDate());
-//
-//	}
-//}
-//
+		//System.out.println(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\truc\\trez\\1"));
+
+//		Event e = new Event("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\bele.png","newhash","oldhash",2,"Toto");
+//		e.save();
+		
+		
+//		Event ret = DataBaseManager.getDataBaseManager().getLastEventOfAFile("C:\\Users\\Nicolas.leleu\\Documents\\testTX2\\bele.png");
+//		if (ret!=null)
+//			System.out.println(ret.getDate());
+
+	}
+}
+

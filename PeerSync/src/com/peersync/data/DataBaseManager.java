@@ -120,9 +120,9 @@ public class DataBaseManager extends DbliteConnection{
 
 				if(!newFolderUID.equals(oldFolderUID))
 				{
-					if(newRelFilepath != null && newFolderUID!=null)
-						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
-					else // joue de la role du on delete cascade sur les sharedFolders
+//					if(newRelFilepath != null && newFolderUID!=null)
+//						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+//					else // joue de la role du on delete cascade sur les sharedFolders
 						update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
 				}
 				//
