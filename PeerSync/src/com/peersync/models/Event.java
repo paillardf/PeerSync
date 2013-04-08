@@ -90,15 +90,12 @@ public class Event {
 	{
 		if(getAction()!=ACTION_CREATE)
 		{
-<<<<<<< HEAD
-			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_filepath);
-			if(e.getNewHash()!=getOldHash())
-=======
+
 			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_relFilePath,m_sharedFolderUID);
 			//TODO : vérifier le bien fondée de la propagation des conflits ( || e.getStatus()==STATUS_CONFLICT )
 			if(e!=null &&  (e.getNewHash()!=getOldHash() || e.getStatus()==STATUS_CONFLICT))
 
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
+
 			{
 				setStatus(STATUS_CONFLICT);
 			}
@@ -122,32 +119,9 @@ public class Event {
 	//On sait jamais, ça peut peut être utile^^
 	public String getAbsFilePath()
 	{
-<<<<<<< HEAD
-		return SharedFolder.RelativeFromAbsolutePath(m_filepath,
-				DataBaseManager.getInstance().getSharedFolderRootPath(m_sharedFolderUID));
 
-	}
-	private void openFile() throws Exception
-	{
-		m_file = new File(getFilepath());
-
-		if(m_file.exists() && (m_file.isFile() || m_file.isDirectory()))
-		{
-			setNewHash(DirectoryReader.calculateHash(m_file));
-
-
-		}
-		else
-		{
-			throw new Exception("File Error");
-
-		}
-
-
-
-=======
 		return SharedFolder.AbsoluteFromRelativePath(m_relFilePath,DataBaseManager.getInstance().getSharedFolderRootPath(m_sharedFolderUID) );
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
+
 
 	}
 	

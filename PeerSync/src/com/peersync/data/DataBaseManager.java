@@ -81,7 +81,7 @@ public class DataBaseManager extends DbliteConnection{
 				PEERGROUPFIELD+ " text, "+
 				"PRIMARY KEY("+UUIDFIELD+"));");
 	}
-<<<<<<< HEAD
+
 
 	@Override
 	protected void onUpdate() throws SQLException {
@@ -91,24 +91,11 @@ public class DataBaseManager extends DbliteConnection{
 
 	@Override
 	protected void onDelete() throws SQLException {
-=======
-
-	@Override
-	protected void onUpdate() throws SQLException {
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 		// TODO Auto-generated method stub
 
 	}
 
-<<<<<<< HEAD
-=======
-	@Override
-	protected void onDelete() throws SQLException {
-		// TODO Auto-generated method stub
 
-	}
-
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 	/** Vérifie que les events sont bien taggés avec le bon SharedFolder.
 	 * 	Dans le cas contraire, update la base de données pour revenir à une situation correcte.
 	 * 	Cas d'appel de cette méthode : Ajout d'un sous SharedFolder au sein d'un SharedFolder existant.
@@ -216,14 +203,11 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		try
 		{
-<<<<<<< HEAD
-			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getRelPath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
-=======
+
 
 
 			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getFilepath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
 
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 
 		}
 		catch(SQLException ex)
@@ -329,18 +313,14 @@ public class DataBaseManager extends DbliteConnection{
 
 		try
 		{
-<<<<<<< HEAD
-			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+" AND "+SHAREDFOLDERFIELD+"="+shareFolderUID+")");
-=======
+
 
 
 			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
 					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
 
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
+
 
 
 			while(rs.next())
@@ -404,14 +384,11 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
 		try {
-<<<<<<< HEAD
-			ResultSet rs = query("select sf."+UUIDFIELD+
-=======
+
 
 
 			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
 
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 					" from "+DBSHAREDFOLDERSTABLE+" sf");
 
 
@@ -479,13 +456,7 @@ public class DataBaseManager extends DbliteConnection{
 		String res =  new String();
 		try {
 			ResultSet rs = query("select sf."+UUIDFIELD+" from "+SHAREDFOLDERFIELD+" sf where "+ROOTPATHFIELD+" = (select max("+ROOTPATHFIELD+")  from "+SHAREDFOLDERFIELD+" where '"+absFilePath+"' like rootAbsolutePath||'%')");
-<<<<<<< HEAD
 
-
-=======
-
-
->>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 			while(rs.next())
 			{
 				res = rs.getString(UUIDFIELD);
