@@ -20,7 +20,7 @@ public class SyncUtils {
 	}
 	
 	public ArrayList<SharedFolderVersion> compareShareFolderVersion(ArrayList<SharedFolderVersion> sharefolderVersionList){
-		DataBaseManager db = DataBaseManager.getDataBaseManager();
+		DataBaseManager db = DataBaseManager.getInstance();
 		
 		ArrayList<SharedFolderVersion> shareFolderVList = new ArrayList<SharedFolderVersion>();
 		
