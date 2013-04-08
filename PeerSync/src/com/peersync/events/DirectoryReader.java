@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.peersync.data.DataBaseManager;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.SharedFolder;
@@ -34,17 +35,21 @@ public class DirectoryReader {
 
 	private static DirectoryReader instance;
 
-	public static DirectoryReader getDirectoryReader(ArrayList<SharedFolder> m_directories)
+	public static DirectoryReader getDirectoryReader()
 	{
 		if(instance==null)
 			instance = new DirectoryReader();
 		
-		instance.shareFolders=m_directories;
 		return instance;
 
 	}
 	private DirectoryReader() {
-
+		loadDirectoriesToScan();
+	}
+	
+	public void loadDirectoriesToScan()
+	{
+		shareFolders = DataBaseManager.getInstance().getAllSharedDirectories();
 	}
 
 	public Map<String,String> getNewFilesMap()
@@ -103,7 +108,16 @@ public class DirectoryReader {
 	}
 
 
-	public void scanDifferences(Map<String,String> om,SharedFolder shareFolder)
+	public void scan()
+	{
+		for (SharedFolder shareFolder : shareFolders) {
+			Map<String,String> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
+			scanDifferences(currentStack,shareFolder);
+			getEventsStack().save();
+		}
+	}
+	
+	private void scanDifferences(Map<String,String> om,SharedFolder shareFolder)
 	{
 		m_oldMap = om;
 		m_filesOk.clear();
@@ -139,8 +153,10 @@ public class DirectoryReader {
 				if(!found)
 				{
 					m_deletedFiles.add(entry.getKey());
+					File f = new File(entry.getKey());
 					System.out.println("A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
-					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), entry.getKey(),null,entry.getValue(),Event.ACTION_DELETE,"Nicolas"));
+					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
+					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,f.isFile()? 1 : 0,null,entry.getValue(),Event.ACTION_DELETE,"Nicolas",Event.STATUS_OK));
 				}
 			}
 		}
@@ -181,36 +197,42 @@ public class DirectoryReader {
 
 		File dir = new File(dirString);
 
-
+		// Pour l'instant, on retire l'optimisation basée sur la date de modif d'un dossier
+		// Quand on modifie un fichier dans un dossier, ça modifie bien la date du dossier parent, mais pas les dates des dossiers parents du parent
+		// --> Optimisation impossible
 		if(dir.exists())
 		{
 			String hashDir = DirectoryReader.calculateHash(dir);
-			boolean toScan = false;
+			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
+			//boolean toScan = false;
 			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
 			{
 				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), dir.getAbsolutePath(),hashDir,null,Event.ACTION_UPDATE,"Nicolas"));
-				toScan = true;
+				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,m_oldMap.get(dir.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
+				//toScan = true;
 			}
 			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
 			{
 				m_newFiles.put(dir.getAbsolutePath(),hashDir);
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), dir.getAbsolutePath(),hashDir,null,Event.ACTION_CREATE,"Nicolas"));
-				toScan = true;
+				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,null,Event.ACTION_CREATE,"Nicolas",Event.STATUS_OK));
+				//toScan = true;
 			}
-			if(toScan)
-			{
+			else
+				m_filesOk.add(dir.getAbsolutePath());
+			//if(toScan)
+			//{
 				File[] content = dir.listFiles();
 				if(content != null)
 				{
 					for (File file : content)
 					{
+						String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(file.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 						String hash = DirectoryReader.calculateHash(file);
-						if(m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+						if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
 						{
-							if(file.isDirectory())
-								m_directoriesOk.add(file.getAbsolutePath());
-							else
+//							if(file.isDirectory())
+//								m_directoriesOk.add(file.getAbsolutePath());
+//							else
 								m_filesOk.add(file.getAbsolutePath());
 						}
 						else
@@ -235,25 +257,25 @@ public class DirectoryReader {
 								if(!m_oldMap.containsKey(file.getAbsolutePath()))
 								{
 									m_newFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), file.getAbsolutePath(),hash,null,Event.ACTION_CREATE,"Nicolas"));
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE,"Nicolas",Event.STATUS_OK));
 								}
 								else
 								{
 									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), file.getAbsolutePath(),hash,m_oldMap.get(file.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas"));
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
 								}
 							}
 
 						}
 					}
 				}
-			}
-			else
-			{
-				System.out.println("On skip "+dir.getAbsolutePath());
-				m_filesOk.add(dir.getAbsolutePath());
-				m_directoriesOk.add(dir.getAbsolutePath());
-			}
+//			}
+//			else
+//			{
+//				System.out.println("On skip "+dir.getAbsolutePath());
+//				m_filesOk.add(dir.getAbsolutePath());
+//				m_directoriesOk.add(dir.getAbsolutePath());
+//			}
 
 		}
 		return files;

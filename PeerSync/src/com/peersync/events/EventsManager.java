@@ -1,21 +1,11 @@
 package com.peersync.events;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.peersync.data.DataBaseManager;
-import com.peersync.models.EventsStack;
-import com.peersync.models.SharedFolder;
-
 public class EventsManager {
 
-	private EventsStack m_EventsStack;
-	
 
-	ArrayList<SharedFolder> m_directories = new ArrayList<SharedFolder>();
 
 
 
@@ -32,13 +22,10 @@ public class EventsManager {
 
 	private EventsManager() 
 	{
-		m_EventsStack = new EventsStack();
-
-		loadDirectoriesToScan();
-
 
 	}
 
+<<<<<<< HEAD
 	public void loadDirectoriesToScan()
 	{
 		m_directories.clear();
@@ -59,23 +46,13 @@ public class EventsManager {
 					it.remove();
 
 
-
-
-			}
-
-
-			if(toAdd)
-			{
-				m_directories.add(new SharedFolder(sd));
-			}
-
-
-		}
+=======
+>>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 
 
 
 
-	}
+
 
 
 
@@ -88,6 +65,7 @@ public class EventsManager {
 		timer.schedule (new TimerTask() {
 			public void run()
 			{
+<<<<<<< HEAD
 				DataBaseManager db = DataBaseManager.getInstance();
 				
 				DirectoryReader dr = DirectoryReader.getDirectoryReader(m_directories);
@@ -98,6 +76,11 @@ public class EventsManager {
 					dr.getEventsStack().save();
 				}
 					
+=======
+				DirectoryReader dr = DirectoryReader.getDirectoryReader();
+				dr.scan();	
+
+>>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 			}
 		}, 0, 20000);
 	}

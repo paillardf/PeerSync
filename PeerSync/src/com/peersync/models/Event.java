@@ -1,19 +1,15 @@
 package com.peersync.models;
 
-import java.io.File;
-
 import net.jxta.document.Element;
 import net.jxta.document.StructuredDocument;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.events.DirectoryReader;
 public class Event {
 
 	private long m_date;
-	private String m_filepath;
+	private String m_relFilePath;
 	private int m_action;
 	private String m_parameters;
-	private File m_file;
 	private String m_owner;
 	private String m_newHash;
 	private String m_sharedFolderUID;
@@ -38,22 +34,20 @@ public class Event {
 	public static final String NEWHASH_TAG = "new_hash";
 	public static final String OLDHASH_TAG = "old_hash";
 	public static final String ISFILE_TAG = "isfile";
-	// Désormais, se base toujours sur le chemin absolu pour en débuire le sharedFolder auquel il appartient
-	// Cela est possible car nous avons décidé que chaque fichier ne peut appartenir qu'a un seul dossier de partage
-	// Todo : requete d'update en cas d'apparition d'un nouveau sous dossier de partage dans un dossier de partage (retagger les events avc le new sharedfolder)
-	public Event(String shareFolderUID, String filepath,  String newHash,String oldHash,int action,String owner) 
+
+	
+	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(System.currentTimeMillis());
-		setFilepath(filepath);
+		setFilepath(relFilePath);
 		setAction(action);
 		setOwner(owner);
 		m_sharedFolderUID = shareFolderUID;
 		setNewHash(newHash);
 		setOldHash(oldHash);
-		setStatus(STATUS_OK);
-		m_file = new File(getFilepath());
-		m_isFile = m_file.isFile()? 1 : 0;
+		setStatus(status);
+		m_isFile = is_file;
 
 
 
@@ -75,18 +69,17 @@ public class Event {
 //
 //	}
 
-	public Event(String shareFolderId,long date, String filepath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
+	public Event(String shareFolderId,long date, String relFilePath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(date);
-		setFilepath(filepath);
+		setFilepath(relFilePath);
 		setAction(action);
 		setOwner(owner);
 		m_sharedFolderUID = shareFolderId;
 		setNewHash(newHash);
 		setOldHash(oldHash);
 		setStatus(status);
-		m_file = new File(getFilepath());
 		m_isFile = isFile; 
 
 	}
@@ -97,8 +90,15 @@ public class Event {
 	{
 		if(getAction()!=ACTION_CREATE)
 		{
+<<<<<<< HEAD
 			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_filepath);
 			if(e.getNewHash()!=getOldHash())
+=======
+			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_relFilePath,m_sharedFolderUID);
+			//TODO : vérifier le bien fondée de la propagation des conflits ( || e.getStatus()==STATUS_CONFLICT )
+			if(e!=null &&  (e.getNewHash()!=getOldHash() || e.getStatus()==STATUS_CONFLICT))
+
+>>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 			{
 				setStatus(STATUS_CONFLICT);
 			}
@@ -117,9 +117,12 @@ public class Event {
 		return m_isFile;
 
 	}
-
-	public String getRelPath()
+	
+	
+	//On sait jamais, ça peut peut être utile^^
+	public String getAbsFilePath()
 	{
+<<<<<<< HEAD
 		return SharedFolder.RelativeFromAbsolutePath(m_filepath,
 				DataBaseManager.getInstance().getSharedFolderRootPath(m_sharedFolderUID));
 
@@ -142,8 +145,12 @@ public class Event {
 
 
 
+=======
+		return SharedFolder.AbsoluteFromRelativePath(m_relFilePath,DataBaseManager.getInstance().getSharedFolderRootPath(m_sharedFolderUID) );
+>>>>>>> 66987430f29bdb1c31748b8ca4901cc957596d12
 
 	}
+	
 	public long getDate() {
 		return m_date;
 	}
@@ -165,12 +172,12 @@ public class Event {
 
 
 	public String getFilepath() {
-		return m_filepath;
+		return m_relFilePath;
 	}
 
 
 	public void setFilepath(String m_filepath) {
-		this.m_filepath = m_filepath;
+		this.m_relFilePath = m_filepath;
 	}
 
 
