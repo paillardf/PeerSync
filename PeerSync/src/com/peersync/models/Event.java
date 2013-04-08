@@ -4,6 +4,7 @@ import net.jxta.document.Element;
 import net.jxta.document.StructuredDocument;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.tools.Constants;
 public class Event {
 
 	private long m_date;
@@ -36,13 +37,13 @@ public class Event {
 	public static final String ISFILE_TAG = "isfile";
 
 	
-	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,String owner,int status) 
+	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,int status) 
 	{
 
 		setDate(System.currentTimeMillis());
 		setFilepath(relFilePath);
 		setAction(action);
-		setOwner(owner);
+		setOwner(Constants.getInstance().PEERID.toString());
 		m_sharedFolderUID = shareFolderUID;
 		setNewHash(newHash);
 		setOldHash(oldHash);

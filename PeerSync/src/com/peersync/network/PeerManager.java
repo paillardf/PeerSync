@@ -52,19 +52,19 @@ public class PeerManager {
 
 	//public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + "config"+System.getProperty("file.separator")+"jxta.conf");
 
-	public static PeerManager getInstance(){
-		if(instance==null)
-			getInstance();
-		
+	public synchronized static PeerManager getInstance(){
+		if(instance==null){
+			instance = new PeerManager();
+		}
 		return instance;
 	}
 	
 	
-	private PeerManager(int port, String name) throws IOException {
+	private PeerManager() {
 		PORT = PreferencesManager.getInstance().getPort();
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
-		PID_EDGE = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, name.getBytes());
-		String configFolder = "." + System.getProperty("file.separator") + name +System.getProperty("file.separator");
+		PID_EDGE = Constants.getInstance().PEERID;
+		String configFolder = "." + System.getProperty("file.separator") + NAME +System.getProperty("file.separator");
 		
 		
 		final File ConfigurationFile_RDV = new File(configFolder+"jxta.conf");

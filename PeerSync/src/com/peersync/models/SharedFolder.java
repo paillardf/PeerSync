@@ -5,19 +5,21 @@ import com.peersync.data.DataBaseManager;
 public class SharedFolder {
 
 	private final String UID;
+	private final String peerGroupUID;
 	private final String asbolutePath;
 
 
 
 
-	public SharedFolder(String UID) {
+	public SharedFolder(String UID, String peerGroupUID) {
 		this.UID = UID;
 		asbolutePath = DataBaseManager.getInstance().getSharedFolderRootPath(UID);
-
+		this.peerGroupUID = peerGroupUID;
 	}
-	
-	public SharedFolder(String UID,String absDirPath) {
+
+	public SharedFolder(String UID,String peerGroupUID, String absDirPath) {
 		this.UID = UID;
+		this.peerGroupUID = peerGroupUID;
 		asbolutePath = absDirPath;
 	}
 
@@ -50,9 +52,13 @@ public class SharedFolder {
 		return asbolutePath;
 	}
 
-	
+	public String getPeerGroupUID() {
+		return peerGroupUID;
+	}
 
-	
+
+
+
 
 
 }

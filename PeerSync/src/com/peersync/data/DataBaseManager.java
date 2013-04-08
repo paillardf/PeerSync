@@ -13,7 +13,6 @@ import com.peersync.models.FileToSync;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
-import com.peersync.network.PeerManager;
 import com.peersync.tools.Constants;
 
 public class DataBaseManager extends DbliteConnection{
@@ -77,8 +76,8 @@ public class DataBaseManager extends DbliteConnection{
 
 		update("create table "+DBSHAREDFOLDERSTABLE+" "+
 				"("+UUIDFIELD+" text, "+
-				ROOTPATHFIELD+ " text, "+
 				PEERGROUPFIELD+ " text, "+
+				ROOTPATHFIELD+ " text, "+
 				"PRIMARY KEY("+UUIDFIELD+"));");
 	}
 
@@ -376,6 +375,17 @@ public class DataBaseManager extends DbliteConnection{
 		}
 		return res;
 
+	}
+	
+	
+	public void saveSharedFolder(SharedFolder sf){
+		
+		try {
+			update("insert into "+DBSHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+") values ('"+sf.getUID() + "', '"+sf.getPeerGroupUID()+"', '"+sf.getAbsFolderRootPath()+"')");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	/** Obtient l'ensemble des dossiers de partage 
