@@ -10,6 +10,7 @@ import net.jxta.id.ID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.data.SyncUtils;
+import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
@@ -34,10 +35,10 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 	public void publishStackVersionAdvertisement(){
 		DataBaseManager db = DataBaseManager.getInstance();
-		ArrayList<String> shareFolderUIDs = db.getAllSharedDirectories();
+		ArrayList<SharedFolder> shareFolderUIDs = db.getAllSharedDirectories();
 		ArrayList<SharedFolderVersion> shareFolders = new ArrayList<SharedFolderVersion>();
-		for (String shareFolderUID : shareFolderUIDs) {
-			shareFolders.add(db.getSharedFolderVersion(shareFolderUID));
+		for (SharedFolder shareFolder : shareFolderUIDs) {
+			shareFolders.add(db.getSharedFolderVersion(shareFolder.getUID()));
 		}
 		StackAdvertisement adv = new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID());
 

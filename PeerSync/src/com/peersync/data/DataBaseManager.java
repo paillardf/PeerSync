@@ -201,15 +201,10 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		try
 		{
-<<<<<<< HEAD
-			openConnection(DBEVENTSPATH);
-			Statement statement = getConnection().createStatement();
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-			statement.executeUpdate("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getFilepath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
-=======
-			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getRelPath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
->>>>>>> Travail BDD
+
+			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getFilepath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
+
 
 		}
 		catch(SQLException ex)
@@ -315,21 +310,12 @@ public class DataBaseManager extends DbliteConnection{
 
 		try
 		{
-<<<<<<< HEAD
-			openConnection(DBEVENTSPATH);
-			Statement statement = getConnection().createStatement();
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
 
-
-			ResultSet rs = statement.executeQuery("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
+			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
 					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
-=======
-			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+" AND "+SHAREDFOLDERFIELD+"="+shareFolderUID+")");
->>>>>>> Travail BDD
+
 
 
 			while(rs.next())
@@ -393,16 +379,10 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
 		try {
-<<<<<<< HEAD
-			openConnection(DBEVENTSPATH);
-			Statement statement = getConnection().createStatement();
 
-			statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-			ResultSet rs = statement.executeQuery("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
-=======
-			ResultSet rs = query("select sf."+UUIDFIELD+
->>>>>>> Travail BDD
+			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
+
 					" from "+DBSHAREDFOLDERSTABLE+" sf");
 
 

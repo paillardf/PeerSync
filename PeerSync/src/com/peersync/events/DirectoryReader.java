@@ -49,7 +49,7 @@ public class DirectoryReader {
 	
 	public void loadDirectoriesToScan()
 	{
-		shareFolders = DataBaseManager.getDataBaseManager().getAllSharedDirectories();
+		shareFolders = DataBaseManager.getInstance().getAllSharedDirectories();
 	}
 
 	public Map<String,String> getNewFilesMap()
@@ -111,7 +111,7 @@ public class DirectoryReader {
 	public void scan()
 	{
 		for (SharedFolder shareFolder : shareFolders) {
-			Map<String,String> currentStack = DataBaseManager.getDataBaseManager().getLastEvents(shareFolder.getUID());
+			Map<String,String> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
 			scanDifferences(currentStack,shareFolder);
 			getEventsStack().save();
 		}
@@ -155,7 +155,7 @@ public class DirectoryReader {
 					m_deletedFiles.add(entry.getKey());
 					File f = new File(entry.getKey());
 					System.out.println("A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
-					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getDataBaseManager().getSharedFolderRootPath(currentShareFolder.getUID()));
+					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,f.isFile()? 1 : 0,null,entry.getValue(),Event.ACTION_DELETE,"Nicolas",Event.STATUS_OK));
 				}
 			}
@@ -203,7 +203,7 @@ public class DirectoryReader {
 		if(dir.exists())
 		{
 			String hashDir = DirectoryReader.calculateHash(dir);
-			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getDataBaseManager().getSharedFolderRootPath(currentShareFolder.getUID()));
+			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 			//boolean toScan = false;
 			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
 			{
@@ -226,7 +226,7 @@ public class DirectoryReader {
 				{
 					for (File file : content)
 					{
-						String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(file.getAbsolutePath(), DataBaseManager.getDataBaseManager().getSharedFolderRootPath(currentShareFolder.getUID()));
+						String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(file.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 						String hash = DirectoryReader.calculateHash(file);
 						if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
 						{
