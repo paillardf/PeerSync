@@ -202,8 +202,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 			while (advertisementsEnum.hasMoreElements()) {
 				Advertisement foundAdv = advertisementsEnum.nextElement();
-				Log.d("ADV", "Nouvelle advertisment "+ foundAdv.getAdvType() +"   "+RendezVousAdvertisement.getAdvertisementType());
-
+				
 
 				if (myPeerGroup.getPeerGroup()==null&&foundAdv.getAdvType().compareTo(PeerGroupAdvertisement.getAdvertisementType())==0) {
 					Log.d(myPeerGroup.peerGroupName,"Found GROUP Advertisement");

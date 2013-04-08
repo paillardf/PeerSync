@@ -25,11 +25,12 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	private StackVersionQuery queryHandler;
 	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
 	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-30*1000;
-	
-	
+
+
 	public StackSyncBehaviour(MyPeerGroup peerGroup){
 		super(peerGroup);
 		queryHandler = new StackVersionQuery(myPeerGroup);
+
 
 	}
 
@@ -41,7 +42,8 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		for (SharedFolder shareFolder : shareFolderUIDs) {
 			shareFolders.add(db.getSharedFolderVersion(shareFolder.getUID()));
 		}
-		StackAdvertisement adv = new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID());
+		StackAdvertisement adv = 
+				new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID(), myPeerGroup.getPeerGroup().getPeerID());
 
 		//peer.myPeerGroup.getPipeService().
 		try {
@@ -83,22 +85,24 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 	protected void parseAdvertisement(Enumeration<Advertisement> TheAdvEnum) {
 		while (TheAdvEnum.hasMoreElements()) { 
-			
+
 			Advertisement TheAdv = TheAdvEnum.nextElement();
-			
+
 			if (TheAdv.getAdvType().compareTo(StackAdvertisement.AdvertisementType)==0) {
-				Log.d(NAME, "Adv recu");
+
 				// We found StackVersion Advertisement
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
-				
-				;
-				ArrayList<SharedFolderVersion> shareFolderVersion = 
-						SyncUtils.getInstance().compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
-				if(shareFolderVersion.size()>0){
-					//ENVOYER UNE REQUETE
-					queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
+				if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
+
+					Log.d(NAME, "Adv recu" + stackVersionAdvertisement.getShareFolderList().size());
+					
+					ArrayList<SharedFolderVersion> shareFolderVersion = 
+							SyncUtils.getInstance().compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
+					if(shareFolderVersion.size()>0){
+						//ENVOYER UNE REQUETE
+						queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
+					}
 				}
-				
 				//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 				//queryHandler.sendQuery(stackVersionAdvertisement.getShareFolderList(), stackVersionAdvertisement.getPeerId());
 				//System.out.println(stackVersionAdvertisement.toString());
@@ -112,6 +116,12 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 
 	}
+	
+	@Override
+	public synchronized void start() {
+		myPeerGroup.getPeerGroup().getResolverService().registerHandler(StackVersionQuery.NAME, queryHandler);
+		super.start();
+	};
 
 	@Override
 	public void notifyNetPeerGroupRDVConnection(ID id) {

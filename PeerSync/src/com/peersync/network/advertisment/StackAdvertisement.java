@@ -43,8 +43,6 @@ package com.peersync.network.advertisment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -58,7 +56,7 @@ import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.TextElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
-import net.jxta.impl.id.CBID.PeerID;
+import net.jxta.peer.PeerID;
 import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.models.SharedFolderVersion;
@@ -88,13 +86,12 @@ public class StackAdvertisement extends Advertisement {
 
 	private final static String[] IndexableFields = { ShareFolderTAG , StackTAG};
 
-	public StackAdvertisement(ArrayList<SharedFolderVersion> shareFolder,PeerGroupID peerGroupId) {
+	public StackAdvertisement(ArrayList<SharedFolderVersion> shareFolder,PeerGroupID peerGroupId,PeerID peerId) {
 		this.shareFolderList = shareFolder;
 		this.peerGroupId = peerGroupId;
+		this.peerId = peerId.toString();
 	}
-
-
-	public StackAdvertisement() {
+		private StackAdvertisement() {
 		shareFolderList = new ArrayList<SharedFolderVersion>();
 	}
 
@@ -147,7 +144,7 @@ public class StackAdvertisement extends Advertisement {
 		StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
 				TheMimeMediaType, AdvertisementType);
 
-		Element peerIdElement = TheResult.createElement(ShareFolderTAG, getPeerId());
+		Element peerIdElement = TheResult.createElement(PeerIdTAG, getPeerId());
 		TheResult.appendChild(peerIdElement);
 
 
@@ -235,8 +232,8 @@ public class StackAdvertisement extends Advertisement {
 			return StackAdvertisement.getAdvertisementType();
 		}
 
-		public Advertisement newInstance(ArrayList<SharedFolderVersion> shareFolderList, PeerGroupID peerG) {
-			return new StackAdvertisement(shareFolderList, peerG);
+		public Advertisement newInstance(ArrayList<SharedFolderVersion> shareFolderList, PeerGroupID peerG, PeerID peerID) {
+			return new StackAdvertisement(shareFolderList, peerG, peerID);
 		}
 
 		public Advertisement newInstance(net.jxta.document.Element root) {

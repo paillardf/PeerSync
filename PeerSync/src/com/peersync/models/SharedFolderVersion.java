@@ -34,7 +34,7 @@ public class SharedFolderVersion {
 				return stackVersion;
 		}
 		
-		return new StackVersion(UID, 0);
+		return new StackVersion(stackVersionUID, 0);
 	}
 
 	public int size() {

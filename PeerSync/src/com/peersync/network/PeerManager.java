@@ -85,7 +85,7 @@ public class PeerManager {
 			conf = manager.getConfigurator();
 			conf.addSeedRendezvous(RendezVousSeedURI);
 			conf.setTcpPort(PORT);
-			conf.setUseMulticast(false);
+			conf.setUseMulticast(true);
 			conf.setTcpEnabled(true);
 			conf.setTcpIncoming(true);
 			conf.setTcpOutgoing(true);

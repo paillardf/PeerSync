@@ -215,14 +215,14 @@ public class Event {
 		Element eventElement = resp.createElement(EVENTID_TAG);
 		element.appendChild(eventElement);
 		
-		eventElement.appendChild(resp.createElement(DATE_TAG, getDate()));
-		eventElement.appendChild(resp.createElement(PATH_TAG, getFilepath()));
-		eventElement.appendChild(resp.createElement(ACTION_TAG, getAction()));
-		eventElement.appendChild(resp.createElement(PARAMETERS_TAG, getParameters()));
-		eventElement.appendChild(resp.createElement(OWNER_TAG, getOwner()));
-		eventElement.appendChild(resp.createElement(NEWHASH_TAG, getNewHash()));
-		eventElement.appendChild(resp.createElement(OLDHASH_TAG, getOldHash()));
-		eventElement.appendChild(resp.createElement(ISFILE_TAG, isFile()));
+		eventElement.appendChild(resp.createElement(DATE_TAG, ""+getDate()));
+		eventElement.appendChild(resp.createElement(PATH_TAG, ""+getFilepath()));
+		eventElement.appendChild(resp.createElement(ACTION_TAG, ""+getAction()));
+		eventElement.appendChild(resp.createElement(PARAMETERS_TAG, ""+getParameters()));
+		eventElement.appendChild(resp.createElement(OWNER_TAG, ""+getOwner()));
+		eventElement.appendChild(resp.createElement(NEWHASH_TAG, ""+getNewHash()));
+		eventElement.appendChild(resp.createElement(OLDHASH_TAG, ""+getOldHash()));
+		eventElement.appendChild(resp.createElement(ISFILE_TAG, ""+isFile()));
 		
 	}
 
