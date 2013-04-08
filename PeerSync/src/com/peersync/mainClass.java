@@ -1,27 +1,31 @@
 package com.peersync;
 
+import net.jxta.id.IDFactory;
+import net.jxta.peergroup.PeerGroupID;
+
 import com.peersync.data.DataBaseManager;
-
-
 import com.peersync.events.EventsManagerThread;
-import com.peersync.models.Event;
-import com.peersync.models.FileToSync;
-import com.peersync.models.FileToSyncList;
-
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import com.peersync.models.SharedFolder;
+import com.peersync.network.PeerManager;
+import com.peersync.tools.Constants;
+import com.peersync.tools.PreferencesManager;
 
 
 
 public class mainClass {
 	public static void main(String[] args){
+		Constants.getInstance().PEERNAME = "client2";
+		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
-
+		DataBaseManager db = DataBaseManager.getInstance();
+		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
+		
+		db.saveSharedFolder(new SharedFolder("5001", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
+		db.saveSharedFolder(new SharedFolder("5002", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
+		PreferencesManager pref = PreferencesManager.getInstance();
+		pref.setPort(9788);
 		EventsManagerThread.getEventsManagerThread().start();
+		//PeerManager.getInstance();
 		
 		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();
 		

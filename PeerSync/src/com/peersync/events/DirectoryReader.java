@@ -202,23 +202,23 @@ public class DirectoryReader {
 		// --> Optimisation impossible
 		if(dir.exists())
 		{
-			String hashDir = DirectoryReader.calculateHash(dir);
-			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-			//boolean toScan = false;
-			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
-			{
-				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,m_oldMap.get(dir.getAbsolutePath()),Event.ACTION_UPDATE,Event.STATUS_OK));
-				//toScan = true;
-			}
-			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
-			{
-				m_newFiles.put(dir.getAbsolutePath(),hashDir);
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,null,Event.ACTION_CREATE,Event.STATUS_OK));
-				//toScan = true;
-			}
-			else
-				m_filesOk.add(dir.getAbsolutePath());
+//			String hashDir = DirectoryReader.calculateHash(dir);
+//			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
+//			//boolean toScan = false;
+//			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
+//			{
+//				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
+//				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,m_oldMap.get(dir.getAbsolutePath()),Event.ACTION_UPDATE,Event.STATUS_OK));
+//				//toScan = true;
+//			}
+//			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
+//			{
+//				m_newFiles.put(dir.getAbsolutePath(),hashDir);
+//				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,null,Event.ACTION_CREATE,Event.STATUS_OK));
+//				//toScan = true;
+//			}
+//			else
+//				m_filesOk.add(dir.getAbsolutePath());
 			//if(toScan)
 			//{
 				File[] content = dir.listFiles();
@@ -237,9 +237,9 @@ public class DirectoryReader {
 						}
 						else
 						{
+							boolean isShareFolder = false;
 							if(file.isDirectory())
 							{
-								boolean isShareFolder = false;
 								for (SharedFolder sf : shareFolders) {
 									if(file.getAbsolutePath().compareTo(sf.getAbsFolderRootPath())==0)
 										isShareFolder = true;
@@ -250,11 +250,13 @@ public class DirectoryReader {
 									files.addAll(listAllFilesInADir(file.getAbsolutePath()));
 								}
 							}
-							else 
+							if(!isShareFolder) 
 							{
 								files.add(file);
+								if(file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+									m_filesOk.add(file.getAbsolutePath());
 
-								if(!m_oldMap.containsKey(file.getAbsolutePath()))
+								else if(!m_oldMap.containsKey(file.getAbsolutePath()))
 								{
 									m_newFiles.put(file.getAbsolutePath(),hash);
 									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE,Event.STATUS_OK));
