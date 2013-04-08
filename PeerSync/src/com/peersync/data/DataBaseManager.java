@@ -152,7 +152,33 @@ public class DataBaseManager extends DbliteConnection{
 		String uid = getSharedFolderOfAFile(absFilePath);
 		return getLastEventOfAFile(SharedFolder.RelativeFromAbsolutePath(absFilePath, getSharedFolderRootPath(uid) ),uid);
 	}
+	
+	
+	
+	public ArrayList<SharedFolder> getSharedFoldersOfAPeerGroup(String peerGroupID)
+	{
+		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
+		try {
 
+
+
+			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
+
+					" from "+DBSHAREDFOLDERSTABLE+" sf");
+
+
+			while(rs.next())
+			{
+				res.add(new SharedFolder(rs.getString(UUIDFIELD),peerGroupID,rs.getString(ROOTPATHFIELD)));
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+
+	}
 	/** Récupère le dernier événement pour un fichier donné
 	 * 	@param relFilePath : Chemin relatif du fichier dont on veut récupérer le dernier événement
 	 * 	@param sharedFolderUID : UID du Shared Folder où se trouve le fichier en question
@@ -397,14 +423,14 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
-			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
+			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+",sf."+PEERGROUPFIELD+
 
 					" from "+DBSHAREDFOLDERSTABLE+" sf");
 
 
 			while(rs.next())
 			{
-				res.add(new SharedFolder(rs.getString(UUIDFIELD),rs.getString(ROOTPATHFIELD)));
+				res.add(new SharedFolder(rs.getString(UUIDFIELD),rs.getString(PEERGROUPFIELD),rs.getString(ROOTPATHFIELD)));
 
 			}
 		} catch (SQLException e) {
@@ -538,6 +564,31 @@ public class DataBaseManager extends DbliteConnection{
 		} catch (SQLException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		return res;
+	}
+
+	public String getSharedFolderPeerGroup(String UID) {
+		
+		String res = new String();
+		try
+		{
+			ResultSet rs = query("select sf."+PEERGROUPFIELD+
+					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" ='"+UID+"'");
+
+			while(rs.next())
+			{
+				// read the result set
+				res = rs.getString(PEERGROUPFIELD);
+				//		        System.out.println("name = " + rs.getString(FILEPATHFIELD));
+				//		        System.out.println("id = " + rs.getString(HASHFIELD));
+			}
+		}
+		catch(SQLException  e)
+		{
+			// if the error message is "out of memory", 
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
 		}
 		return res;
 	}
