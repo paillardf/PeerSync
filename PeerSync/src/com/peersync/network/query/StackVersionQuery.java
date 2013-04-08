@@ -108,7 +108,7 @@ public class StackVersionQuery implements QueryHandler{
 		
 		StructuredDocument resp = (StructuredTextDocument)
 		StructuredDocumentFactory.newStructuredDocument(new MimeMediaType( "text/xml" ),QueryType);
-		DataBaseManager db = DataBaseManager.getDataBaseManager();
+		DataBaseManager db = DataBaseManager.getInstance();
 		for (SharedFolderVersion sharedFolderVersion : shareFolderList) {
 			
 			EventsStack eventsStack = db.getEventsToSync(sharedFolderVersion);

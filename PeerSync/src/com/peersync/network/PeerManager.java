@@ -18,9 +18,11 @@ import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
 import com.peersync.network.group.PeerGroupManager;
+import com.peersync.tools.Constants;
 import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 import com.peersync.tools.Outils;
+import com.peersync.tools.PreferencesManager;
 
 public class PeerManager {
 
@@ -44,6 +46,7 @@ public class PeerManager {
 	private KeyStoreManager keyStoreManager;
 	private PeerGroupManager peerGroupManager;
 	public NetworkConfigurator conf;
+	public final String NAME;
 	private static PeerManager instance;
 	public static PeerID PID_EDGE;
 
@@ -51,25 +54,15 @@ public class PeerManager {
 
 	public static PeerManager getInstance(){
 		if(instance==null)
-			getInstance(0, "0");
+			getInstance();
 		
 		return instance;
 	}
 	
-	public static PeerManager getInstance(int port, String name){
-		if(instance==null){
-			try {
-				instance = new PeerManager(port, name);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-		}
-		return instance;
-	}
-
+	
 	private PeerManager(int port, String name) throws IOException {
-		PORT = port;
+		PORT = PreferencesManager.getInstance().getPort();
+		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		PID_EDGE = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, name.getBytes());
 		String configFolder = "." + System.getProperty("file.separator") + name +System.getProperty("file.separator");
 		

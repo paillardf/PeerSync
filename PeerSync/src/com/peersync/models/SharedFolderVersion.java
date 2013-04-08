@@ -1,6 +1,7 @@
 package com.peersync.models;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class SharedFolderVersion {
 
@@ -39,8 +40,6 @@ public class SharedFolderVersion {
 	public int size() {
 		return stackVersionList.size();
 	}
-	
-	
 
 	
 

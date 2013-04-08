@@ -19,12 +19,12 @@ public class FileToSyncList {
 	
 	public void refreshFilesToDownload()
 	{
-		filesToDownload = DataBaseManager.getDataBaseManager().getFilesToDownload();
+		filesToDownload = DataBaseManager.getInstance().getFilesToDownload();
 	}
 	
 	public void refreshFilesWithLocalSource()
 	{
-		filesWithLocalSource = DataBaseManager.getDataBaseManager().getFilesWithLocalSource();
+		filesWithLocalSource = DataBaseManager.getInstance().getFilesWithLocalSource();
 	}
 
 	public ArrayList<FileToSync> getFilesWithLocalSource() {

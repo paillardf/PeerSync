@@ -43,7 +43,7 @@ public class EventsManager {
 	{
 		m_directories.clear();
 
-		ArrayList<String> sharedDirectories = DataBaseManager.getDataBaseManager().getAllSharedDirectories();
+		ArrayList<String> sharedDirectories = DataBaseManager.getInstance().getAllSharedDirectories();
 		for(String sd : sharedDirectories)
 		{
 			Iterator<SharedFolder> it = m_directories.iterator();
@@ -53,9 +53,9 @@ public class EventsManager {
 			{
 
 				String tmp = it.next().getAbsFolderRootPath(); //Pour éviter les embrouilles du genre deux dossiers test et test1 cote à cote, on fait +"\\"
-				if(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd).contains(tmp+"\\"))
+				if(DataBaseManager.getInstance().getSharedFolderRootPath(sd).contains(tmp+"\\"))
 					toAdd=false;
-				else if( tmp.contains(DataBaseManager.getDataBaseManager().getSharedFolderRootPath(sd)+"\\"))
+				else if( tmp.contains(DataBaseManager.getInstance().getSharedFolderRootPath(sd)+"\\"))
 					it.remove();
 
 
@@ -88,12 +88,12 @@ public class EventsManager {
 		timer.schedule (new TimerTask() {
 			public void run()
 			{
-				DataBaseManager db = DataBaseManager.getDataBaseManager();
+				DataBaseManager db = DataBaseManager.getInstance();
 				
 				DirectoryReader dr = DirectoryReader.getDirectoryReader(m_directories);
 				
 				for (SharedFolder shareFolder : m_directories) {
-					Map<String,String> currentStack = DataBaseManager.getDataBaseManager().getLastEvents(shareFolder.getUID());
+					Map<String,String> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
 					dr.scanDifferences(currentStack,shareFolder);
 					dr.getEventsStack().save();
 				}

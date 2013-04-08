@@ -12,7 +12,7 @@ public class SharedFolder {
 
 	public SharedFolder(String UID) {
 		this.UID = UID;
-		asbolutePath = DataBaseManager.getDataBaseManager().getSharedFolderRootPath(UID);
+		asbolutePath = DataBaseManager.getInstance().getSharedFolderRootPath(UID);
 	}
 
 	public String getUID() {

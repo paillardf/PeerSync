@@ -97,7 +97,7 @@ public class Event {
 	{
 		if(getAction()!=ACTION_CREATE)
 		{
-			Event e = DataBaseManager.getDataBaseManager().getLastEventOfAFile(m_filepath);
+			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_filepath);
 			if(e.getNewHash()!=getOldHash())
 			{
 				setStatus(STATUS_CONFLICT);
@@ -108,7 +108,7 @@ public class Event {
 	public void save()
 	{
 		checkConflict();
-		DataBaseManager.getDataBaseManager().saveEvent(this);
+		DataBaseManager.getInstance().saveEvent(this);
 
 	}
 
@@ -121,7 +121,7 @@ public class Event {
 	public String getRelPath()
 	{
 		return SharedFolder.RelativeFromAbsolutePath(m_filepath,
-				DataBaseManager.getDataBaseManager().getSharedFolderRootPath(m_sharedFolderUID));
+				DataBaseManager.getInstance().getSharedFolderRootPath(m_sharedFolderUID));
 
 	}
 	private void openFile() throws Exception
