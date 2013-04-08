@@ -174,16 +174,45 @@ public class StackVersionQuery implements QueryHandler{
 						TextElement eventElement = (TextElement)	eventElements.nextElement();
 						if(eventElement.getName().compareTo(Event.EVENTID_TAG)==0){
 							//new Event(shareFolderId, date, filepath, isFile, newHash, oldHash, action, owner, status)
+							Enumeration eventParams = eventElement.getChildren();
+
+							long date = 0;
+							String path = null, newHash = null, oldHash = null, owner = null;
+							int isFile = 0, action = 0, status;
+
+							while(eventParams.hasMoreElements()){
+								TextElement eventParam = (TextElement)	eventParams.nextElement();
+
+
+
+								if(eventParam.getName().compareTo(Event.DATE_TAG)==0){
+									date = Long.parseLong(eventParam.getValue());
+								}else if (eventParam.getName().compareTo(Event.PATH_TAG)==0){
+									path = eventParam.getValue();
+								}else if (eventParam.getName().compareTo(Event.ISFILE_TAG)==0){
+									isFile = Integer.parseInt(eventParam.getValue());
+								}else if (eventParam.getName().compareTo(Event.NEWHASH_TAG)==0){
+									newHash = eventParam.getValue();
+								}else if (eventParam.getName().compareTo(Event.OLDHASH_TAG)==0){
+									oldHash = eventParam.getValue();
+								}else if (eventParam.getName().compareTo(Event.ACTION_TAG)==0){
+									action = Integer.parseInt(eventParam.getValue());
+								}else if (eventParam.getName().compareTo(Event.OWNER_TAG)==0){
+									owner = eventParam.getValue();
+
+								}
+							}
+
 							eventsStack.addEvent(
 									new Event(shareFolderId,
-											Long.parseLong(((TextElement) eventElement.getChildren(Event.DATE_TAG).nextElement()).getValue()),
-											((TextElement) eventElement.getChildren(Event.PATH_TAG).nextElement()).getValue(),
-											Integer.parseInt(((TextElement) eventElement.getChildren(Event.ISFILE_TAG).nextElement()).getValue()),
-											((TextElement) eventElement.getChildren(Event.NEWHASH_TAG).nextElement()).getValue(), 
-											((TextElement) eventElement.getChildren(Event.OLDHASH_TAG).nextElement()).getValue(),
-											Integer.parseInt(((TextElement) eventElement.getChildren(Event.ACTION_TAG).nextElement()).getValue()),
-											((TextElement) eventElement.getChildren(Event.OWNER_TAG).nextElement()).getValue(),
-											Integer.parseInt(((TextElement) eventElement.getChildren(Event.STATUS_UNSYNC).nextElement()).getValue())));
+											date,
+											path,
+											isFile,
+											newHash,
+											oldHash,
+											action,
+											owner,
+											Event.STATUS_UNSYNC));
 						}
 					}
 
