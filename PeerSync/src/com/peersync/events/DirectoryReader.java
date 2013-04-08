@@ -208,7 +208,7 @@ public class DirectoryReader {
 			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
 			{
 				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,null,Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
+				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,m_oldMap.get(dir.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
 				//toScan = true;
 			}
 			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
@@ -262,7 +262,7 @@ public class DirectoryReader {
 								else
 								{
 									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()),Event.ACTION_UPDATE,"Nicolas",Event.STATUS_OK));
 								}
 							}
 

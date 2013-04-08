@@ -1,12 +1,9 @@
 package com.peersync.models;
 
-import java.io.File;
-
 import net.jxta.document.Element;
 import net.jxta.document.StructuredDocument;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.events.DirectoryReader;
 public class Event {
 
 	private long m_date;
