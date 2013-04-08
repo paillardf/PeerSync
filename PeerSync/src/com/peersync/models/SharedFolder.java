@@ -11,10 +11,11 @@ public class SharedFolder {
 
 
 
-	public SharedFolder(String UID, String peerGroupUID) {
+	public SharedFolder(String UID) {
 		this.UID = UID;
 		asbolutePath = DataBaseManager.getInstance().getSharedFolderRootPath(UID);
-		this.peerGroupUID = peerGroupUID;
+		
+		this.peerGroupUID = DataBaseManager.getInstance().getSharedFolderPeerGroup(UID);;
 	}
 
 	public SharedFolder(String UID,String peerGroupUID, String absDirPath) {
