@@ -1,4 +1,4 @@
-package com.commands;
+package com.peersync.commands;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,12 +12,12 @@ public class ShellConsole {
 	private static ShellConsole instance;
 	private boolean running;
 
-	private final String BEGIN = "^";
-	private final String SPACES = "[\\s]";
-	private final String FACSPACES = "[\\s]*";
-	private final String ARG = "(\\S+)";
-	private final String END = "$";
-	private final String JOKER = ".*";
+	public final static String BEGIN = "^";
+	public final static String SPACES = "[\\s]+";
+	public final static String FACSPACES = "[\\s]*";
+	public final static String ARG = "(\\S+)";
+	public final static String END = "$";
+	public final static String JOKER = "(.*)";
 	
 	public static ShellConsole getShellConsole() 
 	{
@@ -58,8 +58,8 @@ public class ShellConsole {
 			{
 				commandName=commandName.substring(0,1).toUpperCase() + commandName.substring(1);
 				try {
-					AbstractCommand c = (AbstractCommand)Class.forName("com.commands."+commandName).newInstance();
-					c.exec(command);
+					AbstractCommand c = (AbstractCommand)Class.forName("com.peersync.commands."+commandName).newInstance();
+					c.exec(" "+m.group(2)+" "); // Ajout d' " " pour faciliter le parsing
 				} catch (InstantiationException | IllegalAccessException
 						| ClassNotFoundException e) {
 					System.out.println("Commande "+command+" invalide");
