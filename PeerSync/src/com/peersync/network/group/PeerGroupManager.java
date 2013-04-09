@@ -2,6 +2,7 @@ package com.peersync.network.group;
 
 import java.util.ArrayList;
 
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.PeerManager;
 
 import net.jxta.discovery.DiscoveryService;
@@ -20,9 +21,9 @@ public class PeerGroupManager {
 	private PeerGroup netPeerGroup;
 	private ArrayList<MyPeerGroup> peerGroupList;
 	
-	public PeerGroupManager(PeerManager peerManager, PeerGroup netPeerGroup) {
+	public PeerGroupManager(PeerManager peerManager, PeerGroup netPeerG) {
 		this.peer = peerManager;
-		this.netPeerGroup = netPeerGroup;
+		this.netPeerGroup = netPeerG;
 		peerGroupList = new ArrayList<MyPeerGroup>();
 		netPeerGroup.getRendezVousService().addListener(new RendezvousListener() {
 			
@@ -31,7 +32,7 @@ public class PeerGroupManager {
 				if(event.getType()==RendezvousEvent.RDVCONNECT){
 					
 					for (MyPeerGroup peerGroup : peerGroupList) {
-						peerGroup.notifyNetPeerGroupRDVConnection(event.getPeerID());
+						peerGroup.notifyPeerGroup(new PeerGroupEvent(PeerGroupEvent.RDV_CONNECTION, netPeerGroup.getPeerGroupID(), event));
 					}
 				}
 				

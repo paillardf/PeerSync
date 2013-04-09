@@ -5,6 +5,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.jxta.document.Element;
 import net.jxta.document.MimeMediaType;
@@ -20,9 +23,9 @@ import net.jxta.resolver.QueryHandler;
 import net.jxta.resolver.ResolverService;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.data.SyncUtils;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
@@ -36,7 +39,22 @@ public class StackVersionQuery implements QueryHandler{
 	private final static String ShareFolderTAG = "sharefolderID";
 	private final static String StackTAG = "stackID";
 	private final static String StackLastUpdateTAG = "last_update";
+
+	private static final long QUERY_TIMEOUT = 30*1000;
 	private MyPeerGroup myPeerGroup;
+
+	Map<String, QueryInfo> queryList  = new Hashtable<String, QueryInfo>();
+
+	private class QueryInfo{
+		public long time;
+		public int queryID;
+
+		public QueryInfo(long time, int queryID) {
+			this.time = time;
+			this.queryID = queryID;
+		}
+		
+	}
 
 	private int queryNum = 0;
 
@@ -45,6 +63,16 @@ public class StackVersionQuery implements QueryHandler{
 	}
 
 	public void sendQuery(ArrayList<SharedFolderVersion> sharedFolderVersionList, String peerID){
+
+		if(queryList.containsKey(peerID)){
+			long value =  queryList.get(peerID).time;
+			if(System.currentTimeMillis()-value<QUERY_TIMEOUT){
+				return;
+			}
+			queryList.remove(peerID);
+		}
+		queryNum++;
+		queryList.put(peerID, new QueryInfo(System.currentTimeMillis(), queryNum));
 
 		StructuredDocument doc = (StructuredTextDocument)
 				StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8,QueryType);
@@ -70,7 +98,7 @@ public class StackVersionQuery implements QueryHandler{
 		ResolverQuery query = new ResolverQuery();
 		query.setQuery(doc.toString());
 		//query.setCredential(doc);
-		query.setQueryId(queryNum++);
+		query.setQueryId(queryNum);
 		query.setHandlerName(NAME);
 		query.setSrcPeer(myPeerGroup.getPeerGroup().getPeerID());
 		myPeerGroup.getPeerGroup().getResolverService().sendQuery(peerID, query);
@@ -156,6 +184,15 @@ public class StackVersionQuery implements QueryHandler{
 	public void processResponse(ResolverResponseMsg response) {
 		try {
 			Log.d(StackAdvertisement.Name, "réception d'une réponse");
+			
+			for (Entry<String, QueryInfo> e : queryList.entrySet()) {
+				if(e.getValue().queryID==response.getQueryId()){
+					queryList.remove(e); 
+					break;
+				}
+					
+			}
+			queryList.remove(response.getResponse());
 			Reader resp = new StringReader(response.getResponse());
 
 			StructuredTextDocument doc = (StructuredTextDocument)
@@ -215,8 +252,12 @@ public class StackVersionQuery implements QueryHandler{
 											Event.STATUS_UNSYNC));
 						}
 					}
+					if(eventsStack.getEvents().size()>0){
+						eventsStack.save();
+						myPeerGroup.notifyPeerGroup(new PeerGroupEvent(PeerGroupEvent.STACK_UPDATE,
+								myPeerGroup.getNetPeerGroup().getPeerGroupID(), null));
+					}
 
-					eventsStack.save();
 				}
 			}
 		}

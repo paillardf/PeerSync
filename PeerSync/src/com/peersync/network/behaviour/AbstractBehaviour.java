@@ -5,12 +5,8 @@ import java.util.Enumeration;
 import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryListener;
 import net.jxta.document.Advertisement;
-import net.jxta.id.ID;
-import net.jxta.impl.endpoint.IPUtils;
-import net.jxta.impl.endpoint.TransportUtils;
-import net.jxta.impl.id.UUID.IDFormat;
-import net.jxta.peer.PeerInfoEvent;
 
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.group.MyPeerGroup;
 
 public abstract class AbstractBehaviour extends Thread implements DiscoveryListener{
@@ -28,8 +24,8 @@ public abstract class AbstractBehaviour extends Thread implements DiscoveryListe
 
 	public abstract void run();
 	protected abstract void parseAdvertisement(Enumeration<Advertisement> advertisementsEnum);
-	public abstract void notifyNetPeerGroupRDVConnection(ID id);
-	public abstract void notifyPeerGroupRDVConnection(ID id);
+	//public abstract void notifyNetPeerGroup(PeerInfoEvent event);
+	public abstract void notifyPeerGroup(PeerGroupEvent event);
 	
 	
 

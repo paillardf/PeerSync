@@ -10,6 +10,7 @@ import net.jxta.rendezvous.RendezVousService;
 import net.jxta.rendezvous.RendezvousEvent;
 import net.jxta.rendezvous.RendezvousListener;
 
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.behaviour.AbstractBehaviour;
 import com.peersync.network.behaviour.StackSyncBehaviour;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
@@ -59,7 +60,7 @@ public class MyPeerGroup {
 				@Override
 				public void rendezvousEvent(RendezvousEvent event) {
 					if(event.getType()==RendezvousEvent.RDVCONNECT){
-						notifyPeerGroupRDVConnection(event.getPeerID());
+						notifyPeerGroup(new PeerGroupEvent(PeerGroupEvent.RDV_CONNECTION, peerGroup.getPeerGroupID(), event));
 					}
 					
 					
@@ -88,18 +89,13 @@ public class MyPeerGroup {
 		return groupManager;
 	}
 
-	public void notifyNetPeerGroupRDVConnection(ID id) {
+	public void notifyPeerGroup(PeerGroupEvent e) {
 		for (AbstractBehaviour behaviour : behaviourList) {
-				behaviour.notifyNetPeerGroupRDVConnection(id);
+				behaviour.notifyPeerGroup(e);
 		}
 		
 	}
-	private void notifyPeerGroupRDVConnection(ID id) {
-		for (AbstractBehaviour behaviour : behaviourList) {
-				behaviour.notifyPeerGroupRDVConnection(id);
-		}
-		
-	}
+	
 
 	public void removeBehaviour(AbstractBehaviour abstractBehaviour) {
 		behaviourList.remove(abstractBehaviour);

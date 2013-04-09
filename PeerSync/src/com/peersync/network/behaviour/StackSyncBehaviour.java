@@ -10,6 +10,7 @@ import net.jxta.id.ID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.data.SyncUtils;
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
@@ -24,7 +25,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	private long lastStackVersionAdvertismentEvent=0;
 	private StackVersionQuery queryHandler;
 	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
-	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-30*1000;
+	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-10*1000;
 
 
 	public StackSyncBehaviour(MyPeerGroup peerGroup){
@@ -123,15 +124,33 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		super.start();
 	};
 
+//	@Override
+//	public void notifyNetPeerGroupRDVConnection(ID id) {
+//		// TODO Auto-generated method stub
+//
+//	}
+//
+//	@Override
+//	public void notifyPeerGroupRDVConnection(ID id) {
+//		lastStackVersionAdvertismentEvent = 0;
+//	}
+	
 	@Override
-	public void notifyNetPeerGroupRDVConnection(ID id) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void notifyPeerGroupRDVConnection(ID id) {
-		lastStackVersionAdvertismentEvent = 0;
+	public void notifyPeerGroup(PeerGroupEvent event) {
+		if(myPeerGroup.getNetPeerGroup().getPeerGroupID().toString().equals(event.getPeerGroupID().toString())){
+			//NETPEERGROUPEVENT
+		}else{
+			
+			switch (event.getID()) {
+			case PeerGroupEvent.RDV_CONNECTION:
+				lastStackVersionAdvertismentEvent = 0;
+				break;
+			case PeerGroupEvent.STACK_UPDATE:
+				lastStackVersionAdvertismentEvent = 0;
+				break;
+			}
+			
+		}
 	}
 
 }

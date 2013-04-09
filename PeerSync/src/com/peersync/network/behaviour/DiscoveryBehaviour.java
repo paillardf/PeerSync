@@ -6,12 +6,10 @@ import java.util.List;
 
 import net.jxta.credential.AuthenticationCredential;
 import net.jxta.credential.Credential;
-import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.exception.PeerGroupException;
-import net.jxta.id.ID;
 import net.jxta.impl.membership.pse.StringAuthenticator;
 import net.jxta.membership.MembershipService;
 import net.jxta.peer.PeerID;
@@ -20,6 +18,7 @@ import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.Module;
 import net.jxta.protocol.PeerGroupAdvertisement;
 
+import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.PeerManager;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.group.MyPeerGroup;
@@ -252,16 +251,27 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 	}
 
 
+//	@Override
+//	public void notifyNetPeerGroup(PeerInfoEvent event) {
+//		lastRDVPublishTime = 0;
+//
+//	}
+
+
 	@Override
-	public void notifyNetPeerGroupRDVConnection(ID id) {
-		lastRDVPublishTime = 0;
-
-	}
-
-
-	@Override
-	public void notifyPeerGroupRDVConnection(ID id) {
-		//TODO
+	public void notifyPeerGroup(PeerGroupEvent event) {
+		if(myPeerGroup.getNetPeerGroup().getPeerGroupID().toString().equals(event.getPeerGroupID().toString())){
+			//NETPEERGROUPEVENT
+			switch (event.getID()) {
+			case PeerGroupEvent.RDV_CONNECTION:
+				lastRDVPublishTime = 0;
+				break;
+			}
+		}else{
+			
+			
+			
+		}
 	}
 
 
