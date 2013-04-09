@@ -29,11 +29,8 @@ public class mainClass {
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9788);
 		ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
-		//EventsManagerThread.getEventsManagerThread().start();
-		for(StackVersion sfv : el)
-		{
-			System.out.println(sfv.getUID()+" "+sfv.getLastUpdate());
-		}
+		EventsManagerThread.getEventsManagerThread().start();
+		
 		
 		//PeerManager.getInstance();
 		

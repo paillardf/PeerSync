@@ -22,4 +22,12 @@ PRIMARY KEY (uuid)
 )
 
 
+create table FilesInfo 
+(
+absolutePath text,
+dateModif long,
+PRIMARY KEY (absolutePath)
+)
+
+
 

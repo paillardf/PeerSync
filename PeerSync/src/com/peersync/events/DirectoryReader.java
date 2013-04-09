@@ -19,6 +19,7 @@ import com.peersync.data.DataBaseManager;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.SharedFolder;
+import com.peersync.network.PeerManager;
 
 public class DirectoryReader {
 
@@ -114,11 +115,20 @@ System.out.println(res);
 
 	public void scan()
 	{
+		Set<String> folderWithNewEvents = new HashSet<String>();
 		for (SharedFolder shareFolder : shareFolders) {
 			Map<String,String> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
 			scanDifferences(currentStack,shareFolder);
 			getEventsStack().save();
+			if(getEventsStack().getEvents().size()>0)
+				folderWithNewEvents.add(shareFolder.getPeerGroupUID());
 		}
+		
+		for (String t : folderWithNewEvents)
+		{
+			// TODO Signifier que ya eu des events sur ce peergroup
+		}
+		
 	}
 	
 	private void scanDifferences(Map<String,String> om,SharedFolder shareFolder)
