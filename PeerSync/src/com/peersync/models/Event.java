@@ -94,9 +94,7 @@ public class Event {
 
 			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_relFilePath,m_sharedFolderUID);
 			//TODO : vérifier le bien fondée de la propagation des conflits ( || e.getStatus()==STATUS_CONFLICT )
-			if(e!=null &&  (e.getNewHash()!=getOldHash() || e.getStatus()==STATUS_CONFLICT))
-
-
+			if(e!=null &&  (e.getNewHash().compareTo(getOldHash())!=0 || e.getStatus()==STATUS_CONFLICT))
 			{
 				setStatus(STATUS_CONFLICT);
 			}

@@ -18,12 +18,13 @@ import java.util.Set;
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
+import com.peersync.models.FileInfo;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerManager;
 
 public class DirectoryReader {
 
-	private Map<String,String> m_oldMap;
+	private Map<String,FileInfo> m_oldMap;
 	private Set<String> m_filesOk = new HashSet<String>();
 	private Set<String> m_directoriesOk = new HashSet<String>();
 	private Map<String,String> m_newFiles = new Hashtable<String,String>();
@@ -70,9 +71,8 @@ public class DirectoryReader {
 
 	/**
 	 *  Calcule le Hash Sha-1 du ficher passé en paramètre.
-	 * 	Pour un dossier, ce n'est pas le hash qui est retourné mais sa date de modification.
 	 * 	@param f : fichier à hasher
-	 * 	@return hash (ou date de modification pour un dossier) 
+	 * 	@return hash 
 	 */
 	public static String calculateHash(File f)
 	{
@@ -98,17 +98,15 @@ public class DirectoryReader {
 			    for (int i = 0; i < mdbytes.length; i++) {
 			    	sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
 			    }
-			    res =sb.toString();
+			    res = sb.toString();
+			    dis.close();
 			}catch (Exception ex) {  
 				ex.printStackTrace();  
 			}
 		}
-		else if(f.isDirectory())
-		{
-			res = String.valueOf(f.lastModified());
-
-		}
-System.out.println(res);
+		else
+			return null;
+		
 		return res;
 	}
 
@@ -117,7 +115,7 @@ System.out.println(res);
 	{
 		Set<String> folderWithNewEvents = new HashSet<String>();
 		for (SharedFolder shareFolder : shareFolders) {
-			Map<String,String> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
+			Map<String,FileInfo> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
 			scanDifferences(currentStack,shareFolder);
 			getEventsStack().save();
 			if(getEventsStack().getEvents().size()>0)
@@ -131,7 +129,7 @@ System.out.println(res);
 		
 	}
 	
-	private void scanDifferences(Map<String,String> om,SharedFolder shareFolder)
+	private void scanDifferences(Map<String,FileInfo> om,SharedFolder shareFolder)
 	{
 		m_oldMap = om;
 		m_filesOk.clear();
@@ -150,7 +148,7 @@ System.out.println(res);
 
 	private void searchDeletedFiles()
 	{
-		for(Entry<String, String> entry : m_oldMap.entrySet()) {
+		for(Entry<String, FileInfo> entry : m_oldMap.entrySet()) {
 			if(!m_filesOk.contains(entry.getKey()) && !m_updatedFiles.containsKey(entry.getKey()) && !m_newFiles.containsKey(entry.getKey()) )
 			{
 				boolean found = false;
@@ -170,7 +168,7 @@ System.out.println(res);
 					File f = new File(entry.getKey());
 					System.out.println("A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
 					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,f.isFile()? 1 : 0,null,entry.getValue(),Event.ACTION_DELETE,Event.STATUS_OK));
+					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,f.isFile()? 1 : 0,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
 				}
 			}
 		}
@@ -216,23 +214,28 @@ System.out.println(res);
 		// --> Optimisation impossible
 		if(dir.exists())
 		{
-//			String hashDir = DirectoryReader.calculateHash(dir);
-//			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-//			//boolean toScan = false;
-//			if(m_oldMap.containsKey(dir.getAbsolutePath()) && !m_oldMap.get(dir.getAbsolutePath()).equals(hashDir))
-//			{
-//				m_updatedFiles.put(dir.getAbsolutePath(),hashDir);
-//				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,m_oldMap.get(dir.getAbsolutePath()),Event.ACTION_UPDATE,Event.STATUS_OK));
-//				//toScan = true;
-//			}
-//			else if(!m_oldMap.containsKey(dir.getAbsolutePath()))
-//			{
-//				m_newFiles.put(dir.getAbsolutePath(),hashDir);
-//				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,hashDir,null,Event.ACTION_CREATE,Event.STATUS_OK));
-//				//toScan = true;
-//			}
-//			else
-//				m_filesOk.add(dir.getAbsolutePath());
+			
+			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
+	
+			if(!m_oldMap.containsKey(dir.getAbsolutePath()))
+			{
+				m_newFiles.put(dir.getAbsolutePath(),"");
+				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,Event.STATUS_OK));
+				FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
+				fi.save();
+				//toScan = true;
+			}
+			else
+			{
+				if(m_oldMap.get(dir.getAbsolutePath()).getUpdateDate()!=dir.lastModified())
+				{
+					FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
+					fi.save();
+				}
+		
+				m_filesOk.add(dir.getAbsolutePath());
+				
+			}
 			//if(toScan)
 			//{
 				File[] content = dir.listFiles();
@@ -241,8 +244,8 @@ System.out.println(res);
 					for (File file : content)
 					{
 						String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(file.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-						String hash = DirectoryReader.calculateHash(file);
-						if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+						
+						if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).getUpdateDate()==file.lastModified())
 						{
 //							if(file.isDirectory())
 //								m_directoriesOk.add(file.getAbsolutePath());
@@ -264,21 +267,29 @@ System.out.println(res);
 									files.addAll(listAllFilesInADir(file.getAbsolutePath()));
 								}
 							}
-							if(!isShareFolder) 
+							else
 							{
 								files.add(file);
-								if(file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
-									m_filesOk.add(file.getAbsolutePath());
+								System.out.println("No choice, we calculate the hash of "+file.getAbsolutePath());
+								String hash = DirectoryReader.calculateHash(file);
+								
+//								if(file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
+//									m_filesOk.add(file.getAbsolutePath());
 
-								else if(!m_oldMap.containsKey(file.getAbsolutePath()))
+
+								if(!m_oldMap.containsKey(file.getAbsolutePath()))
 								{
+									FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
+									fi.save();
 									m_newFiles.put(file.getAbsolutePath(),hash);
 									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE,Event.STATUS_OK));
 								}
 								else
 								{
 									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()),Event.ACTION_UPDATE,Event.STATUS_OK));
+									FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
+									fi.save();
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()).getHash(),Event.ACTION_UPDATE,Event.STATUS_OK));
 								}
 							}
 
@@ -296,6 +307,8 @@ System.out.println(res);
 		}
 		return files;
 	}
+	
+	
 	public EventsStack getEventsStack() {
 		return m_EventsStack;
 	}

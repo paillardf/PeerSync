@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
+import com.peersync.models.FileAvailable;
+import com.peersync.models.FileInfo;
 import com.peersync.models.FileToSync;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
@@ -37,6 +39,9 @@ public class DataBaseManager extends DbliteConnection{
 	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 	private static final String PEERGROUPFIELD = "peerGroup";
 
+	private static final String FILESINFO_TABLE = "FilesInfo";
+	private static final String FILESINFO_ABSOLUTEPATHFIELD = "absolutePath";
+	private static final String FILESINFO_UPDATEDATEFIELD = "dateModif";
 
 	private static final int VERSION = 1;
 
@@ -79,6 +84,13 @@ public class DataBaseManager extends DbliteConnection{
 				PEERGROUPFIELD+ " text, "+
 				ROOTPATHFIELD+ " text, "+
 				"PRIMARY KEY("+UUIDFIELD+"));");
+
+		update("create table "+FILESINFO_TABLE+" "+
+				"("+FILESINFO_ABSOLUTEPATHFIELD+" text, "+
+				FILESINFO_UPDATEDATEFIELD+ " long, "+
+				"PRIMARY KEY("+FILESINFO_ABSOLUTEPATHFIELD+"));");
+
+
 	}
 
 
@@ -120,10 +132,10 @@ public class DataBaseManager extends DbliteConnection{
 
 				if(!newFolderUID.equals(oldFolderUID))
 				{
-//					if(newRelFilepath != null && newFolderUID!=null)
-//						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
-//					else // joue de la role du on delete cascade sur les sharedFolders
-						update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+					//					if(newRelFilepath != null && newFolderUID!=null)
+					//						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+					//					else // joue de la role du on delete cascade sur les sharedFolders
+					update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
 				}
 				//
 
@@ -152,9 +164,9 @@ public class DataBaseManager extends DbliteConnection{
 		String uid = getSharedFolderOfAFile(absFilePath);
 		return getLastEventOfAFile(SharedFolder.RelativeFromAbsolutePath(absFilePath, getSharedFolderRootPath(uid) ),uid);
 	}
-	
-	
-	
+
+
+
 	public ArrayList<SharedFolder> getSharedFoldersOfAPeerGroup(String peerGroupID)
 	{
 		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
@@ -324,15 +336,17 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
+	
 	/**
 	 *  Retourne les derniers événements en base de données, pour chaque fichier.
 	 *  Ne prends pas en compte les événements "Suppression", ni les events avec un status différent de "OK"
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
-	public Map<String,String> getLastEvents(String shareFolderUID)
+	public ArrayList<FileAvailable> getFilesAvailable(String shareFolderUID)
 	{
-		Map<String,String> res = new Hashtable<String,String>();
+		//TODO faire ça
+		ArrayList<FileAvailable>  res = new ArrayList<FileAvailable>() ;
 
 
 
@@ -340,10 +354,12 @@ public class DataBaseManager extends DbliteConnection{
 		{
 
 
+			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
+		
 
-			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
+			ResultSet rs = query(sql);
 
 
 
@@ -354,8 +370,61 @@ public class DataBaseManager extends DbliteConnection{
 				// read the result set
 				if(rs.getString(ROOTPATHFIELD)!=null)
 				{
-					String absolutePath = SharedFolder.AbsoluteFromRelativePath(rs.getString(FILEPATHFIELD), rs.getString(ROOTPATHFIELD)) ;
-					res.put(absolutePath, rs.getString(NEWHASHFIELD));
+					String absolutePath = rs.getString("absPath") ;
+					//res.put(absolutePath, new FileInfo(absolutePath, rs.getLong(FILESINFO_UPDATEDATEFIELD),rs.getString(NEWHASHFIELD)));
+
+				}
+				else
+					System.err.println("PB de shared folder");
+			}
+		}
+		catch(SQLException e)
+		{
+			// if the error message is "out of memory", 
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		}
+
+
+		return res;
+	}
+	
+	
+	
+	/**
+	 *  Retourne les derniers événements en base de données, pour chaque fichier.
+	 *  Ne prends pas en compte les événements "Suppression", ni les events avec un status différent de "OK"
+	 * 	@param shareFolderUID 
+	 * 	@return  Map nom_de_fichier,hash
+	 */
+	public Map<String,FileInfo> getLastEvents(String shareFolderUID)
+	{
+		Map<String,FileInfo> res = new Hashtable<String,FileInfo>();
+
+
+
+		try
+		{
+
+
+			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
+		
+
+			ResultSet rs = query(sql);
+
+
+
+
+			while(rs.next())
+			{
+
+				// read the result set
+				if(rs.getString(ROOTPATHFIELD)!=null)
+				{
+					String absolutePath = rs.getString("absPath") ;
+					res.put(absolutePath, new FileInfo(absolutePath, rs.getLong(FILESINFO_UPDATEDATEFIELD),rs.getString(NEWHASHFIELD)));
 
 				}
 				else
@@ -402,16 +471,42 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 
 	}
-	
-	
+
+	public void saveFileInfo(FileInfo fi){
+		boolean update = false;
+		try {
+			ResultSet rs = query("select fi."+FILESINFO_ABSOLUTEPATHFIELD+
+					" from "+FILESINFO_TABLE+" fi where "+FILESINFO_ABSOLUTEPATHFIELD+"='"+fi.getAbsFilePath()+"'");
+
+			while(rs.next())
+			{
+				if(rs.getString(FILESINFO_ABSOLUTEPATHFIELD)!=null)
+					update = true;
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			if(update)
+				update("Update "+FILESINFO_TABLE+" set "+FILESINFO_UPDATEDATEFIELD+"="+fi.getUpdateDate()+" where "+FILESINFO_ABSOLUTEPATHFIELD+"='"+fi.getAbsFilePath()+"'");
+			else
+				update("insert into "+FILESINFO_TABLE+ "("+FILESINFO_ABSOLUTEPATHFIELD+", "+FILESINFO_UPDATEDATEFIELD+") values ('"+fi.getAbsFilePath() + "', "+fi.getUpdateDate()+")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void saveSharedFolder(SharedFolder sf){
-		
+
 		try {
 			update("insert into "+DBSHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+") values ('"+sf.getUID() + "', '"+sf.getPeerGroupUID()+"', '"+sf.getAbsFolderRootPath()+"')");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	/** Obtient l'ensemble des dossiers de partage 
@@ -569,7 +664,7 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 	public String getSharedFolderPeerGroup(String UID) {
-		
+
 		String res = new String();
 		try
 		{
