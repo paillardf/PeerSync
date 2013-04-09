@@ -80,20 +80,24 @@ public class DirectoryReader {
 		{
 			try
 			{
-				MessageDigest md = MessageDigest.getInstance("SHA-1"); 
+				MessageDigest md = MessageDigest.getInstance("SHA1"); 
 				DigestInputStream dis = new DigestInputStream(new FileInputStream(f), md);  
-				dis.on(true);  
-
-				while (dis.read() != -1){  
-					;  
-				}  
-				byte[] b = md.digest();  
-				dis.close();
-
-				for (int j=0;j<b.length;++j) {  
-
-					res+= String.format("%x", b[j]) ;  
-				} 
+				byte[] dataBytes = new byte[1024];
+				 
+			    int nread = 0; 
+			 
+			    while ((nread = dis.read(dataBytes)) != -1) {
+			      md.update(dataBytes, 0, nread);
+			    };
+			 
+			    byte[] mdbytes = md.digest();
+			 
+			    //convert the byte to hex format
+			    StringBuffer sb = new StringBuffer("");
+			    for (int i = 0; i < mdbytes.length; i++) {
+			    	sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+			    }
+			    res =sb.toString();
 			}catch (Exception ex) {  
 				ex.printStackTrace();  
 			}
@@ -103,7 +107,7 @@ public class DirectoryReader {
 			res = String.valueOf(f.lastModified());
 
 		}
-
+System.out.println(res);
 		return res;
 	}
 
