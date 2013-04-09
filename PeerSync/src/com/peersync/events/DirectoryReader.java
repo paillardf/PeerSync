@@ -106,7 +106,6 @@ public class DirectoryReader {
 		}
 		else
 			return null;
-		
 		return res;
 	}
 

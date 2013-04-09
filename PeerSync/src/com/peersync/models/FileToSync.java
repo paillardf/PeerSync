@@ -1,11 +1,11 @@
 package com.peersync.models;
 
-import java.io.File;
-import java.net.URI;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 import net.jxta.content.ContentID;
 import net.jxta.id.IDFactory;
+import net.jxta.peergroup.PeerGroupID;
 
 public class FileToSync {
 	
@@ -72,11 +72,11 @@ public class FileToSync {
 		this.localSource = localSource;
 	}
 
-	public ContentID getContentID() {
+	public ContentID getContentID(PeerGroupID groupID) {
 		if(contentID==null)
 			try {
-				contentID = (ContentID) IDFactory.fromURI(new URI("urn:jxta:uuid-"+fileHash));
-			} catch (URISyntaxException e) {
+				contentID = IDFactory.newContentID(groupID, true, fileHash.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		return contentID;

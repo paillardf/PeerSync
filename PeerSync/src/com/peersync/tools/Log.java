@@ -45,9 +45,9 @@ public class Log {
 
 
 			Onglets = new JTabbedPane();
-			JTextPane txt = new JTextPane();
-			JScrollPane jsp = new JScrollPane(txt);
-			Onglets.addTab(DEFAULT, null, jsp, null); 
+			//JTextPane txt = new JTextPane();
+			//JScrollPane jsp = new JScrollPane(txt);
+			//Onglets.addTab(DEFAULT, null, jsp, null); 
 
 			this.getContentPane().add(Onglets);
 
