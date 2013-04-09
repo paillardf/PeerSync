@@ -20,13 +20,12 @@ public class main {
 		
 		Constants.getInstance().PEERNAME = "client4";
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
+		DataBaseManager db = DataBaseManager.getInstance();
+		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Florian\\Desktop\\Share test\\Client1"));
+		PreferencesManager pref = PreferencesManager.getInstance();
+		pref.setPort(9789);
 		EventsManagerThread.getEventsManagerThread().start();
-		//		DataBaseManager db = DataBaseManager.getInstance();
-//		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Florian\\Desktop\\Share test\\Client1"));
-//		PreferencesManager pref = PreferencesManager.getInstance();
-//		pref.setPort(9789);
-//		EventsManagerThread.getEventsManagerThread().start();
-//		PeerManager.getInstance();
+		PeerManager.getInstance();
 		
 		
 	}

@@ -19,16 +19,22 @@ import com.peersync.data.DataBaseManager;
 import com.peersync.models.FileToSync;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.listener.ThreadCompleteListener;
+import com.peersync.network.query.FileQuery;
+import com.peersync.tools.Log;
 
 
-public class ContentBehaviour extends AbstractBehaviour{
+public class ContentBehaviour extends AbstractBehaviour implements ThreadCompleteListener{
 
 	private static final String NAME = "ContentBehaviour";
 	private long lastShareContentAdvertisment=0;
-	private ArrayList<FileToSync> currentlySharedFiles;
+	private ArrayList<FileToSync> currentlySharedFiles = new ArrayList<FileToSync>();
+	private List<FileQuery> downloadThreadList = new ArrayList<FileQuery>();
+	private int runningThreadCount = 0;
 	//	private StackVersionQuery queryHandler;
 	//	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
 	private static final long PUBLISH_ADVERTISEMENT_DELAY = 10*60*1000;
+	private static final int MAX_DOWNLOAD_THREAD = 3;
 
 
 	public ContentBehaviour(MyPeerGroup peerGroup){
@@ -51,18 +57,19 @@ public class ContentBehaviour extends AbstractBehaviour{
 					lastShareContentAdvertisment  = System.currentTimeMillis();
 
 
-					ArrayList<FileToSync> files = db.getFilesWithLocalSource();
+					ArrayList<FileToSync> files = db.getFilesWithLocalSource();//TODO mauvaise fonction
 					ArrayList<FileToSync>  unsharedFile = (ArrayList<FileToSync>) currentlySharedFiles.clone();
 					unsharedFile.removeAll(files);
 
 
 					for (FileToSync fileToUnshare : unsharedFile) {
-						service.unshareContent(fileToUnshare.getContentID());
+						service.unshareContent(fileToUnshare.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()));
 					}
-
+					
+					currentlySharedFiles = files;
 					for (FileToSync fileToSync : files) {
 						FileDocument fileDoc = new FileDocument(new File(fileToSync.getRelFilePath()), MimeMediaType.AOS);
-						Content content = new Content(fileToSync.getContentID(), null, fileDoc);
+						Content content = new Content(fileToSync.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()), null, fileDoc);
 						List<ContentShare> shares = service.shareContent(content);
 						DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 						for (ContentShare share : shares) {
@@ -76,11 +83,33 @@ public class ContentBehaviour extends AbstractBehaviour{
 						}
 					}
 				}
-
+				
+//				int threadAlive = 0;
+//				
+//				for (Entry<String, FileQuery> e : downloadList.entrySet()) {
+//					FileQuery fq = e.getValue();
+//					if(fq.getState()==Thread.State.TERMINATED){
+//						
+//					}else if(fq.getState()==Thread.State.NEW){
+//						
+//					}else if(fq.isAlive()){
+//						threadAlive++;
+//					}
+//				}
+				
+				ArrayList<FileToSync> files = db.getFilesToDownload();
+				for (FileToSync fileToSync : files) {
+					FileQuery fq = 	new FileQuery(myPeerGroup, fileToSync.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()));
+					if(!downloadThreadList.contains(fq)){
+						downloadThreadList.add(fq);		
+						fq.addListener(this);
+						Log.d("ContentBehaviour", "Add FileQuery");
+					}
+				}
+				startDownloadThread();
 
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
@@ -112,7 +141,45 @@ public class ContentBehaviour extends AbstractBehaviour{
 		}
 	}
 
+	@Override
+	public void notifyOfThreadComplete(Thread thread) {
+		
+		
+		for (int i = 0; i<downloadThreadList.size(); i++) {
+			if(downloadThreadList.get(i)==thread){
+				downloadThreadList.remove(i);
+				break;
+			}
+				
+		}
+		runningThreadCount--;
+		startDownloadThread();
+		
+	}
+	
+	private void startDownloadThread(){
+		if(runningThreadCount <MAX_DOWNLOAD_THREAD){
+			int threadToRun = MAX_DOWNLOAD_THREAD-runningThreadCount;
+			
+			for (int i = 0; i<downloadThreadList.size(); i++) {
+				if(downloadThreadList.get(i).getState()==Thread.State.NEW&&threadToRun>0){
+					downloadThreadList.get(i).start();
+					Log.d("ContentBehaviour", "start FileQuery");
+					runningThreadCount++;
+					threadToRun--;
+				}
+			}
+		}
+		
+	}
 
+@Override
+public void interrupt() {
+	for (FileQuery fq : downloadThreadList) {
+		fq.interrupt();
+	}
+	super.interrupt();
+}
 
 
 

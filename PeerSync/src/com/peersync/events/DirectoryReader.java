@@ -108,7 +108,6 @@ public class DirectoryReader {
 			res = String.valueOf(f.lastModified());
 
 		}
-System.out.println(res);
 		return res;
 	}
 
