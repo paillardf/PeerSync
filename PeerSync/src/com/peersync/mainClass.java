@@ -1,11 +1,15 @@
 package com.peersync;
 
+import java.util.ArrayList;
+
 import net.jxta.id.IDFactory;
 import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
 import com.peersync.models.SharedFolder;
+import com.peersync.models.SharedFolderVersion;
+import com.peersync.models.StackVersion;
 import com.peersync.network.PeerManager;
 import com.peersync.tools.Constants;
 import com.peersync.tools.PreferencesManager;
@@ -24,7 +28,13 @@ public class mainClass {
 		db.saveSharedFolder(new SharedFolder("5002", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9788);
-		EventsManagerThread.getEventsManagerThread().start();
+		ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
+		//EventsManagerThread.getEventsManagerThread().start();
+		for(StackVersion sfv : el)
+		{
+			System.out.println(sfv.getUID()+" "+sfv.getLastUpdate());
+		}
+		
 		//PeerManager.getInstance();
 		
 		//DataBaseManager.getDataBaseManager().checkEventsIntegrity();

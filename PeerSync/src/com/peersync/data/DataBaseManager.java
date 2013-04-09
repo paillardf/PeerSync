@@ -326,7 +326,7 @@ public class DataBaseManager extends DbliteConnection{
 
 	/**
 	 *  Retourne les derniers événements en base de données, pour chaque fichier.
-	 *  Ne prends pas en compte les événements "Suppression"
+	 *  Ne prends pas en compte les événements "Suppression", ni les events avec un status différent de "OK"
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
@@ -342,7 +342,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 			ResultSet rs = query("select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and  e1."+DATEFIELD+" = " +
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")");
 
 
