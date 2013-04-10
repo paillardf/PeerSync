@@ -7,6 +7,7 @@ import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
+import com.peersync.models.ClassicFile;
 import com.peersync.models.FileAvailable;
 import com.peersync.models.FileToDownload;
 import com.peersync.models.SharedFolder;
@@ -24,7 +25,8 @@ public class mainClass {
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
 		DataBaseManager db = DataBaseManager.getInstance();
-		db.getFilesWithLocalSource("toto");
+		for(ClassicFile cf : db.getFilesWithLocalSource("toto"))
+			System.out.println(cf.getAbsFilePath());
 //		db.saveSharedFolder(new SharedFolder("5000", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
 //		
 //		db.saveSharedFolder(new SharedFolder("5001", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));

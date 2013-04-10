@@ -679,7 +679,7 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		ArrayList<FileToDownload> res = new ArrayList<FileToDownload>();
 		try {
-			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" as absPath "+
+			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
 					" and e1."+ISFILEFIELD+"=1"+
 					" and sf."+PEERGROUPFIELD+"='"+peerGroupId+"'"+
@@ -689,6 +689,7 @@ public class DataBaseManager extends DbliteConnection{
 					" from "+DBEVENTSTABLE+" e2  where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" and e2."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+"))";
 
+			System.out.println(sqlQuery);
 			ResultSet rs = query(sqlQuery);
 			Set<String> setHash = new HashSet<String>();
 			while(rs.next())
@@ -699,7 +700,7 @@ public class DataBaseManager extends DbliteConnection{
 				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
 				
 				if(setHash.add(fileHash))
-					res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID, rs.getString("absPath"),peerGroupId));
+					res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID, rs.getString(ROOTPATHFIELD),peerGroupId));
 
 
 			}
@@ -716,7 +717,7 @@ public class DataBaseManager extends DbliteConnection{
 		ArrayList<FileWithLocalSource> res = new ArrayList<FileWithLocalSource>();
 		try {
 
-			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+",(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
+			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf1."+ROOTPATHFIELD+",(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
 					" from "+DBEVENTSTABLE+" e2 left join "+DBSHAREDFOLDERSTABLE+" sf on (e2."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" " +
 					" and e1."+ISFILEFIELD+"=1"+
 					" and e2."+NEWHASHFIELD+" = e1."+NEWHASHFIELD+
@@ -727,7 +728,7 @@ public class DataBaseManager extends DbliteConnection{
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
 					" and localSource NOT NULL";
 			
-			System.out.println(sqlQuery);
+
 
 			ResultSet rs = query(sqlQuery);
 
@@ -738,7 +739,7 @@ public class DataBaseManager extends DbliteConnection{
 				String fileHash = rs.getString(NEWHASHFIELD);
 				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
 				String localSource = rs.getString("localsource");
-				res.add(new FileWithLocalSource(relFilePath, fileHash, sharedFolderUID,rs.getString("ROOTPATHFIELD"),localSource));
+				res.add(new FileWithLocalSource(relFilePath, fileHash, sharedFolderUID,rs.getString(ROOTPATHFIELD),localSource));
 
 			}
 		} catch (SQLException  e) {
