@@ -3,7 +3,6 @@ package com.peersync.network.group;
 import java.util.ArrayList;
 
 import net.jxta.discovery.DiscoveryService;
-import net.jxta.id.ID;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 import net.jxta.rendezvous.RendezVousService;
@@ -13,8 +12,8 @@ import net.jxta.rendezvous.RendezvousListener;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.behaviour.AbstractBehaviour;
 import com.peersync.network.behaviour.ContentBehaviour;
-import com.peersync.network.behaviour.StackSyncBehaviour;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
+import com.peersync.network.behaviour.StackSyncBehaviour;
 
 public class MyPeerGroup {
 
@@ -24,10 +23,13 @@ public class MyPeerGroup {
 	private PeerGroup peerGroup;
 	public String peerGroupName;
 	private ArrayList<AbstractBehaviour> behaviourList = new ArrayList<AbstractBehaviour>();
+	private PeerGroupID peerGroupId;
 	
 	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName)  {
 		this.peerGroupName = peerGroupName;
+		this.peerGroupId=psepeergroupid;
 		this.groupManager=peerGroupManager;
+		
 		DiscoveryBehaviour db = new DiscoveryBehaviour(this);
 		behaviourList.add(db);
 		behaviourList.add(new StackSyncBehaviour(this));
@@ -40,6 +42,10 @@ public class MyPeerGroup {
 		return getGroupManager().getNetDiscoveryService();
 	}
 
+	public PeerGroupID getPeerGroupID(){
+		return peerGroupId;
+	}
+	
 	public PeerGroup getNetPeerGroup() {
 		return getGroupManager().getNetPeerGroup();
 	}
@@ -102,6 +108,10 @@ public class MyPeerGroup {
 		behaviourList.remove(abstractBehaviour);
 		if(abstractBehaviour.isAlive())
 			abstractBehaviour.interrupt();
+	}
+
+	public String getPeerGroupName() {
+		return peerGroupName;
 	}
 	
 

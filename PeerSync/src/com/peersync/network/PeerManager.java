@@ -31,9 +31,7 @@ public class PeerManager {
 	private int PORT = 9799;
 
     
-	public static final String PsePeerGroupName = "SECURE PeerGroup";
-	public static final PeerGroupID PsePeerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, PsePeerGroupName.getBytes());
-
+	
 
 	
  
@@ -116,7 +114,7 @@ public class PeerManager {
 					);
 		
 		peerGroupManager = new PeerGroupManager(this, netPeerGroup);
-		peerGroupManager.addPeerGroupToManage(PsePeerGroupID, PsePeerGroupName);
+		peerGroupManager.addPeerGroupToManage(Constants.PsePeerGroupID, Constants.PsePeerGroupName);
 		
 //		peerNetworkManager = new DiscoveryManager(this);
 //		peerNetworkManager.start();

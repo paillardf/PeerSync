@@ -59,7 +59,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 			if(myPeerGroup.getPeerGroup()==null){
 				Log.d(myPeerGroup.peerGroupName, "GroupAdv Not Found");
-				joinGroup(createNewPeerGroup(PeerManager.PsePeerGroupID, PeerManager.PsePeerGroupName, "Groupe securisé"));
+				joinGroup(createNewPeerGroup(myPeerGroup.getPeerGroupID(),myPeerGroup.getPeerGroupName(), "Groupe securisé"));
 
 			}
 			if(myPeerGroup.getPeerGroup()!=null){
