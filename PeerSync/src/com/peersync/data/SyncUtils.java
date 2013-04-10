@@ -53,11 +53,18 @@ public class SyncUtils {
 				
 				DataBaseManager.exclusiveAccess.lock();
 				DataBaseManager db = DataBaseManager.getInstance();
+				
+				ArrayList<String> folders = db.getUnsyncFolder(peerGroupID);
+				for (String path : folders) {
+					new File(path).mkdirs();
+				}
+				
+				
 				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSource(peerGroupID);
 				
 				for (FileWithLocalSource fileWithLocalSource : files) {
 					File f = new File(fileWithLocalSource.getLocalSourcePath());
-					FileUtils.copy(f, new File(fileWithLocalSource.getRelFilePath()));
+					FileUtils.copy(f, new File(fileWithLocalSource.getAbsFilePath()));
 				}
 				DataBaseManager.exclusiveAccess.unlock();
 			}

@@ -13,7 +13,7 @@ public class Constants {
 	
 	public static final String PsePeerGroupName = "SECURE PeerGroup";
 	public static final PeerGroupID PsePeerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, PsePeerGroupName.getBytes());
-	public static final String TEMP_PATH = "./tmp/";
+	public static final String TEMP_PATH = ".\\tmp\\";
 
 	
 	
