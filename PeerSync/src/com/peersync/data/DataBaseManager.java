@@ -369,7 +369,7 @@ public class DataBaseManager extends DbliteConnection{
 		try
 		{
 
-			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
+			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", sf."+PEERGROUPFIELD+",(case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
 					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" e1."+ISFILEFIELD+" =1 AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 		
@@ -386,7 +386,7 @@ public class DataBaseManager extends DbliteConnection{
 				if(rs.getString(ROOTPATHFIELD)!=null)
 				{
 					String absolutePath = rs.getString("absPath") ;
-					res.add(new FileAvailable(absolutePath, rs.getString(NEWHASHFIELD)));
+					res.add(new FileAvailable(absolutePath, rs.getString(NEWHASHFIELD), rs.getString(PEERGROUPFIELD)));
 
 				}
 				else
@@ -656,7 +656,7 @@ public class DataBaseManager extends DbliteConnection{
 				String relFilePath = rs.getString(FILEPATHFIELD);
 				String fileHash = rs.getString(NEWHASHFIELD);
 				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
-				res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID));
+				res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID, peerGroupId));
 
 
 			}

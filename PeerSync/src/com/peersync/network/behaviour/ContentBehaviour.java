@@ -17,7 +17,7 @@ import net.jxta.protocol.ContentShareAdvertisement;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.FileAvailable;
-import com.peersync.models.FileToSync;
+import com.peersync.models.FileToDownload;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.group.MyPeerGroup;
 import com.peersync.network.listener.ThreadCompleteListener;
@@ -58,19 +58,19 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 					lastShareContentAdvertisment  = System.currentTimeMillis();
 
 
-					ArrayList<FileToSync> files = db.getFilesWithLocalSource();//TODO mauvaise fonction
-					ArrayList<FileToSync>  unsharedFile = (ArrayList<FileToSync>) currentlySharedFiles.clone();
+					ArrayList<FileAvailable> files = db.getFilesAvailableForAPeerGroup(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
+					ArrayList<FileAvailable>  unsharedFile = (ArrayList<FileAvailable>) currentlySharedFiles.clone();
 					unsharedFile.removeAll(files);
 
-
-					for (FileToSync fileToUnshare : unsharedFile) {
-						service.unshareContent(fileToUnshare.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()));
+					
+					for (FileAvailable fileToUnshare : unsharedFile) {
+						service.unshareContent(fileToUnshare.getContentID());
 					}
 					
 					currentlySharedFiles = files;
-					for (FileToSync fileToSync : files) {
-						FileDocument fileDoc = new FileDocument(new File(fileToSync.getRelFilePath()), MimeMediaType.AOS);
-						Content content = new Content(fileToSync.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()), null, fileDoc);
+					for (FileAvailable fileToSync : files) {
+						FileDocument fileDoc = new FileDocument(new File(fileToSync.getAbsFilePath()), MimeMediaType.AOS);
+						Content content = new Content(fileToSync.getContentID(), null, fileDoc);
 						List<ContentShare> shares = service.shareContent(content);
 						DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 						for (ContentShare share : shares) {
@@ -98,9 +98,9 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 //					}
 //				}
 				
-				ArrayList<FileToSync> files = db.getFilesToDownload();
-				for (FileToSync fileToSync : files) {
-					FileQuery fq = 	new FileQuery(myPeerGroup, fileToSync.getContentID(myPeerGroup.getPeerGroup().getPeerGroupID()));
+				ArrayList<FileToDownload> files = db.getFilesToDownload(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
+				for (FileToDownload fileToSync : files) {
+					FileQuery fq = 	new FileQuery(myPeerGroup, fileToSync.getContentID());
 					if(!downloadThreadList.contains(fq)){
 						downloadThreadList.add(fq);		
 						fq.addListener(this);
