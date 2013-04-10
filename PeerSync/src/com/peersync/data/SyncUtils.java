@@ -2,6 +2,7 @@ package com.peersync.data;
 
 import java.util.ArrayList;
 
+import com.peersync.models.FileWithLocalSource;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 
@@ -49,6 +50,26 @@ public class SyncUtils {
 		}
 		
 		return sfv;
+		
+		
+	}
+	
+	public void startInteligentSync(final String peerGroupID){
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				DataBaseManager.exclusiveAccess.lock();
+				DataBaseManager db = DataBaseManager.getInstance();
+				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSource(peerGroupID);
+				
+				for (FileWithLocalSource fileWithLocalSource : files) {
+					fileWithLocalSource.getLocalSource();//TODO
+				}
+				DataBaseManager.exclusiveAccess.unlock();
+			}
+		});
 		
 		
 	}

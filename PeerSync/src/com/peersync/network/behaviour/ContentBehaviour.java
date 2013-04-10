@@ -78,6 +78,7 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 							ContentShareAdvertisement adv = share.getContentShareAdvertisement();
 							try {
 								discoService.publish(adv);
+								Log.d("ContentBehaviour", "adv publish");
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
@@ -100,7 +101,7 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 				
 				ArrayList<FileToDownload> files = db.getFilesToDownload(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
 				for (FileToDownload fileToSync : files) {
-					FileQuery fq = 	new FileQuery(myPeerGroup, fileToSync.getContentID());
+					FileQuery fq = 	new FileQuery(myPeerGroup, fileToSync);
 					if(!downloadThreadList.contains(fq)){
 						downloadThreadList.add(fq);		
 						fq.addListener(this);

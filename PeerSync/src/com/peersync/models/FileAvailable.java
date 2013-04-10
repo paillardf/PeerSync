@@ -21,7 +21,7 @@ public class FileAvailable {
 		this.setAbsFilePath(absFilePath);
 		this.setHash(hash);
 		try {
-			contentID = IDFactory.newContentID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)), true, hash.getBytes("UTF-8"));
+			contentID = IDFactory.newContentID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)), false, hash.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException | URISyntaxException e) {
 			e.printStackTrace();
 		}
