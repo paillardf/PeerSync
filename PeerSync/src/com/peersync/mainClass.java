@@ -7,6 +7,7 @@ import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
+import com.peersync.models.FileToDownload;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
@@ -22,15 +23,20 @@ public class mainClass {
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
 		DataBaseManager db = DataBaseManager.getInstance();
-		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
-		
-		db.saveSharedFolder(new SharedFolder("5001", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
-		db.saveSharedFolder(new SharedFolder("5002", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
+//		db.saveSharedFolder(new SharedFolder("5000", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
+//		
+//		db.saveSharedFolder(new SharedFolder("5001", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
+//		db.saveSharedFolder(new SharedFolder("5002", "", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9788);
-		ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
-		EventsManagerThread.getEventsManagerThread().start();
+		//ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
+		//EventsManagerThread.getEventsManagerThread().start();
 		
+		
+		ArrayList<FileToDownload> res = DataBaseManager.getInstance().getFilesToDownload("toto");
+		System.out.println(res.size());
+		for(FileToDownload f :res )
+			System.out.println(f.getRelFilePath());
 		
 		//PeerManager.getInstance();
 		
