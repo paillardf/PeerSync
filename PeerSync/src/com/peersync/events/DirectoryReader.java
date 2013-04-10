@@ -216,25 +216,25 @@ public class DirectoryReader {
 			
 			String relFilePath = SharedFolder.RelativeFromAbsolutePath(dir.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 	
-			if(!m_oldMap.containsKey(dir.getAbsolutePath()))
-			{
-				m_newFiles.put(dir.getAbsolutePath(),"");
-				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,Event.STATUS_OK));
-				FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
-				fi.save();
-				//toScan = true;
-			}
-			else
-			{
-				if(m_oldMap.get(dir.getAbsolutePath()).getUpdateDate()!=dir.lastModified())
-				{
-					FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
-					fi.save();
-				}
-		
-				m_filesOk.add(dir.getAbsolutePath());
-				
-			}
+//			if(!m_oldMap.containsKey(dir.getAbsolutePath()))
+//			{
+//				m_newFiles.put(dir.getAbsolutePath(),"");
+//				m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePath,dir.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,Event.STATUS_OK));
+//				FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
+//				fi.save();
+//				//toScan = true;
+//			}
+//			else
+//			{
+//				if(m_oldMap.get(dir.getAbsolutePath()).getUpdateDate()!=dir.lastModified())
+//				{
+//					FileInfo fi = new FileInfo(dir.getAbsolutePath(),dir.lastModified(),null);
+//					fi.save();
+//				}
+//		
+//				m_filesOk.add(dir.getAbsolutePath());
+//				
+//			}
 			//if(toScan)
 			//{
 				File[] content = dir.listFiles();
@@ -262,6 +262,18 @@ public class DirectoryReader {
 								}
 
 								if(!isShareFolder){
+									
+									if(!m_oldMap.containsKey(file.getAbsolutePath()))
+									{
+										
+										FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),null);
+										fi.save();
+										m_newFiles.put(file.getAbsolutePath(),"");
+										m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,Event.STATUS_OK));
+										//toScan = true;
+									}
+									else
+										m_filesOk.add(file.getAbsolutePath());
 									files.add(file);
 									files.addAll(listAllFilesInADir(file.getAbsolutePath()));
 								}

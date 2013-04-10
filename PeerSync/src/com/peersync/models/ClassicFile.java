@@ -1,20 +1,24 @@
 package com.peersync.models;
 
 
-public abstract class AbstractFile {
+public class ClassicFile {
 	protected String sharedFolderUID;
 	protected String fileHash;
 	protected String relFilePath;
 	
 
+	protected String sharedFolderRootPath;
+	
+
 
 	
 	
-	public AbstractFile(String relFilePath,String fileHash,String sharedFolderUID)
+	public ClassicFile(String relFilePath,String fileHash,String sharedFolderUID,String sharedFolderRootPath)
 	{
 		setRelFilePath(relFilePath);
 		setFileHash(fileHash);
 		setSharedFolderUID(sharedFolderUID);
+		setSharedFolderRootPath(sharedFolderRootPath);
 	}
 	
 
@@ -56,9 +60,23 @@ public abstract class AbstractFile {
 	
 	@Override
 	public boolean equals(Object obj) {
-		AbstractFile f = (AbstractFile)obj;
+		ClassicFile f = (ClassicFile)obj;
 		
 		return f.fileHash.equals(fileHash)&&f.relFilePath.equals(relFilePath);
+	}
+
+
+
+
+	public String getSharedFolderRootPath() {
+		return sharedFolderRootPath;
+	}
+
+
+
+
+	public void setSharedFolderRootPath(String sharedFolderRootPath) {
+		this.sharedFolderRootPath = sharedFolderRootPath;
 	}
 
 }

@@ -8,7 +8,7 @@ import net.jxta.content.ContentID;
 import net.jxta.id.IDFactory;
 import net.jxta.peergroup.PeerGroupID;
 
-public class FileToDownload extends AbstractFile{
+public class FileToDownload extends ClassicFile{
 
 
 
@@ -16,9 +16,9 @@ public class FileToDownload extends AbstractFile{
 	private ContentID contentID;
 
 
-	public FileToDownload(String relFilePath,String fileHash,String sharedFolderUID, String peerGroupID)
+	public FileToDownload(String relFilePath,String fileHash,String sharedFolderUID,String sharedFolderRootPath, String peerGroupID)
 	{
-		super(relFilePath,fileHash,sharedFolderUID);
+		super(relFilePath,fileHash,sharedFolderUID,sharedFolderRootPath);
 		try {
 			contentID = IDFactory.newContentID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)), true, fileHash.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException | URISyntaxException e) {

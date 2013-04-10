@@ -1,25 +1,25 @@
 package com.peersync.models;
 
-public class FileWithLocalSource extends AbstractFile{
+public class FileWithLocalSource extends ClassicFile{
 	
 
 
 	
-	private String localSource;
+	private String localSourcePath;
 	
-	public FileWithLocalSource(String relFilePath,String fileHash,String sharedFolderUID,String localSource)
+	public FileWithLocalSource(String relFilePath,String fileHash,String sharedFolderUID,String sharedFolderRootPath,String localSourcePath)
 	{
-		super(relFilePath,fileHash,sharedFolderUID);
-		this.setLocalSource(localSource);
+		super(relFilePath,fileHash,sharedFolderUID,sharedFolderRootPath);
+		this.setLocalSourcePath(localSourcePath);
 
 	}
 
-	public String getLocalSource() {
-		return localSource;
+	public String getLocalSourcePath() {
+		return localSourcePath;
 	}
 
-	public void setLocalSource(String localSource) {
-		this.localSource = localSource;
+	public void setLocalSourcePath(String localSource) {
+		this.localSourcePath = localSource;
 	}
 	
 	
