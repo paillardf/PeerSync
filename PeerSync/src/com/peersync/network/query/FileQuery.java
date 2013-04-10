@@ -10,6 +10,7 @@ import net.jxta.content.TransferException;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
+import com.peersync.models.Event;
 import com.peersync.models.FileToDownload;
 import com.peersync.network.group.MyPeerGroup;
 import com.peersync.network.listener.NotifyingThread;
@@ -35,7 +36,7 @@ public class FileQuery extends NotifyingThread{
 		try {
 
 			ContentService service = myPeerGroup.getPeerGroup().getContentService();
-			Log.d("FileQuery", "Initiating Content transfer");
+			Log.d("FileQuery", "Initiating Content transfer "+contentID);
 			ContentTransfer transfer = service.retrieveContent(contentID);
 			if (transfer == null) {
 				Log.d("FileQuery", "Could not retrieve Content");
@@ -47,7 +48,12 @@ public class FileQuery extends NotifyingThread{
 				//					aggregator.addContentTransferAggregatorListener(aggListener);
 				//				}
 				transfer.startSourceLocation();
-				Thread.sleep(8000);
+				int i = 0;
+				while(!transfer.getSourceLocationState().hasEnough()&&i<6){
+					Thread.sleep(4000);
+					i++;
+				}
+				
 				if(transfer.getSourceLocationState().hasEnough()){
 					val++;
 					File file = new File(Constants.TEMP_PATH+hash+".tmp");
@@ -63,10 +69,10 @@ public class FileQuery extends NotifyingThread{
 					ArrayList<ClassicFile> files = db.getFilesToSyncConcernByThisHash(hash);
 					for (ClassicFile classicFile : files) {
 						
-						FileUtils.copy(file, new File(classicFile.getRelFilePath()));
-						
-						//TODO mettre a jour des evenements
+						if(FileUtils.copy(file, new File(classicFile.getAbsFilePath())))
+							db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_OK);
 					}
+					file.delete();
 					DataBaseManager.exclusiveAccess.unlock();
 					
 

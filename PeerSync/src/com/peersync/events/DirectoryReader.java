@@ -112,18 +112,18 @@ public class DirectoryReader {
 
 	public void scan()
 	{
-		Set<String> folderWithNewEvents = new HashSet<String>();
+		Set<String> peerGroupWithNewEvents = new HashSet<String>();
 		for (SharedFolder shareFolder : shareFolders) {
 			Map<String,FileInfo> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
 			scanDifferences(currentStack,shareFolder);
 			getEventsStack().save();
 			if(getEventsStack().getEvents().size()>0)
-				folderWithNewEvents.add(shareFolder.getPeerGroupUID());
+				peerGroupWithNewEvents.add(shareFolder.getPeerGroupUID());
 		}
 		
-		for (String t : folderWithNewEvents)
+		for (String peerGroupId : peerGroupWithNewEvents)
 		{
-			// TODO Signifier que ya eu des events sur ce peergroup
+			PeerManager.getInstance().getPeerGroupManager().notifyPeerGroup(peerGroupId);
 		}
 		
 	}

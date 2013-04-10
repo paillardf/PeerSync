@@ -18,7 +18,7 @@ public class ClassicFile {
 		setRelFilePath(relFilePath);
 		setFileHash(fileHash);
 		setSharedFolderUID(sharedFolderUID);
-		setSharedFolderRootPath(sharedFolderRootPath);
+		this.sharedFolderRootPath=sharedFolderRootPath;
 	}
 	
 
@@ -62,21 +62,19 @@ public class ClassicFile {
 	public boolean equals(Object obj) {
 		ClassicFile f = (ClassicFile)obj;
 		
-		return f.fileHash.equals(fileHash)&&f.relFilePath.equals(relFilePath);
+		return f.fileHash.equals(fileHash)&&f.relFilePath.equals(relFilePath)&&sharedFolderUID.equals(f.sharedFolderUID);
 	}
 
 
 
 
-	public String getSharedFolderRootPath() {
-		return sharedFolderRootPath;
+	public String getAbsFilePath() {
+		return sharedFolderRootPath+relFilePath;
 	}
 
 
 
 
-	public void setSharedFolderRootPath(String sharedFolderRootPath) {
-		this.sharedFolderRootPath = sharedFolderRootPath;
-	}
+	
 
 }

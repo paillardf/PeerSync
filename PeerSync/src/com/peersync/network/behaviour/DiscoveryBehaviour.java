@@ -32,7 +32,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 	private static final long VALIDITY_RDV_ADV = 10*60*1000;
 	private long lastRDVPublishTime = 0;
 	private RendezVousAdvertisement peerRDVAdv;
-
+	private static final int NB_ESSAIS_GROUP = 1;
 
 
 
@@ -47,7 +47,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 
 			int essai=0;
-			while(myPeerGroup.getPeerGroup()==null&&essai<5){
+			while(myPeerGroup.getPeerGroup()==null&&essai<NB_ESSAIS_GROUP){
 				essai++;
 				findGroupAdvertisement();
 				sleep(6000);
@@ -223,7 +223,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 							List<PeerID> listRDV = myPeerGroup.getPeerGroup().getRendezVousService().getLocalRendezVousView();
 							for (PeerID peerID : listRDV) {
 								if(peerID.equals(rdvAdv.getPeerId())){
-									if(rdvAdv.getStartDate()<peerRDVAdv.getStartDate()){
+									if(peerRDVAdv==null||rdvAdv.getStartDate()<peerRDVAdv.getStartDate()){
 										myPeerGroup.getRendezVousService().stopRendezVous();
 										peerRDVAdv = null;
 										break;

@@ -20,7 +20,7 @@ public class FileToDownload extends ClassicFile{
 	{
 		super(relFilePath,fileHash,sharedFolderUID,sharedFolderRootPath);
 		try {
-			contentID = IDFactory.newContentID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)), true, fileHash.getBytes("UTF-8"));
+			contentID = IDFactory.newContentID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)), false, fileHash.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException | URISyntaxException e) {
 			e.printStackTrace();
 		}

@@ -65,6 +65,7 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 					
 					for (FileAvailable fileToUnshare : unsharedFile) {
 						service.unshareContent(fileToUnshare.getContentID());
+						Log.d("ContentBehaviour", "remove "+fileToUnshare.getAbsFilePath()+"from publish");
 					}
 					
 					currentlySharedFiles = files;
@@ -72,17 +73,19 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 						FileDocument fileDoc = new FileDocument(new File(fileToSync.getAbsFilePath()), MimeMediaType.AOS);
 						Content content = new Content(fileToSync.getContentID(), null, fileDoc);
 						List<ContentShare> shares = service.shareContent(content);
+						
 						DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 						for (ContentShare share : shares) {
 							//share.addContentShareListener(shareListener);
 							ContentShareAdvertisement adv = share.getContentShareAdvertisement();
 							try {
 								discoService.publish(adv);
-								Log.d("ContentBehaviour", "adv publish");
+								
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						}
+						Log.d("ContentBehaviour", "add "+fileToSync.getAbsFilePath()+" / "+fileToSync.getContentID()+" to publish");
 					}
 				}
 				
@@ -105,7 +108,6 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 					if(!downloadThreadList.contains(fq)){
 						downloadThreadList.add(fq);		
 						fq.addListener(this);
-						Log.d("ContentBehaviour", "Add FileQuery");
 					}
 				}
 				startDownloadThread();
@@ -166,7 +168,6 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 			for (int i = 0; i<downloadThreadList.size(); i++) {
 				if(downloadThreadList.get(i).getState()==Thread.State.NEW&&threadToRun>0){
 					downloadThreadList.get(i).start();
-					Log.d("ContentBehaviour", "start FileQuery");
 					runningThreadCount++;
 					threadToRun--;
 				}

@@ -57,5 +57,14 @@ public class PeerGroupManager {
 		return peer.conf;
 		
 	}
+	public void notifyPeerGroup(String peerGroupID){
+		for (int i = 0; i < peerGroupList.size(); i++) {
+			if(peerGroupList.get(i).getPeerGroupID().toString().equals(peerGroupID)){
+				peerGroupList.get(i).notifyPeerGroup(new PeerGroupEvent(PeerGroupEvent.STACK_UPDATE,peerGroupList.get(i).getPeerGroupID() ,null ));
+			}
+			
+		}
+	}
+	
 
 }

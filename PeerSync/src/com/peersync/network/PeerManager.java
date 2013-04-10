@@ -62,6 +62,8 @@ public class PeerManager {
 		PORT = PreferencesManager.getInstance().getPort();
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		PID_EDGE = Constants.getInstance().PEERID;
+		
+		new File(Constants.TEMP_PATH).mkdirs();
 		String configFolder = "." + System.getProperty("file.separator") + NAME +System.getProperty("file.separator");
 		
 		
@@ -126,6 +128,10 @@ public class PeerManager {
 
 	public PeerID getPeerId() {
 		return PID_EDGE;
+	}
+	
+	public PeerGroupManager getPeerGroupManager(){
+		return peerGroupManager;
 	}
 
 }
