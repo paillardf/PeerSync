@@ -6,10 +6,14 @@ import com.peersync.data.DataBaseManager;
 
 public class FileToSyncList {
 	
-	private ArrayList<FileToSync> filesToDownload;
-	private ArrayList<FileToSync> filesWithLocalSource;
+	private ArrayList<FileToDownload> filesToDownload;
+	private ArrayList<FileWithLocalSource> filesWithLocalSource;
+	private String peerGroupId;
 	
-	
+	public FileToSyncList(String peerGroupId)
+	{
+		this.peerGroupId = peerGroupId;
+	}
 	public void reload()
 	{
 		refreshFilesToDownload();
@@ -19,27 +23,27 @@ public class FileToSyncList {
 	
 	public void refreshFilesToDownload()
 	{
-		filesToDownload = DataBaseManager.getInstance().getFilesToDownload();
+		filesToDownload = DataBaseManager.getInstance().getFilesToDownload(peerGroupId);
 	}
 	
 	public void refreshFilesWithLocalSource()
 	{
-		filesWithLocalSource = DataBaseManager.getInstance().getFilesWithLocalSource();
+		filesWithLocalSource = DataBaseManager.getInstance().getFilesWithLocalSource(peerGroupId);
 	}
 
-	public ArrayList<FileToSync> getFilesWithLocalSource() {
+	public ArrayList<FileWithLocalSource> getFilesWithLocalSource() {
 		return filesWithLocalSource;
 	}
 
 
 
-	public ArrayList<FileToSync> getFilesToDownload() {
+	public ArrayList<FileToDownload> getFilesToDownload() {
 		return filesToDownload;
 	}
 	
-	public ArrayList<FileToSync> getFilesToDownload(String sharedFolderUID) {
-		ArrayList<FileToSync> res = new ArrayList<FileToSync>();
-		for(FileToSync ft : filesToDownload)
+	public ArrayList<FileToDownload> getFilesToDownloadInASharedFolder(String sharedFolderUID) {
+		ArrayList<FileToDownload> res = new ArrayList<FileToDownload>();
+		for(FileToDownload ft : filesToDownload)
 		{
 			if(ft.getSharedFolderUID().equals(sharedFolderUID))
 				res.add(ft);
@@ -47,14 +51,24 @@ public class FileToSyncList {
 		return res;
 	}
 	
-	public ArrayList<FileToSync> getFilesWithLocalSource(String sharedFolderUID) {
-		ArrayList<FileToSync> res = new ArrayList<FileToSync>();
-		for(FileToSync ft : filesWithLocalSource)
+	public ArrayList<FileWithLocalSource> getFilesWithLocalSourceInASharedFolder(String sharedFolderUID) {
+		ArrayList<FileWithLocalSource> res = new ArrayList<FileWithLocalSource>();
+		for(FileWithLocalSource ft : filesWithLocalSource)
 		{
 			if(ft.getSharedFolderUID().equals(sharedFolderUID))
 				res.add(ft);
 		}
 		return res;
+	}
+	
+	
+
+	public String getPeerGroupId() {
+		return peerGroupId;
+	}
+
+	public void setPeerGroupId(String peerGroupId) {
+		this.peerGroupId = peerGroupId;
 	}
 
 

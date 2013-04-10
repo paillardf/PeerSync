@@ -16,6 +16,7 @@ import net.jxta.document.MimeMediaType;
 import net.jxta.protocol.ContentShareAdvertisement;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.models.FileAvailable;
 import com.peersync.models.FileToSync;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.group.MyPeerGroup;
@@ -28,7 +29,7 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 
 	private static final String NAME = "ContentBehaviour";
 	private long lastShareContentAdvertisment=0;
-	private ArrayList<FileToSync> currentlySharedFiles = new ArrayList<FileToSync>();
+	private ArrayList<FileAvailable> currentlySharedFiles = new ArrayList<FileAvailable>();
 	private List<FileQuery> downloadThreadList = new ArrayList<FileQuery>();
 	private int runningThreadCount = 0;
 	//	private StackVersionQuery queryHandler;

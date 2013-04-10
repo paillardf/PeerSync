@@ -1,6 +1,6 @@
 package com.peersync.models;
 
-// TODO Méthode(s) de dbmanager retournant une arraylist de ceci
+
 public class FileAvailable {
 
 	private String absFilePath;
