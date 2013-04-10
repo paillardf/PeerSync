@@ -3,6 +3,8 @@ package com.peersync.events;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.peersync.data.DataBaseManager;
+
 public class EventsManager {
 
 
@@ -43,9 +45,11 @@ public class EventsManager {
 		timer.schedule (new TimerTask() {
 			public void run()
 			{
-
+				DataBaseManager.exclusiveAccess.lock();
 				DirectoryReader dr = DirectoryReader.getDirectoryReader();
 				dr.scan();
+				
+				DataBaseManager.exclusiveAccess.unlock();
 				
 
 			}
