@@ -9,6 +9,7 @@ import net.jxta.rendezvous.RendezVousService;
 import net.jxta.rendezvous.RendezvousEvent;
 import net.jxta.rendezvous.RendezvousListener;
 
+import com.peersync.data.SyncUtils;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.behaviour.AbstractBehaviour;
 import com.peersync.network.behaviour.ContentBehaviour;
@@ -61,6 +62,7 @@ public class MyPeerGroup {
 		this.peerGroup = mPeerGroup;
 		if(peerGroup!=null){
 			getRendezVousService().setAutoStart(true,30000);
+			SyncUtils.startIntelligentSync(mPeerGroup.getPeerGroupID().toString());
 			startBehaviour();
 			peerGroup.getRendezVousService().addListener(new RendezvousListener() {
 				

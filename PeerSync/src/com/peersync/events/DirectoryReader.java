@@ -297,13 +297,13 @@ public class DirectoryReader {
 							}
 							else
 							{
-								if(m_oldMap.get(file.getAbsolutePath()).getHash().equals(hash) )
+								FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
+								fi.save();
+								if(m_oldMap.get(file.getAbsolutePath()).getHash().equals(hash) ){
 									m_filesOk.add(file.getAbsolutePath());
-								else
+								}else
 								{
 									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
-									fi.save();
 									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()).getHash(),Event.ACTION_UPDATE,Event.STATUS_OK));
 								}
 							}

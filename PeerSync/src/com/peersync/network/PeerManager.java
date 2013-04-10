@@ -14,6 +14,7 @@ import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 
+import com.peersync.data.SyncUtils;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
@@ -64,6 +65,8 @@ public class PeerManager {
 		PID_EDGE = Constants.getInstance().PEERID;
 		
 		new File(Constants.TEMP_PATH).mkdirs();
+		
+		
 		String configFolder = "." + System.getProperty("file.separator") + NAME +System.getProperty("file.separator");
 		
 		
