@@ -1,6 +1,7 @@
 package com.peersync.network.query;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import net.jxta.content.ContentID;
 import net.jxta.content.ContentService;
@@ -8,6 +9,7 @@ import net.jxta.content.ContentTransfer;
 import net.jxta.content.TransferException;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.models.ClassicFile;
 import com.peersync.models.FileToDownload;
 import com.peersync.network.group.MyPeerGroup;
 import com.peersync.network.listener.NotifyingThread;
@@ -56,7 +58,15 @@ public class FileQuery extends NotifyingThread{
 					transfer.waitFor();
 					Log.d("FileQuery", "END OF TRANSFERT");
 					DataBaseManager.exclusiveAccess.lock();
-					// TODO FileUtils.copier(file, new File(pathname));
+					
+					DataBaseManager db = DataBaseManager.getInstance();
+					ArrayList<ClassicFile> files = db.getFilesToSyncConcernByThisHash(hash);
+					for (ClassicFile classicFile : files) {
+						
+						FileUtils.copy(file, new File(classicFile.getRelFilePath()));
+						
+						//TODO mettre a jour des evenements
+					}
 					DataBaseManager.exclusiveAccess.unlock();
 					
 

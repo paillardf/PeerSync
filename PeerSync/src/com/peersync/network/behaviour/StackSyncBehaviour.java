@@ -98,7 +98,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 					Log.d(NAME, "Adv recu" + stackVersionAdvertisement.getShareFolderList().size());
 					
 					ArrayList<SharedFolderVersion> shareFolderVersion = 
-							SyncUtils.getInstance().compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
+							SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
 					if(shareFolderVersion.size()>0){
 						//ENVOYER UNE REQUETE
 						queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
