@@ -7,6 +7,7 @@ import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.EventsManagerThread;
+import com.peersync.models.FileAvailable;
 import com.peersync.models.FileToDownload;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
@@ -33,10 +34,10 @@ public class mainClass {
 		//EventsManagerThread.getEventsManagerThread().start();
 		
 		
-		ArrayList<FileToDownload> res = DataBaseManager.getInstance().getFilesToDownload("toto");
+		ArrayList<FileAvailable> res = DataBaseManager.getInstance().getFilesAvailableForAPeerGroup("toto");
 		System.out.println(res.size());
-		for(FileToDownload f :res )
-			System.out.println(f.getRelFilePath());
+		for(FileAvailable f :res )
+			System.out.println(f.getAbsFilePath());
 		
 		//PeerManager.getInstance();
 		

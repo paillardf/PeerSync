@@ -370,10 +370,10 @@ public class DataBaseManager extends DbliteConnection{
 		{
 
 			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", sf."+PEERGROUPFIELD+",(case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" e1."+ISFILEFIELD+" =1 AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"='"+shareFolderUID+"' and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 		
-
+			System.err.println(sql);
 			ResultSet rs = query(sql);
 
 
