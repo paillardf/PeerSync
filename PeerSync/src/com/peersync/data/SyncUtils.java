@@ -1,26 +1,17 @@
 package com.peersync.data;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import com.peersync.models.FileWithLocalSource;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
+import com.peersync.tools.FileUtils;
 
 public class SyncUtils {
 
-	private static SyncUtils instance;
-	
-	public static SyncUtils getInstance(){
-		if(instance==null)
-			instance = new SyncUtils();
-		return instance;
-	}
-	
-	private SyncUtils(){
-		
-	}
-	
-	public ArrayList<SharedFolderVersion> compareShareFolderVersion(ArrayList<SharedFolderVersion> sharefolderVersionList){
+
+	public static ArrayList<SharedFolderVersion> compareShareFolderVersion(ArrayList<SharedFolderVersion> sharefolderVersionList){
 		DataBaseManager db = DataBaseManager.getInstance();
 		
 		ArrayList<SharedFolderVersion> shareFolderVList = new ArrayList<SharedFolderVersion>();
@@ -38,7 +29,7 @@ public class SyncUtils {
 		return shareFolderVList;
 	}
 
-	private SharedFolderVersion getNeededStackVersion(SharedFolderVersion advSFV,SharedFolderVersion ownedSFV){
+	private static SharedFolderVersion getNeededStackVersion(SharedFolderVersion advSFV,SharedFolderVersion ownedSFV){
 		
 		SharedFolderVersion sfv  = new SharedFolderVersion(advSFV.getUID());
 		
@@ -54,7 +45,7 @@ public class SyncUtils {
 		
 	}
 	
-	public void startInteligentSync(final String peerGroupID){
+	public static void startIntelligentSync(final String peerGroupID){
 		new Thread(new Runnable() {
 			
 			@Override
@@ -65,7 +56,8 @@ public class SyncUtils {
 				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSource(peerGroupID);
 				
 				for (FileWithLocalSource fileWithLocalSource : files) {
-					fileWithLocalSource.getLocalSource();//TODO
+					File f = new File(fileWithLocalSource.getLocalSourcePath());
+					FileUtils.copy(f, new File(fileWithLocalSource.getRelFilePath()));
 				}
 				DataBaseManager.exclusiveAccess.unlock();
 			}

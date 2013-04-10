@@ -4,7 +4,7 @@ import java.io.File;
 
 public class FileUtils {
 
-	public static boolean copier( File source, File destination ){ //Methode permettant la copie d'un fichier 
+	public static boolean copy( File source, File destination ){ //Methode permettant la copie d'un fichier 
 		boolean resultat = false; 
 
 		// Declaration des flux 

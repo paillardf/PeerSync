@@ -23,6 +23,7 @@ import net.jxta.resolver.QueryHandler;
 import net.jxta.resolver.ResolverService;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.data.SyncUtils;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.PeerGroupEvent;
@@ -260,6 +261,7 @@ public class StackVersionQuery implements QueryHandler{
 
 				}
 			}
+			SyncUtils.startIntelligentSync(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
 		}
 		catch (Exception e){
 			// ignore

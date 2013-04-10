@@ -640,7 +640,7 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
-	public ArrayList<ClassicFile> getFileToSyncConcernByThisHash(String hash)
+	public ArrayList<ClassicFile> getFilesToSyncConcernByThisHash(String hash)
 	{
 		ArrayList<ClassicFile> res = new ArrayList<ClassicFile> ();
 		try {
