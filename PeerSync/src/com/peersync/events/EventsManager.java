@@ -48,7 +48,6 @@ public class EventsManager {
 				DataBaseManager.exclusiveAccess.lock();
 				DirectoryReader dr = DirectoryReader.getDirectoryReader();
 				dr.scan();
-				
 				DataBaseManager.exclusiveAccess.unlock();
 				
 

@@ -715,7 +715,8 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		ArrayList<FileWithLocalSource> res = new ArrayList<FileWithLocalSource>();
 		try {
-			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf1."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" as absPath,(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
+
+			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+",(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
 					" from "+DBEVENTSTABLE+" e2 left join "+DBSHAREDFOLDERSTABLE+" sf on (e2."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" " +
 					" and e1."+ISFILEFIELD+"=1"+
 					" and e2."+NEWHASHFIELD+" = e1."+NEWHASHFIELD+
@@ -725,6 +726,8 @@ public class DataBaseManager extends DbliteConnection{
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf1 on (e1."+SHAREDFOLDERFIELD+"=sf1."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
 					" and localSource NOT NULL";
+			
+			System.out.println(sqlQuery);
 
 			ResultSet rs = query(sqlQuery);
 
@@ -735,7 +738,7 @@ public class DataBaseManager extends DbliteConnection{
 				String fileHash = rs.getString(NEWHASHFIELD);
 				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
 				String localSource = rs.getString("localsource");
-				res.add(new FileWithLocalSource(relFilePath, fileHash, sharedFolderUID,rs.getString("absPath"),localSource));
+				res.add(new FileWithLocalSource(relFilePath, fileHash, sharedFolderUID,rs.getString("ROOTPATHFIELD"),localSource));
 
 			}
 		} catch (SQLException  e) {

@@ -24,15 +24,16 @@ public class mainClass {
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
 		DataBaseManager db = DataBaseManager.getInstance();
-		db.saveSharedFolder(new SharedFolder("5000", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
-		
-		db.saveSharedFolder(new SharedFolder("5001", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
-		db.saveSharedFolder(new SharedFolder("5002", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
-		PreferencesManager pref = PreferencesManager.getInstance();
-		pref.setPort(9788);
-		//ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
-		EventsManagerThread.getEventsManagerThread().start();
-		
+		db.getFilesWithLocalSource("toto");
+//		db.saveSharedFolder(new SharedFolder("5000", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
+//		
+//		db.saveSharedFolder(new SharedFolder("5001", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX"));
+//		db.saveSharedFolder(new SharedFolder("5002", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX\\ter"));
+//		PreferencesManager pref = PreferencesManager.getInstance();
+//		pref.setPort(9788);
+//		//ArrayList<StackVersion> el = DataBaseManager.getInstance().getSharedFolderVersion("5002").getStackVersionList();
+//		EventsManagerThread.getEventsManagerThread().start();
+//		
 		
 //		ArrayList<FileAvailable> res = DataBaseManager.getInstance().getFilesAvailableForAPeerGroup("toto");
 //		System.out.println(res.size());
