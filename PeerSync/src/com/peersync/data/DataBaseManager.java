@@ -427,7 +427,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND "+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and "+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND e1."+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 		
 
@@ -739,6 +739,45 @@ public class DataBaseManager extends DbliteConnection{
 		}
 		return res;
 	}
+	
+	
+	public void updateEventStatus(String relFilePath,String hash,String sharedFolderUID, int status)
+	{
+		
+		try {
+			update("Update "+DBEVENTSTABLE+" set "+STATUSFIELD+"="+status+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"' and "+NEWHASHFIELD+"='"+hash+"'");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	public ArrayList<String> getUnsyncFolder(String peerGroupId)
+	{
+		ArrayList<String> res = new ArrayList<String>();
+		try {
+			String sqlQuery = "select sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath"+
+					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" = "+Event.ACTION_CREATE+" AND e1."+PEERGROUPFIELD+"='"+peerGroupId+"' and "+STATUSFIELD+"="+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
+					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
+
+			ResultSet rs = query(sqlQuery);
+
+			while(rs.next())
+			{
+
+
+				res.add(rs.getString("abspath"));
+
+			}
+		} catch (SQLException  e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
 
 	public String getSharedFolderPeerGroup(String UID) {
 
