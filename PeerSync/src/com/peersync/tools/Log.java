@@ -35,7 +35,7 @@ public class Log {
 		private JTabbedPane Onglets;
 
 		private DebugWindows(){
-			super("Debug Windows");
+			super(Constants.getInstance().PEERNAME);
 			windows=this;
 
 			windows.setSize(400, 400);

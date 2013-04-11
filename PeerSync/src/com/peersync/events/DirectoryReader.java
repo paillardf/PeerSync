@@ -21,6 +21,7 @@ import com.peersync.models.EventsStack;
 import com.peersync.models.FileInfo;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerManager;
+import com.peersync.tools.Log;
 
 public class DirectoryReader {
 
@@ -164,22 +165,21 @@ public class DirectoryReader {
 				if(!found)
 				{
 					m_deletedFiles.add(entry.getKey());
-					File f = new File(entry.getKey());
-					System.out.println("A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
+					Log.d("SCAN", "A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
 					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,f.isFile()? 1 : 0,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
+					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,entry.getValue().getHash()!=null? 1 : 0,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
 				}
 			}
 		}
 		for (String t : m_filesOk)
 		{
-			System.out.println("FileOk : name = " + t);
+			//Log.d("SCAN", "FileOk : name = " + t);
 		}
 		for(Entry<String, String> entry : m_newFiles.entrySet()) {
-			System.out.println("FileACREER: name = " + entry.getKey());
+			Log.d("SCAN", "FileACREER: name = " + entry.getKey());
 		}
 		for(Entry<String, String> entry : m_updatedFiles.entrySet()) {
-			System.out.println("FileAMAJ: name = " + entry.getKey());
+			Log.d("SCAN", "FileAMAJ: name = " + entry.getKey());
 		}
 
 
@@ -281,7 +281,7 @@ public class DirectoryReader {
 						else
 						{
 							files.add(file);
-							System.out.println("No choice, we calculate the hash of "+file.getAbsolutePath());
+							Log.d("SCAN", "No choice, we calculate the hash of "+file.getAbsolutePath());
 							String hash = DirectoryReader.calculateHash(file);
 
 							//								if(file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
@@ -299,7 +299,7 @@ public class DirectoryReader {
 							{
 								FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
 								fi.save();
-								if(m_oldMap.get(file.getAbsolutePath()).getHash().equals(hash) ){
+								if(m_oldMap.get(file.getAbsolutePath()).getHash().equals(hash) || (m_oldMap.get(file.getAbsolutePath()).getHash()=="null" && hash==null) ){
 									m_filesOk.add(file.getAbsolutePath());
 								}else
 								{

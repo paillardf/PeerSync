@@ -22,7 +22,7 @@ public class main {
 		Constants.getInstance().PEERNAME = "client1";
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 		DataBaseManager db = DataBaseManager.getInstance();
-		db.saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:\\Users\\Florian\\Desktop\\Share test\\Client1"));
+		db.saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:\\PeerSyncTest\\Client1"));
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9789);
 		EventsManagerThread.getEventsManagerThread().start();

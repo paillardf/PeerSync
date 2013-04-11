@@ -70,6 +70,30 @@ public class SyncUtils {
 					FileUtils.copy(f, new File(fileWithLocalSource.getAbsFilePath()));
 					db.updateEventStatus(fileWithLocalSource.getRelFilePath(), fileWithLocalSource.getFileHash(), fileWithLocalSource.getSharedFolderUID(), Event.STATUS_OK);
 				}
+				
+				ArrayList<ClassicFile> filesToRemove = db.getFilesToRemove(peerGroupID);
+				
+				for (ClassicFile fileToRemove : filesToRemove) {
+					File f = new File(fileToRemove.getAbsFilePath());
+					boolean res = FileUtils.deleteFile(f);
+					//Ici pb : le hash est nul ... Je pense pas que ça pose de vrais pb, mais on identifie mal l'event du coup
+					db.updateEventStatus(fileToRemove.getRelFilePath(), fileToRemove.getFileHash(), fileToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
+				}
+				
+				// TODO : vérifier, car en pratique ne fonctionne pas sur le dossier (conflit) --> temporiser ?
+				ArrayList<ClassicFile> foldersToRemove = db.getFoldersToRemove(peerGroupID);
+				for (ClassicFile folderToRemove : foldersToRemove) {
+					File f = new File(folderToRemove.getAbsFilePath());
+					boolean res = FileUtils.deleteFile(f);
+					//Ici pb : le hash est nul ... Je pense pas que ça pose de vrai pb, mais on identifie mal l'event du coup
+					db.updateEventStatus(folderToRemove.getRelFilePath(), folderToRemove.getFileHash(), folderToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
+					if(!res)
+					{
+						Event e = new Event(folderToRemove.getSharedFolderUID(), folderToRemove.getFileHash(),0,null,null,Event.ACTION_CREATE,Event.STATUS_OK);
+						e.save();
+					}
+				}
+				
 				DataBaseManager.exclusiveAccess.unlock();
 			}
 		}).run();

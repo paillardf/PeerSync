@@ -21,11 +21,11 @@ import com.peersync.tools.PreferencesManager;
 
 public class mainClass {
 	public static void main(String[] args){
-		Constants.getInstance().PEERNAME = "client2";
+		Constants.getInstance().PEERNAME = "client1";
 		Constants.getInstance().PEERID = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Constants.getInstance().PEERNAME.getBytes());
 
 		DataBaseManager db = DataBaseManager.getInstance();
-		for(ClassicFile cf : db.getFilesWithLocalSource("toto"))
+		for(ClassicFile cf : db.getFilesToRemove("urn:jxta:uuid-5345435552454050A565B247726F757059616261646162614E5047205032503302"))
 			System.out.println(cf.getAbsFilePath());
 //		db.saveSharedFolder(new SharedFolder("5000", "toto", "C:\\Users\\Nicolas.leleu\\Documents\\testTX2"));
 //		

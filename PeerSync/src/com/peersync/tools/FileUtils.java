@@ -37,5 +37,20 @@ public class FileUtils {
 		} 
 		return( resultat ); 
 	}
+	
+	/** Suppression d'un fichier
+	 * Si dossier, il faut qu'il soit vide
+	 * @param fileToRemove
+	 * @return true si ok, false sinon
+	 */
+	public static boolean deleteFile( File fileToRemove ){ //Methode permettant la suppression d'un fichier 
+		// TODO : que faire si pas la permission de supprimer ?
+		if(fileToRemove.exists())
+			return fileToRemove.delete();
+		else
+			return true;
+	}
+	
+	
 
 }
