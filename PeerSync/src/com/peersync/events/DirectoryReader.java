@@ -167,7 +167,7 @@ public class DirectoryReader {
 					m_deletedFiles.add(entry.getKey());
 					Log.d("SCAN", "A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
 					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,entry.getValue().getHash()!=null? 1 : 0,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
+					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,entry.getValue().getHash().equals("null")? 0 : 1,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
 				}
 			}
 		}
