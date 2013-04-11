@@ -64,7 +64,7 @@ public class PeerManager {
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		PID_EDGE = Constants.getInstance().PEERID;
 		
-		new File(Constants.TEMP_PATH).mkdirs();
+		new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"\\").mkdirs();
 		
 		
 		String configFolder = "." + System.getProperty("file.separator") + NAME +System.getProperty("file.separator");

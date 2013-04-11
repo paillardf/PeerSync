@@ -20,7 +20,6 @@ import com.peersync.tools.Log;
 
 public class FileQuery extends NotifyingThread{
 
-	private static int val = 0;
 	private MyPeerGroup myPeerGroup;
 	private ContentID contentID;
 	private String hash;
@@ -33,6 +32,7 @@ public class FileQuery extends NotifyingThread{
 
 
 	public void doRun() {
+		File file = null;
 		try {
 
 			ContentService service = myPeerGroup.getPeerGroup().getContentService();
@@ -49,19 +49,23 @@ public class FileQuery extends NotifyingThread{
 				//				}
 				transfer.startSourceLocation();
 				int i = 0;
-				while(!transfer.getSourceLocationState().hasEnough()&&i<6){
-					Thread.sleep(4000);
+				
+				while(!transfer.getSourceLocationState().hasEnough()&&i<20){
+					Thread.sleep(1000);
 					i++;
 				}
 				
 				if(transfer.getSourceLocationState().hasEnough()){
-					val++;
-					File file = new File(Constants.TEMP_PATH+hash+".tmp");
+					
+					
+					Log.d("FileQuery", "START OF TRANSFERT");
+					file = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"\\"+hash+".tmp");
 					transfer.startTransfer(file);
 					/*
 					 * Finally, we wait for transfer completion or failure.
 					 */
 					transfer.waitFor();
+					transfer.stopSourceLocation();
 					Log.d("FileQuery", "END OF TRANSFERT");
 					DataBaseManager.exclusiveAccess.lock();
 					
@@ -72,20 +76,26 @@ public class FileQuery extends NotifyingThread{
 						if(FileUtils.copy(file, new File(classicFile.getAbsFilePath())))
 							db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_OK);
 					}
-					file.delete();
 					DataBaseManager.exclusiveAccess.unlock();
 					
 
 				}else{
 					Log.d("FileQuery", "has not Enough SourceLocation");
+					
 				}
 			}
 		} catch (TransferException transx) {
 			transx.printStackTrace(System.err);
+			Log.d("FileQuery", "TransferException");
+			
 		} catch (InterruptedException intx) {
 			Log.d("FileQuery", "Interrupted");
 		}
-		System.gc();
+		
+		if(file!=null&&file.exists()){
+			file.delete();
+		}
+		
 	}
 
 

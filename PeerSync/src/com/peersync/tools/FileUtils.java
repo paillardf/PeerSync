@@ -6,14 +6,20 @@ public class FileUtils {
 
 	public static boolean copy( File source, File destination ){ //Methode permettant la copie d'un fichier 
 		boolean resultat = false; 
+		if(source.getAbsolutePath().equals(destination.getAbsolutePath()))
+			return true;
 		// Declaration des flux 
 		java.io.FileInputStream sourceFile=null; 
 		java.io.FileOutputStream destinationFile=null; 
 		try { 
-			// Création du fichier : 
-			destination.createNewFile(); 
+			
 			// Ouverture des flux 
 			sourceFile = new java.io.FileInputStream(source); 
+			
+			// Création du fichier : 
+			destination.createNewFile(); 
+						
+						
 			destinationFile = new java.io.FileOutputStream(destination); 
 			// Lecture par segment de 0.5Mo 
 			byte buffer[]=new byte[512*1024]; 

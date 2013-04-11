@@ -117,7 +117,7 @@ public class DataBaseManager extends DbliteConnection{
 
 	/** Vérifie que les events sont bien taggés avec le bon SharedFolder.
 	 * 	Dans le cas contraire, update la base de données pour revenir à une situation correcte.
-	 * 	Cas d'appel de cette méthode : Ajout d'un sous SharedFolder au sein d'un SharedFolder existant.
+	 * 	Cas d\"appel de cette méthode : Ajout d\"un sous SharedFolder au sein d\"un SharedFolder existant.
 	 */
 	public void checkEventsIntegrity()
 	{
@@ -141,9 +141,9 @@ public class DataBaseManager extends DbliteConnection{
 				if(!newFolderUID.equals(oldFolderUID))
 				{
 					//					if(newRelFilepath != null && newFolderUID!=null)
-					//						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"='"+newRelFilepath+"',"+SHAREDFOLDERFIELD+"='"+newFolderUID+"' where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+					//						update("Update "+DBEVENTSTABLE+" set "+FILEPATHFIELD+"=\""+newRelFilepath+"\","+SHAREDFOLDERFIELD+"=\""+newFolderUID+"\" where "+FILEPATHFIELD+"=\""+oldRelFilepath+"\" and "+SHAREDFOLDERFIELD+"=\""+oldFolderUID+"\"");
 					//					else // joue de la role du on delete cascade sur les sharedFolders
-					update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+oldRelFilepath+"' and "+SHAREDFOLDERFIELD+"='"+oldFolderUID+"'");
+					update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"=\""+oldRelFilepath+"\" and "+SHAREDFOLDERFIELD+"=\""+oldFolderUID+"\"");
 				}
 				//
 
@@ -187,7 +187,7 @@ public class DataBaseManager extends DbliteConnection{
 
 			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
 
-					" from "+DBSHAREDFOLDERSTABLE+" sf where sf."+PEERGROUPFIELD+"='"+peerGroupID+"'");
+					" from "+DBSHAREDFOLDERSTABLE+" sf where sf."+PEERGROUPFIELD+"=\""+peerGroupID+"\"");
 
 
 			while(rs.next())
@@ -213,8 +213,8 @@ public class DataBaseManager extends DbliteConnection{
 		try
 		{
 			ResultSet rs = query("select e."+DATEFIELD+",e."+FILEPATHFIELD+",e."+NEWHASHFIELD+",e."+OLDHASHFIELD+",e."+ACTIONFIELD+",e."+PARAMETERSFIELD+",e."+OWNERFIELD+",e."+SHAREDFOLDERFIELD+",e."+ISFILEFIELD+",e."+STATUSFIELD+" from "+DBEVENTSTABLE+" e"
-					+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"'"
-					+" and "+DATEFIELD+" = (select max("+DATEFIELD+") from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"')"
+					+" where "+FILEPATHFIELD+"=\""+relFilePath+"\" and "+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\""
+					+" and "+DATEFIELD+" = (select max("+DATEFIELD+") from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"=\""+relFilePath+"\" and "+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\")"
 					);
 			while(rs.next())
 			{
@@ -254,7 +254,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
-			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES('"+e.getDate()+"','"+e.getFilepath()+"','"+e.getNewHash()+"','"+e.getOldHash()+"',"+e.getAction()+",'"+e.getParameters()+"','"+e.getOwner()+"','"+e.getShareFolderUID()+"',"+e.isFile()+","+e.getStatus()+")");
+			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+STATUSFIELD+") VALUES(\""+e.getDate()+"\",\""+e.getFilepath()+"\",\""+e.getNewHash()+"\",\""+e.getOldHash()+"\","+e.getAction()+",\""+e.getParameters()+"\",\""+e.getOwner()+"\",\""+e.getShareFolderUID()+"\","+e.isFile()+","+e.getStatus()+")");
 
 
 		}
@@ -277,7 +277,7 @@ public class DataBaseManager extends DbliteConnection{
 		return loadEventsStack("*",-1,"*");
 	}
 
-	/** Obtient la liste des événements d'un Shared Folder donné
+	/** Obtient la liste des événements d\"un Shared Folder donné
 	 * 	Appel {@link #loadEventsStack(String,long, String)}
 	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
 	 * 	@return EventsStack
@@ -288,10 +288,10 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 
-	/** Obtient la liste des événements d'un Shared Folder donné depuis une date donnée
+	/** Obtient la liste des événements d\"un Shared Folder donné depuis une date donnée
 	 * 	Appel {@link #loadEventsStack(String,long, String)}
 	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
-	 * 	@param date : date (en ms depuis l'epoch) à partir de laquelle on veut récupérer les événements
+	 * 	@param date : date (en ms depuis l\"epoch) à partir de laquelle on veut récupérer les événements
 	 * 	@return EventsStack
 	 */
 	public EventsStack loadEventsStack(String UIDFolder,long date)
@@ -299,10 +299,10 @@ public class DataBaseManager extends DbliteConnection{
 		return loadEventsStack(UIDFolder,date,"*");
 	}
 
-	/** Obtient la liste des événements d'un Shared Folder donné depuis une date donnée et pour un propriétaire donné
+	/** Obtient la liste des événements d\"un Shared Folder donné depuis une date donnée et pour un propriétaire donné
 	 * 	@param sharedFolderUID : UID du Shared Folder dont on veut récupérer les événements. Joker possible : "*"
-	 * 	@param date : date (en ms depuis l'epoch) à partir de laquelle on veut récupérer les événements. Joker possible : -1
-	 *  @param owner : pour ne récupérer que les events dont l'"actionneur" est "owner". Joker possible : "*"
+	 * 	@param date : date (en ms depuis l\"epoch) à partir de laquelle on veut récupérer les événements. Joker possible : -1
+	 *  @param owner : pour ne récupérer que les events dont l\""actionneur" est "owner". Joker possible : "*"
 	 * 	@return EventsStack
 	 */
 	public EventsStack loadEventsStack(String sharedFolderUID,long date,String owner)
@@ -313,9 +313,9 @@ public class DataBaseManager extends DbliteConnection{
 			String sqlQuery = "select e."+DATEFIELD+",e."+FILEPATHFIELD+",e."+NEWHASHFIELD+",e."+OLDHASHFIELD+",e."+ACTIONFIELD+",e."+PARAMETERSFIELD+",e."+OWNERFIELD+",e."+SHAREDFOLDERFIELD+",e."+ISFILEFIELD+",e."+STATUSFIELD+" from "+DBEVENTSTABLE+" e"
 					+" where 1 ";
 			if(!sharedFolderUID.equals("*"))
-				sqlQuery += " and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"'";
+				sqlQuery += " and "+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\"";
 			if(!sharedFolderUID.equals("*"))
-				sqlQuery += " and "+OWNERFIELD+"='"+owner+"'";
+				sqlQuery += " and "+OWNERFIELD+"=\""+owner+"\"";
 			if(date!=-1)
 				sqlQuery += " and "+DATEFIELD+" > "+date;
 
@@ -375,8 +375,8 @@ public class DataBaseManager extends DbliteConnection{
 		try
 		{
 
-			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", sf."+PEERGROUPFIELD+",(case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"='"+shareFolderUID+"' and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", sf."+PEERGROUPFIELD+",(case when e1."+FILEPATHFIELD+"=\"\\\" THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"=\""+shareFolderUID+"\" and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 		
 
@@ -428,8 +428,8 @@ public class DataBaseManager extends DbliteConnection{
 		{
 
 
-			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"='\\' THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND e1."+SHAREDFOLDERFIELD+"='"+shareFolderUID+"' and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", (case when e1."+FILEPATHFIELD+"=\"\\\" THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
+					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" AND e1."+SHAREDFOLDERFIELD+"=\""+shareFolderUID+"\" and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+" and "+STATUSFIELD+"="+Event.STATUS_OK+")";
 		
 
@@ -463,7 +463,7 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
-	/** Obtient le chemin (absolu) d'un dossier de partage 
+	/** Obtient le chemin (absolu) d\"un dossier de partage 
 	 * 	@param UID : UID du Shared Folder dont on veut récupérer le chemin absolu
 	 * 	@return chemin absolu du dossier de partage 
 	 */
@@ -473,7 +473,7 @@ public class DataBaseManager extends DbliteConnection{
 		try
 		{
 			ResultSet rs = query("select sf."+ROOTPATHFIELD+
-					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" ='"+UID+"'");
+					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" =\""+UID+"\"");
 
 			while(rs.next())
 			{
@@ -497,7 +497,7 @@ public class DataBaseManager extends DbliteConnection{
 		boolean update = false;
 		try {
 			ResultSet rs = query("select fi."+FILESINFO_ABSOLUTEPATHFIELD+
-					" from "+FILESINFO_TABLE+" fi where "+FILESINFO_ABSOLUTEPATHFIELD+"='"+fi.getAbsFilePath()+"'");
+					" from "+FILESINFO_TABLE+" fi where "+FILESINFO_ABSOLUTEPATHFIELD+"=\""+fi.getAbsFilePath()+"\"");
 
 			while(rs.next())
 			{
@@ -512,9 +512,9 @@ public class DataBaseManager extends DbliteConnection{
 
 		try {
 			if(update)
-				update("Update "+FILESINFO_TABLE+" set "+FILESINFO_UPDATEDATEFIELD+"="+fi.getUpdateDate()+" where "+FILESINFO_ABSOLUTEPATHFIELD+"='"+fi.getAbsFilePath()+"'");
+				update("Update "+FILESINFO_TABLE+" set "+FILESINFO_UPDATEDATEFIELD+"="+fi.getUpdateDate()+" where "+FILESINFO_ABSOLUTEPATHFIELD+"=\""+fi.getAbsFilePath()+"\"");
 			else
-				update("insert into "+FILESINFO_TABLE+ "("+FILESINFO_ABSOLUTEPATHFIELD+", "+FILESINFO_UPDATEDATEFIELD+") values ('"+fi.getAbsFilePath() + "', "+fi.getUpdateDate()+")");
+				update("insert into "+FILESINFO_TABLE+ "("+FILESINFO_ABSOLUTEPATHFIELD+", "+FILESINFO_UPDATEDATEFIELD+") values (\""+fi.getAbsFilePath() + "\", "+fi.getUpdateDate()+")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -523,14 +523,14 @@ public class DataBaseManager extends DbliteConnection{
 	public void saveSharedFolder(SharedFolder sf){
 
 		try {
-			update("insert into "+DBSHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+") values ('"+sf.getUID() + "', '"+sf.getPeerGroupUID()+"', '"+sf.getAbsFolderRootPath()+"')");
+			update("insert into "+DBSHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+") values (\""+sf.getUID() + "\", \""+sf.getPeerGroupUID()+"\", \""+sf.getAbsFolderRootPath()+"\")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	/** Obtient l'ensemble des dossiers de partage 
+	/** Obtient l\"ensemble des dossiers de partage 
 	 */
 	public ArrayList<SharedFolder> getAllSharedDirectories()
 	{
@@ -575,7 +575,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 	/** Récupère la version de pile pour chaque owner pour un dossier donné
-	 * 	@param UID: UID du SharedFolder que l'on veut analyser
+	 * 	@param UID: UID du SharedFolder que l\"on veut analyser
 	 * 	@return SharedFolderVersion
 	 */
 	public SharedFolderVersion getSharedFolderVersion(String UID){
@@ -585,7 +585,7 @@ public class DataBaseManager extends DbliteConnection{
 		try {
 			ResultSet rs = query("select max("+DATEFIELD+") as version,"+OWNERFIELD+" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")"+
 
-				" where sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" like (select "+ROOTPATHFIELD+"||'%' from "+DBSHAREDFOLDERSTABLE+" where "+UUIDFIELD+"='"+UID+"') group by "+OWNERFIELD);
+				" where sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" like (select "+ROOTPATHFIELD+"||\"%\" from "+DBSHAREDFOLDERSTABLE+" where "+UUIDFIELD+"=\""+UID+"\") group by "+OWNERFIELD);
 
 
 			while(rs.next())
@@ -606,7 +606,7 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		String res =  new String();
 		try {
-			ResultSet rs = query("select sf."+UUIDFIELD+" from "+SHAREDFOLDERFIELD+" sf where "+ROOTPATHFIELD+" = (select max("+ROOTPATHFIELD+")  from "+SHAREDFOLDERFIELD+" where '"+absFilePath+"' like rootAbsolutePath||'%')");
+			ResultSet rs = query("select sf."+UUIDFIELD+" from "+SHAREDFOLDERFIELD+" sf where "+ROOTPATHFIELD+" = (select max("+ROOTPATHFIELD+")  from "+SHAREDFOLDERFIELD+" where \""+absFilePath+"\" like rootAbsolutePath||\"%\")");
 
 			while(rs.next())
 			{
@@ -626,7 +626,7 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		String res =  new String();
 		try {
-			ResultSet rs = query("select sf."+PEERGROUPFIELD+" from "+DBSHAREDFOLDERSTABLE+" sf where "+UUIDFIELD+" = '"+SharedFolder+"'");
+			ResultSet rs = query("select sf."+PEERGROUPFIELD+" from "+DBSHAREDFOLDERSTABLE+" sf where "+UUIDFIELD+" = \""+SharedFolder+"\"");
 
 			while(rs.next())
 			{
@@ -649,7 +649,7 @@ public class DataBaseManager extends DbliteConnection{
 			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" = "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
 					" and e1."+ISFILEFIELD+"=1"+
-					" and sf."+PEERGROUPFIELD+"='"+peerGroupId+"'"+
+					" and sf."+PEERGROUPFIELD+"=\""+peerGroupId+"\""+
 					" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 
@@ -682,7 +682,7 @@ public class DataBaseManager extends DbliteConnection{
 			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" = "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
 					" and e1."+ISFILEFIELD+"=0"+
-					" and sf."+PEERGROUPFIELD+"='"+peerGroupId+"'"+
+					" and sf."+PEERGROUPFIELD+"=\""+peerGroupId+"\""+
 					" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 
@@ -718,7 +718,7 @@ public class DataBaseManager extends DbliteConnection{
 			String sqlQuery = "select e1."+FILEPATHFIELD+", e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
 					" and e1."+ISFILEFIELD+"=1"+
-					" and e1."+NEWHASHFIELD+"='"+hash+"'"+
+					" and e1."+NEWHASHFIELD+"=\""+hash+"\""+
 					" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" ;
 
@@ -751,7 +751,7 @@ public class DataBaseManager extends DbliteConnection{
 			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
 					" and e1."+ISFILEFIELD+"=1"+
-					" and sf."+PEERGROUPFIELD+"='"+peerGroupId+"'"+
+					" and sf."+PEERGROUPFIELD+"=\""+peerGroupId+"\""+
 					" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
 					" and e1."+NEWHASHFIELD+" NOT IN (select e2."+NEWHASHFIELD+
@@ -790,7 +790,7 @@ public class DataBaseManager extends DbliteConnection{
 					" from "+DBEVENTSTABLE+" e2 left join "+DBSHAREDFOLDERSTABLE+" sf on (e2."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" " +
 					" and e1."+ISFILEFIELD+"=1"+
 					" and e2."+NEWHASHFIELD+" = e1."+NEWHASHFIELD+
-					" and sf."+PEERGROUPFIELD+"='"+peerGroupId+"'"+
+					" and sf."+PEERGROUPFIELD+"=\""+peerGroupId+"\""+
 					" and e2."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+" and "+STATUSFIELD+" = "+Event.STATUS_OK+" )) as localSource "+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf1 on (e1."+SHAREDFOLDERFIELD+"=sf1."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
@@ -824,7 +824,7 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		
 		try {
-			update("Update "+DBEVENTSTABLE+" set "+STATUSFIELD+"="+status+" where "+FILEPATHFIELD+"='"+relFilePath+"' and "+SHAREDFOLDERFIELD+"='"+sharedFolderUID+"' and "+NEWHASHFIELD+"='"+hash+"'");
+			update("Update "+DBEVENTSTABLE+" set "+STATUSFIELD+"="+status+" where "+FILEPATHFIELD+"=\""+relFilePath+"\" and "+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\" and "+NEWHASHFIELD+"=\""+hash+"\"");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -839,7 +839,7 @@ public class DataBaseManager extends DbliteConnection{
 		try {
 			String sqlQuery = "select e1."+FILEPATHFIELD+", e1."+NEWHASHFIELD+",  e1."+SHAREDFOLDERFIELD+", sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" = "+Event.ACTION_CREATE+" and  e1."+ISFILEFIELD+" = 0  AND sf."+
-					PEERGROUPFIELD+"='"+peerGroupId+"' and "+STATUSFIELD+"="+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
+					PEERGROUPFIELD+"=\""+peerGroupId+"\" and "+STATUSFIELD+"="+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 
 			ResultSet rs = query(sqlQuery);
@@ -864,7 +864,7 @@ public class DataBaseManager extends DbliteConnection{
 		try
 		{
 			ResultSet rs = query("select sf."+PEERGROUPFIELD+
-					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" ='"+UID+"'");
+					" from "+DBSHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" =\""+UID+"\"");
 
 			while(rs.next())
 			{

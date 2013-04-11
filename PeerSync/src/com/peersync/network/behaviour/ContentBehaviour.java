@@ -35,7 +35,7 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 	//	private StackVersionQuery queryHandler;
 	//	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
 	private static final long PUBLISH_ADVERTISEMENT_DELAY = 10*60*1000;
-	private static final int MAX_DOWNLOAD_THREAD = 3;
+	private static final int MAX_DOWNLOAD_THREAD = 1;
 
 
 	public ContentBehaviour(MyPeerGroup peerGroup){
@@ -73,10 +73,10 @@ public class ContentBehaviour extends AbstractBehaviour implements ThreadComplet
 						FileDocument fileDoc = new FileDocument(new File(fileToSync.getAbsFilePath()), MimeMediaType.AOS);
 						Content content = new Content(fileToSync.getContentID(), null, fileDoc);
 						List<ContentShare> shares = service.shareContent(content);
-						
 						DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 						for (ContentShare share : shares) {
-							//share.addContentShareListener(shareListener);
+							
+							
 							ContentShareAdvertisement adv = share.getContentShareAdvertisement();
 							try {
 								discoService.publish(adv);
