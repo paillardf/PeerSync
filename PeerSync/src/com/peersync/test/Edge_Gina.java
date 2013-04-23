@@ -21,7 +21,7 @@ import net.jxta.platform.NetworkManager;
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 import Examples.Z_Tools_And_Others.DelayedJxtaNetworkStopper;
 import Examples.Z_Tools_And_Others.Tools;
-
+ 
 /**
  * Simple EDGE peer connecting via the NetPeerGroup.
  */

@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 
 public class Log {
 
@@ -18,9 +19,14 @@ public class Log {
 		d(DEFAULT , s);
 	}
 
-	public static void d(String tag , String s){
-		if(DEBUG)
-			DebugWindows.getInstance().addLog(tag, s);
+	public static void d(final String tag , final String s){
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	if(DEBUG)
+        			DebugWindows.getInstance().addLog(tag, s);
+            }
+        });
+		
 	}
 
 	public static void e(String name, String string) {
@@ -55,6 +61,7 @@ public class Log {
 		}
 
 		public void addLog(String tag, String v){
+			
 			
 			DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss - ");
 			Date date = new Date();

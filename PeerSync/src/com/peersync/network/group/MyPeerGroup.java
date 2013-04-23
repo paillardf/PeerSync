@@ -25,12 +25,13 @@ public class MyPeerGroup {
 	public String peerGroupName;
 	private ArrayList<AbstractBehaviour> behaviourList = new ArrayList<AbstractBehaviour>();
 	private PeerGroupID peerGroupId;
+	private char[] peerGroupKey;
 	
-	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName)  {
+	public MyPeerGroup(PeerGroupManager peerGroupManager, PeerGroupID psepeergroupid, String peerGroupName, char[] peerGroupKey)  {
 		this.peerGroupName = peerGroupName;
 		this.peerGroupId=psepeergroupid;
 		this.groupManager=peerGroupManager;
-		
+		this.peerGroupKey = peerGroupKey;
 		DiscoveryBehaviour db = new DiscoveryBehaviour(this);
 		behaviourList.add(db);
 		behaviourList.add(new StackSyncBehaviour(this));
@@ -114,6 +115,10 @@ public class MyPeerGroup {
 
 	public String getPeerGroupName() {
 		return peerGroupName;
+	}
+
+	public char[] getPeerGroupKey() {
+		return peerGroupKey;
 	}
 	
 

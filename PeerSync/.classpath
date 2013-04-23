@@ -30,11 +30,6 @@
 	<classpathentry kind="lib" path="lib/junit/junit-4.4.jar"/>
 	<classpathentry kind="lib" path="lib/netty/httptunnel-0.92.jar"/>
 	<classpathentry kind="lib" path="lib/netty/netty-3.1.5.GA.jar"/>
-	<classpathentry kind="lib" path="lib/jxse-2.6.jar" sourcepath="lib/jxta-jxse-2.6-20080820.151051-1-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/jxse-2.7-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/sql/sqlite-jdbc-3.7.2.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/sql/sqlite-jdbc-3.7.2-javadoc.jar!/"/>
@@ -42,5 +37,10 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/bouncycastle/bcprov-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/derby/derby-10.5.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jxse-2.7.jar" sourcepath="lib/jxse-2.7-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/jxse-2.7-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

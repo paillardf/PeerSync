@@ -40,8 +40,8 @@ public class PeerGroupManager {
 		});
 	}
 
-	public void addPeerGroupToManage(PeerGroupID psepeergroupid, String peerGroupName) {
-		MyPeerGroup pg = new MyPeerGroup(this, psepeergroupid, peerGroupName);
+	public void addPeerGroupToManage(PeerGroupID psepeergroupid, String peerGroupName, String peerGroupKey) {
+		MyPeerGroup pg = new MyPeerGroup(this, psepeergroupid, peerGroupName, peerGroupKey.toCharArray());
 		peerGroupList.add(pg);
 	}
 

@@ -10,6 +10,7 @@ import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerManager;
 import com.peersync.network.behaviour.ContentBehaviour;
 import com.peersync.tools.Constants;
+import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.PreferencesManager;
 
 public class main {
@@ -25,6 +26,9 @@ public class main {
 		db.saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:\\PeerSyncTest\\Client1"));
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9789);
+		
+		
+		
 		EventsManagerThread.getEventsManagerThread().start();
 		PeerManager.getInstance();
 		

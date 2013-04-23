@@ -29,7 +29,7 @@ import net.jxta.platform.NetworkManager;
 import net.jxta.protocol.DiscoveryResponseMsg;
 import net.jxta.protocol.PeerAdvertisement;
 
-public class ContentClient {
+public class ContentClient { 
 	private transient NetworkManager manager = null;
 	private transient PeerGroup netPeerGroup = null;
 	private transient boolean waitForRendezvous = true;
