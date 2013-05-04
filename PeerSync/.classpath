@@ -42,5 +42,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/PeerSync/lib/jxse-2.7-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/weupnp-0.1.1.jar" sourcepath="lib/weupnp-0.1.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
