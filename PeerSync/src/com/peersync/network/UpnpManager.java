@@ -14,8 +14,17 @@ public class UpnpManager {
 
 	
 	private GatewayDevice gateway;
+	private static UpnpManager instance=null;
+	
+	public static UpnpManager getInstance()
+	{
+		if(instance==null)
+			instance=new UpnpManager();
+		return instance;
+		
+	}
 
-	public UpnpManager()
+	private UpnpManager()
 	{
 		setGateway(null);
 	}
