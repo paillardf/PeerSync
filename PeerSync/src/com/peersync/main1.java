@@ -4,7 +4,7 @@ import net.jxta.id.IDFactory;
 import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.events.EventsManagerThread;
+import com.peersync.events.EventsManager;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerManager;
 import com.peersync.tools.Constants;
@@ -24,7 +24,7 @@ public class main1 {
 		db.saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:\\PeerSyncTest\\Client2"));
 		PreferencesManager pref = PreferencesManager.getInstance();
 		pref.setPort(9788);
-		EventsManagerThread.getEventsManagerThread().start();
+		EventsManager.getEventsManager().startService();
 		PeerManager.getInstance();
 		
 	}

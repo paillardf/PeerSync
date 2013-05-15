@@ -3,15 +3,11 @@ package com.peersync;
 import net.jxta.id.IDFactory;
 import net.jxta.peergroup.PeerGroupID;
 
+import com.commands.ShellConsole;
 import com.peersync.data.DataBaseManager;
-import com.peersync.data.SyncUtils;
-import com.peersync.events.EventsManagerThread;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerManager;
-import com.peersync.network.behaviour.ContentBehaviour;
-import com.peersync.test.Shell;
 import com.peersync.tools.Constants;
-import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.PreferencesManager;
 
 public class main {
@@ -32,10 +28,11 @@ public class main {
 		
 		
 		
-		EventsManagerThread.getEventsManagerThread().start();
+		//EventsManager.getEventsManager().startService();
 		PeerManager.getInstance();
-		Shell s = new Shell();
+		ShellConsole s = ShellConsole.getShellConsole();
 		s.start();
+		
 		
 	}
 
