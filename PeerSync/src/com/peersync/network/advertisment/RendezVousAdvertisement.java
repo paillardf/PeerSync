@@ -113,7 +113,7 @@ public class RendezVousAdvertisement extends Advertisement {
 					ReadID = new URI(TheElement.getValue());
 				
             	//this.peerGroupId = (PeerGroupID) IDFactory.fromURI(ReadID);
-            	this.setPeerId(net.jxta.impl.id.CBID.PeerID.create((URI) ReadID));
+            	this.setPeerID(net.jxta.impl.id.CBID.PeerID.create((URI) ReadID));
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}
@@ -146,7 +146,7 @@ public class RendezVousAdvertisement extends Advertisement {
     }
     
     public EndpointAddress getRendezVousAddress(){
-    	return new EndpointAddress("jxta", getPeerId().getUniqueValue().toString(), null, null);
+    	return new EndpointAddress("jxta", getPeerID().getUniqueValue().toString(), null, null);
     }
 	
 	public RendezVousAdvertisement() {
@@ -163,7 +163,7 @@ public class RendezVousAdvertisement extends Advertisement {
         
         Element e  = TheResult.createElement(PeerGroupIdTAG, peerGroupId.toString());
     	TheResult.appendChild(e);
-    	e  = TheResult.createElement(PeerIDTAG, getPeerId().toString());
+    	e  = TheResult.createElement(PeerIDTAG, getPeerID().toString());
     	TheResult.appendChild(e);
     	e  = TheResult.createElement(StartDateTAG, getStartDate()+"");
     	TheResult.appendChild(e);
@@ -185,7 +185,7 @@ public class RendezVousAdvertisement extends Advertisement {
             try {
                 // We have not yet built it. Do it now
                 byte[] seed = getAdvertisementType().getBytes("UTF-8");
-                InputStream in = new ByteArrayInputStream(getPeerId().toString().getBytes("UTF-8"));
+                InputStream in = new ByteArrayInputStream(getPeerID().toString().getBytes("UTF-8"));
                 AdvertisementID = IDFactory.newCodatID((PeerGroupID) peerGroupId, seed, in);
             } catch (Exception ez) {
                 return ID.nullID;
@@ -209,7 +209,7 @@ public class RendezVousAdvertisement extends Advertisement {
 
         Result.AdvertisementID = this.AdvertisementID;
         Result.peerGroupId = this.peerGroupId;
-        Result.setPeerId(this.getPeerId());
+        Result.setPeerID(this.getPeerID());
         Result.setStartDate(this.getStartDate());
         
         return Result;
@@ -227,11 +227,11 @@ public class RendezVousAdvertisement extends Advertisement {
         return AdvertisementType;
     }    
     
-    public PeerID getPeerId() {
+    public PeerID getPeerID() {
 		return peerId;
 	}
 
-	public void setPeerId(PeerID peerId) {
+	public void setPeerID(PeerID peerId) {
 		this.peerId = peerId;
 	}
 

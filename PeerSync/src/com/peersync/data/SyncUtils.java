@@ -3,6 +3,8 @@ package com.peersync.data;
 import java.io.File;
 import java.util.ArrayList;
 
+import net.jxta.peer.PeerID;
+
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.FileWithLocalSource;
@@ -47,7 +49,7 @@ public class SyncUtils {
 		
 	}
 	
-	public static void startIntelligentSync(final String peerGroupID){
+	public static void startIntelligentSync(final String peerGroupID, final String peerID){
 		new Thread(new Runnable() {
 			
 			@Override
@@ -89,7 +91,7 @@ public class SyncUtils {
 					db.updateEventStatus(folderToRemove.getRelFilePath(), folderToRemove.getFileHash(), folderToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
 					if(!res)
 					{
-						Event e = new Event(folderToRemove.getSharedFolderUID(), folderToRemove.getFileHash(),0,null,null,Event.ACTION_CREATE,Event.STATUS_OK);
+						Event e = new Event(folderToRemove.getSharedFolderUID(),System.currentTimeMillis(), folderToRemove.getFileHash(),0,null,null,Event.ACTION_CREATE,  peerID ,Event.STATUS_OK);
 						e.save();
 					}
 				}

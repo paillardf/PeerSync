@@ -37,22 +37,22 @@ public class Event {
 	public static final String ISFILE_TAG = "isfile";
 
 	
-	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,int status) 
-	{
-
-		setDate(System.currentTimeMillis());
-		setFilepath(relFilePath);
-		setAction(action);
-		setOwner(Constants.getInstance().PEERID.toString());
-		m_sharedFolderUID = shareFolderUID;
-		setNewHash(newHash);
-		setOldHash(oldHash);
-		setStatus(status);
-		m_isFile = is_file;
-
-
-
-	}
+//	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,int status) 
+//	{
+//		this(shareFolderUID, )
+//		setDate(System.currentTimeMillis());
+//		setFilepath(relFilePath);
+//		setAction(action);
+//		setOwner(Constants.getInstance().PEERID.toString());
+//		m_sharedFolderUID = shareFolderUID;
+//		setNewHash(newHash);
+//		setOldHash(oldHash);
+//		setStatus(status);
+//		m_isFile = is_file;
+//
+//
+//
+//	}
 	// UTILE???
 //	public Event(String filepath,String newHash,String oldHash,int action,String owner,int status) 
 //	{
@@ -70,14 +70,14 @@ public class Event {
 //
 //	}
 
-	public Event(String shareFolderId,long date, String relFilePath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
+	public Event(String shareFolderUID,long date, String relFilePath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(date);
 		setFilepath(relFilePath);
 		setAction(action);
 		setOwner(owner);
-		m_sharedFolderUID = shareFolderId;
+		m_sharedFolderUID = shareFolderUID;
 		setNewHash(newHash);
 		setOldHash(oldHash);
 		setStatus(status);

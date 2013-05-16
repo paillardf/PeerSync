@@ -63,7 +63,7 @@ import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
-import com.peersync.network.PeerManager;
+import com.peersync.network.PeerSync;
 
 public class StackAdvertisement extends Advertisement {
 

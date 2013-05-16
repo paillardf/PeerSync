@@ -12,7 +12,7 @@ import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.FileToDownload;
-import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.listener.NotifyingThread;
 import com.peersync.tools.Constants;
 import com.peersync.tools.FileUtils;
@@ -20,12 +20,12 @@ import com.peersync.tools.Log;
 
 public class FileQuery extends NotifyingThread{
 
-	private MyPeerGroup myPeerGroup;
+	private BasicPeerGroup myPeerGroup;
 	private ContentID contentID;
 	private String hash;
 
-	public FileQuery(MyPeerGroup myPeerGroup, FileToDownload f) {
-		this.myPeerGroup = myPeerGroup;
+	public FileQuery(BasicPeerGroup BasicPeerGroup, FileToDownload f) {
+		this.myPeerGroup = BasicPeerGroup;
 		this.contentID = f.getContentID();
 		this.hash = f.getFileHash();
 	}

@@ -6,7 +6,6 @@ import java.util.Enumeration;
 
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
-import net.jxta.id.ID;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.data.SyncUtils;
@@ -14,7 +13,7 @@ import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
-import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.query.StackVersionQuery;
 import com.peersync.tools.Log;
 
@@ -28,11 +27,13 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-10*1000;
 
 
-	public StackSyncBehaviour(MyPeerGroup peerGroup){
+	public StackSyncBehaviour(BasicPeerGroup peerGroup){
 		super(peerGroup);
 		queryHandler = new StackVersionQuery(myPeerGroup);
-
-
+	}
+	@Override
+	public void initialize() {
+		myPeerGroup.getPeerGroup().getResolverService().registerHandler(StackVersionQuery.NAME, queryHandler);
 	}
 
 	public void publishStackVersionAdvertisement(){
@@ -57,32 +58,32 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		lastStackVersionAdvertismentEvent = System.currentTimeMillis();
 	}
 
+	@Override
+	protected int action() {
+		if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > PUBLISH_ADVERTISEMENT_DELAY){
+			publishStackVersionAdvertisement();
 
-	public void run() {
+
+		}
+		Enumeration<Advertisement> TheAdvEnum;
 		try {
-			while(true){
-				sleep(20000);
-				//if(myPeerGroup.getRendezVousService().isConnectedToRendezVous()){
-				if(System.currentTimeMillis()-lastStackVersionAdvertismentEvent > PUBLISH_ADVERTISEMENT_DELAY){
-					publishStackVersionAdvertisement();
+			TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, StackAdvertisement.ShareFolderTAG, null);
 
-
-				}
-				Enumeration<Advertisement> TheAdvEnum;
-				TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, StackAdvertisement.ShareFolderTAG, null);
-				parseAdvertisement(TheAdvEnum);
-				myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
-						null, null,  100, this);
-
-				//}
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			parseAdvertisement(TheAdvEnum);
+			myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
+					null, null,  100, this);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
-
+		}
+		return 20000;
 	}
+
+
+
+
+
+
+
 
 	protected void parseAdvertisement(Enumeration<Advertisement> TheAdvEnum) {
 		while (TheAdvEnum.hasMoreElements()) { 
@@ -96,7 +97,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 				if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 
 					Log.d(NAME, "Adv recu" + stackVersionAdvertisement.getShareFolderList().size());
-					
+
 					ArrayList<SharedFolderVersion> shareFolderVersion = 
 							SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
 					if(shareFolderVersion.size()>0){
@@ -117,30 +118,14 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 
 	}
-	
-	@Override
-	public synchronized void start() {
-		myPeerGroup.getPeerGroup().getResolverService().registerHandler(StackVersionQuery.NAME, queryHandler);
-		super.start();
-	};
 
-//	@Override
-//	public void notifyNetPeerGroupRDVConnection(ID id) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void notifyPeerGroupRDVConnection(ID id) {
-//		lastStackVersionAdvertismentEvent = 0;
-//	}
-	
+
 	@Override
 	public void notifyPeerGroup(PeerGroupEvent event) {
 		if(myPeerGroup.getNetPeerGroup().getPeerGroupID().toString().equals(event.getPeerGroupID().toString())){
 			//NETPEERGROUPEVENT
 		}else{
-			
+
 			switch (event.getID()) {
 			case PeerGroupEvent.RDV_CONNECTION:
 				lastStackVersionAdvertismentEvent = 0;
@@ -149,8 +134,10 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 				lastStackVersionAdvertismentEvent = 0;
 				break;
 			}
-			
+
 		}
 	}
+
+
 
 }

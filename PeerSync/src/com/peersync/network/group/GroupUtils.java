@@ -76,58 +76,58 @@ public class GroupUtils {
 
 	}
 	
-	public static ModuleImplAdvertisement build_psegroup_impl_adv1(PeerGroup base) {
-	        ModuleImplAdvertisement newGroupImpl;
-
-	        try {
-	            newGroupImpl = base.getAllPurposePeerGroupImplAdvertisement();
-	        } catch (Exception unlikely) {
-	            // getAllPurposePeerGroupImplAdvertisement() doesn't really throw expections.
-	            throw new IllegalStateException("Could not get All Purpose Peer Group Impl Advertisement.");
-	        }
-
-	        newGroupImpl.setModuleSpecID(PSE_SAMPLE_MSID);
-	        newGroupImpl.setDescription("PSE Sample Peer Group Implementation");
-
-	        // FIXME bondolo Use something else to edit the params.
-	        StdPeerGroupParamAdv params = new StdPeerGroupParamAdv(newGroupImpl.getParam());
-
-	        Map services = params.getServices();
-	        
-	        
-	        ModuleImplAdvertisement aModuleAdv = CompatibilityUtils.createModuleImplAdvertisement(
-	                PeerGroup.refMembershipSpecID, StdPeerGroup.class.getName(),
-	                "General Purpose Peer Group with PSE Implementation");
-	        
-	        
-//	        ModuleImplAdvertisement.getAdvertisementType()
-//	        ModuleImplAdvertisement aModuleAdv = (PeerGroup.) services.get(PeerGroup.membershipClassID);
-
-	        services.remove(PeerGroup.membershipClassID);
-
-	        ModuleImplAdvertisement implAdv = (ModuleImplAdvertisement) AdvertisementFactory.newAdvertisement(
-	                ModuleImplAdvertisement.getAdvertisementType());
-
-	        implAdv.setModuleSpecID(PSEMembershipService.pseMembershipSpecID);
-	        implAdv.setCompat(aModuleAdv.getCompat());
-	        implAdv.setCode(PSEMembershipService.class.getName());
-	        implAdv.setUri(aModuleAdv.getUri());
-	        implAdv.setProvider(aModuleAdv.getProvider());
-	        implAdv.setDescription("PSE Membership Service");
-
-	        // Add our selected membership service to the peer group service as the
-	        // group's default membership service.
-	        services.put(PeerGroup.membershipClassID, implAdv);
-
-	        // Save the group impl parameters
-	        newGroupImpl.setParam((Element) params.getDocument(MimeMediaType.XMLUTF8));
-
-	        return newGroupImpl;
-	    }
+//	public static ModuleImplAdvertisement build_psegroup_impl_adv1(PeerGroup base) {
+//	        ModuleImplAdvertisement newGroupImpl;
+//
+//	        try {
+//	            newGroupImpl = base.getAllPurposePeerGroupImplAdvertisement();
+//	        } catch (Exception unlikely) {
+//	            // getAllPurposePeerGroupImplAdvertisement() doesn't really throw expections.
+//	            throw new IllegalStateException("Could not get All Purpose Peer Group Impl Advertisement.");
+//	        }
+//
+//	        newGroupImpl.setModuleSpecID(PSE_SAMPLE_MSID);
+//	        newGroupImpl.setDescription("PSE Sample Peer Group Implementation");
+//
+//	        // FIXME bondolo Use something else to edit the params.
+//	        StdPeerGroupParamAdv params = new StdPeerGroupParamAdv(newGroupImpl.getParam());
+//
+//	        Map services = params.getServices();
+//	        
+//	        
+//	        ModuleImplAdvertisement aModuleAdv = CompatibilityUtils.createModuleImplAdvertisement(
+//	                PeerGroup.refMembershipSpecID, StdPeerGroup.class.getName(),
+//	                "General Purpose Peer Group with PSE Implementation");
+//	        
+//	        
+////	        ModuleImplAdvertisement.getAdvertisementType()
+////	        ModuleImplAdvertisement aModuleAdv = (PeerGroup.) services.get(PeerGroup.membershipClassID);
+//
+//	        services.remove(PeerGroup.membershipClassID);
+//
+//	        ModuleImplAdvertisement implAdv = (ModuleImplAdvertisement) AdvertisementFactory.newAdvertisement(
+//	                ModuleImplAdvertisement.getAdvertisementType());
+//
+//	        implAdv.setModuleSpecID(PSEMembershipService.pseMembershipSpecID);
+//	        implAdv.setCompat(aModuleAdv.getCompat());
+//	        implAdv.setCode(PSEMembershipService.class.getName());
+//	        implAdv.setUri(aModuleAdv.getUri());
+//	        implAdv.setProvider(aModuleAdv.getProvider());
+//	        implAdv.setDescription("PSE Membership Service");
+//
+//	        // Add our selected membership service to the peer group service as the
+//	        // group's default membership service.
+//	        services.put(PeerGroup.membershipClassID, implAdv);
+//
+//	        // Save the group impl parameters
+//	        newGroupImpl.setParam((Element) params.getDocument(MimeMediaType.XMLUTF8));
+//
+//	        return newGroupImpl;
+//	    }
 
 	 
 	 
-	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl,String peerGroupName, PeerGroupID peerGroupID, X509Certificate[] invitationCertChain, EncryptedPrivateKeyInfo invitationPrivateKey) {
+	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl,String peerGroupName, PeerGroupID peerGroupID) {
 		PeerGroupAdvertisement newPGAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(
 				PeerGroupAdvertisement.getAdvertisementType());
 		//newPGAdv.getAdvType();
@@ -137,9 +137,7 @@ public class GroupUtils {
 		newPGAdv.setDescription("Created by PSE Sample!");
 		PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement(PSEConfigAdv.getAdvertisementType());
 
-		pseConf.setCertificateChain(invitationCertChain);
-		pseConf.setEncryptedPrivateKey(invitationPrivateKey, invitationCertChain[0].getPublicKey().getAlgorithm());
-
+		
 		XMLDocument pseDoc = (XMLDocument) pseConf.getDocument(MimeMediaType.XMLUTF8);
 
 		newPGAdv.putServiceParam(PeerGroup.membershipClassID, pseDoc);

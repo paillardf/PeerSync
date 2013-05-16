@@ -30,7 +30,7 @@ import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.advertisment.StackAdvertisement;
-import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.tools.Log;
 
 public class StackVersionQuery implements QueryHandler{
@@ -42,7 +42,7 @@ public class StackVersionQuery implements QueryHandler{
 	private final static String StackLastUpdateTAG = "last_update";
 
 	private static final long QUERY_TIMEOUT = 30*1000;
-	private MyPeerGroup myPeerGroup;
+	private BasicPeerGroup myPeerGroup;
 
 	Map<String, QueryInfo> queryList  = new Hashtable<String, QueryInfo>();
 
@@ -59,7 +59,7 @@ public class StackVersionQuery implements QueryHandler{
 
 	private int queryNum = 0;
 
-	public StackVersionQuery(MyPeerGroup peerGroup ) {
+	public StackVersionQuery(BasicPeerGroup peerGroup ) {
 		this.myPeerGroup = peerGroup;
 	}
 
@@ -255,13 +255,13 @@ public class StackVersionQuery implements QueryHandler{
 					}
 					if(eventsStack.getEvents().size()>0){
 						eventsStack.save();
-						myPeerGroup.notifyPeerGroup(new PeerGroupEvent(PeerGroupEvent.STACK_UPDATE,
+						myPeerGroup.notifyPeerGroupBehaviour(new PeerGroupEvent(PeerGroupEvent.STACK_UPDATE,
 								myPeerGroup.getNetPeerGroup().getPeerGroupID(), null));
 					}
 
 				}
 			}
-			SyncUtils.startIntelligentSync(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
+			SyncUtils.startIntelligentSync(myPeerGroup.getPeerGroup().getPeerGroupID().toString(), myPeerGroup.getNetPeerGroup().getPeerID().toString());
 		}
 		catch (Exception e){
 			// ignore

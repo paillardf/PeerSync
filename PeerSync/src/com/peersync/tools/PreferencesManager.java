@@ -25,13 +25,13 @@ public class PreferencesManager{
 		return instance;
 	}
 
-	public void setPort(int i) {
-		pref.putInt(PORT, i);
-	}
-	
-	public int getPort() {
-		return pref.getInt(PORT, 9044);
-	}
+//	public void setPort(int i) {
+//		pref.putInt(PORT, i);
+//	}
+//	
+//	public int getPort() {
+//		return pref.getInt(PORT, 9044);
+//	}
 	
 	
 

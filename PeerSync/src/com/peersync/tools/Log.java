@@ -68,7 +68,7 @@ public class Log {
 			for (int i =0; i< Onglets.getComponentCount(); i++) {
 				if(Onglets.getTitleAt(i).compareTo(tag)==0){
 					JTextPane pane = (JTextPane) ((JScrollPane) Onglets.getComponent(i)).getViewport().getView();
-					pane.setText(dateFormat.format(date) + v+"\n"+pane.getText());
+					pane.setText(pane.getText()+"\n"+dateFormat.format(date) + v);
 					return;
 				}
 
@@ -76,7 +76,7 @@ public class Log {
 
 			JTextPane txt = new JTextPane();
 			JScrollPane jsp = new JScrollPane(txt);
-			txt.setText(dateFormat.format(date) +v+"\n");
+			txt.setText(dateFormat.format(date) +v);
 			Onglets.addTab(tag, null, jsp, null); 
 		}
 

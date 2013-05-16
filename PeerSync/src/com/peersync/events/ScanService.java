@@ -1,40 +1,36 @@
 package com.peersync.events;
 
+import java.util.Observable;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.peersync.data.DataBaseManager;
 
-public class EventsManager {
+public class ScanService extends Observable {
 
 
 
 
 	private boolean running;
-	private static EventsManager instance;
-
-	public static EventsManager getEventsManager() 
-	{
-		if(instance==null)
-			instance = new EventsManager();
-		return instance;
-
-	}
+	private DirectoryReader directoryReader;
 
 	
+
 	private boolean getRunning()
 	{
 		return running;
 	}
-	
+
 	private void setRunning(boolean r)
 	{
 		running=r;
 	}
 
-	private EventsManager() 
+	public ScanService(String peerID) 
 	{
 		running=false;
+		directoryReader = new DirectoryReader(peerID);
 	}
 
 
@@ -50,17 +46,17 @@ public class EventsManager {
 			launch();
 			setRunning(true);
 		}
-		
-		
+
+
 	}
-	
+
 	public void stopService()
 	{
 		setRunning(false);
-		
-		
+
+
 	}
-	
+
 
 
 
@@ -68,7 +64,7 @@ public class EventsManager {
 
 	private void launch()
 	{
-		
+
 		Timer timer = new Timer();
 		timer.schedule (new TimerTask() {
 			public void run()
@@ -80,12 +76,16 @@ public class EventsManager {
 				else
 				{
 					DataBaseManager.exclusiveAccess.lock();
-					DirectoryReader dr = DirectoryReader.getDirectoryReader();
-					dr.scan();
+					Set<String> peerGroupWithNewEvents = directoryReader.scan();
+					for (String peerGroupId : peerGroupWithNewEvents)
+					{
+						notifyObservers(peerGroupId);
+					}
+					setChanged();
 					DataBaseManager.exclusiveAccess.unlock();
 				}
-			
-				
+
+
 
 			}
 		}, 0, 10000);

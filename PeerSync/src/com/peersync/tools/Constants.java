@@ -19,7 +19,7 @@ public class Constants {
 	public String PEERNAME;
 	public String CONF_FOLDER = "conf";
 	//public String PREFERENCES_PATH = CONF_FOLDER+"/"+PEERNAME;
-	public PeerID PEERID;
+	//public PeerID PEERID;
 	
 	public static final String PsePeerGroupName = "SECURE PeerGroup";
 	public static final PeerGroupID PsePeerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, PsePeerGroupName.getBytes());
@@ -69,6 +69,7 @@ public class Constants {
             "jObczNUFtI8c/nSlbn339fN9G9/EpGaQuoMqxoSWwVnMnfmBnYlq2LehZ3UC3DgSaxRI9XN/F2Ul" + 
             "ako4dwiccGcMsGHB/eKHQU/Csk9E19GGghwC2L7Tb2zIx01Ctd2yecpK3clhvN35xR5cvtnKKLtA" + 
             "KSi8v6rCLDJ0cPa88QfIHRk+M5ZTDP5QN4A0uFKnsWtMI/xjA9tK4VsMEMtxqjBFem8=";
+	public int PORT;
     public static X509Certificate PSE_SAMPLE_GROUP_ROOT_CERT;
     public static EncryptedPrivateKeyInfo PSE_SAMPLE_GROUP_ROOT_ENCRYPTED_KEY;
 

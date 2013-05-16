@@ -3,6 +3,7 @@ package com.peersync.events;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.FileInfo;
 import com.peersync.models.SharedFolder;
-import com.peersync.network.PeerManager;
+import com.peersync.network.PeerSync;
 import com.peersync.tools.Log;
 
 public class DirectoryReader {
@@ -34,19 +35,12 @@ public class DirectoryReader {
 	private EventsStack m_EventsStack = new EventsStack();
 	private SharedFolder currentShareFolder;
 	private ArrayList<SharedFolder> shareFolders;
+	private String peerID;
 
 
-	private static DirectoryReader instance;
-
-	public static DirectoryReader getDirectoryReader()
-	{
-		if(instance==null)
-			instance = new DirectoryReader();
-
-		return instance;
-
-	}
-	private DirectoryReader() {
+	
+	DirectoryReader(String peerID) {
+		this.peerID = peerID;
 		loadDirectoriesToScan();
 	}
 
@@ -111,7 +105,7 @@ public class DirectoryReader {
 	}
 
 
-	public void scan()
+	public Set<String> scan()
 	{
 		Set<String> peerGroupWithNewEvents = new HashSet<String>();
 		for (SharedFolder shareFolder : shareFolders) {
@@ -121,11 +115,8 @@ public class DirectoryReader {
 			if(getEventsStack().getEvents().size()>0)
 				peerGroupWithNewEvents.add(shareFolder.getPeerGroupUID());
 		}
+		return peerGroupWithNewEvents;
 
-		for (String peerGroupId : peerGroupWithNewEvents)
-		{
-			PeerManager.getInstance().getPeerGroupManager().notifyPeerGroup(peerGroupId);
-		}
 
 	}
 
@@ -167,7 +158,7 @@ public class DirectoryReader {
 					m_deletedFiles.add(entry.getKey());
 					Log.d("SCAN", "A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
 					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
-					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),relFilePath ,entry.getValue().getHash().equals("null")? 0 : 1,null,entry.getValue().getHash(),Event.ACTION_DELETE,Event.STATUS_OK));
+					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(), relFilePath ,entry.getValue().getHash().equals("null")? 0 : 1,null,entry.getValue().getHash(),Event.ACTION_DELETE,peerID, Event.STATUS_OK));
 				}
 			}
 		}
@@ -269,7 +260,7 @@ public class DirectoryReader {
 									FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),null);
 									fi.save();
 									m_newFiles.put(file.getAbsolutePath(),"");
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,Event.STATUS_OK));
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(),  relFilePathFile,file.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,peerID, Event.STATUS_OK));
 									//toScan = true;
 								}
 								else
@@ -293,7 +284,7 @@ public class DirectoryReader {
 								FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
 								fi.save();
 								m_newFiles.put(file.getAbsolutePath(),hash);
-								m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE,Event.STATUS_OK));
+								m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), System.currentTimeMillis(), relFilePathFile,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE, peerID,Event.STATUS_OK));
 							}
 							else
 							{
@@ -304,7 +295,7 @@ public class DirectoryReader {
 								}else
 								{
 									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()).getHash(),Event.ACTION_UPDATE,Event.STATUS_OK));
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(), relFilePathFile,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()).getHash(),Event.ACTION_UPDATE,peerID, Event.STATUS_OK));
 								}
 							}
 						}

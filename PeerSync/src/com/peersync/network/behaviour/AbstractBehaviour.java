@@ -7,33 +7,52 @@ import net.jxta.discovery.DiscoveryListener;
 import net.jxta.document.Advertisement;
 
 import com.peersync.models.PeerGroupEvent;
-import com.peersync.network.group.MyPeerGroup;
+import com.peersync.network.group.BasicPeerGroup;
 
-public abstract class AbstractBehaviour extends Thread implements DiscoveryListener{
+public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 
 
-	protected MyPeerGroup myPeerGroup;
-
-	public AbstractBehaviour(MyPeerGroup myPeerGroup) {
+	private Thread.State statue = Thread.State.RUNNABLE;
+	protected BasicPeerGroup myPeerGroup;
+	private long nextExecutionTime = 0;
+	
+	public AbstractBehaviour(BasicPeerGroup myPeerGroup) {
 		this.myPeerGroup = myPeerGroup;
-
-
 	}
 
+	
+	public void terminated() {
+		statue  = Thread.State.TERMINATED;
+	};
 
-
-	public abstract void run();
+	
+	@Override
+	public void run() {
+		nextExecutionTime = action()+System.currentTimeMillis();
+	}
+	
+	public boolean hasToRun(){
+		if(System.currentTimeMillis()>=nextExecutionTime&&statue==Thread.State.RUNNABLE){
+			return true;
+		}
+		return false;
+	}
+	
+	protected abstract int action();
+	public void initialize(){};
 	protected abstract void parseAdvertisement(Enumeration<Advertisement> advertisementsEnum);
-	//public abstract void notifyNetPeerGroup(PeerInfoEvent event);
 	public abstract void notifyPeerGroup(PeerGroupEvent event);
 	
 	
 
 	@Override
 	public void discoveryEvent(DiscoveryEvent event) {
-		// String found_peer_id = "urn:jxta:" + event.getSource().toString().substring(7);   
 		parseAdvertisement(event.getSearchResults());
+	}
 
+
+	public long getNextExecutionTime() {
+		return nextExecutionTime;
 	}
 	
 	
