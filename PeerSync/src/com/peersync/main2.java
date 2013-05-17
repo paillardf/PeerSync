@@ -2,16 +2,9 @@ package com.peersync;
 
 import java.io.IOException;
 
-import net.jxta.id.IDFactory;
-import net.jxta.peergroup.PeerGroupID;
-
-import com.commands.ShellConsole;
-import com.peersync.data.DataBaseManager;
-import com.peersync.events.ScanService;
-import com.peersync.models.SharedFolder;
+import com.peersync.cli.ShellConsole;
 import com.peersync.network.PeerSync;
 import com.peersync.tools.Constants;
-import com.peersync.tools.PreferencesManager;
 
 public class main2 {
 

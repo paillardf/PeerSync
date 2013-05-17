@@ -106,7 +106,7 @@ public class PeerSync {
 					RendezVousAdvertisement.getAdvertisementType(),
 					new RendezVousAdvertisement.Instantiator()
 					);
-			scanService = new ScanService(conf.getPeerID().toString());
+			ScanService.getInstance().startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
 			

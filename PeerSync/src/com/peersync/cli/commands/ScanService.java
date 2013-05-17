@@ -1,6 +1,6 @@
 package com.peersync.cli.commands;
 
-import java.io.File;
+import java.io.IOException;
 
 import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
@@ -8,10 +8,7 @@ import com.peersync.cli.ArgumentNode;
 import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
-import com.peersync.cli.ValueArgument;
-import com.peersync.data.DataBaseManager;
-import com.peersync.events.EventsManager;
-import com.peersync.models.SharedFolder;
+import com.peersync.exceptions.JxtaNotInitializedException;
 
 
 public class ScanService extends AbstractCommand {
@@ -78,8 +75,14 @@ public class ScanService extends AbstractCommand {
 			String argValue = argStart.getValue(queryString);
 			if(argValue!=null)
 			{
-				EventsManager.getEventsManager().startService();
-				println("Service started");
+				try {
+					com.peersync.events.ScanService.getInstance().startService();
+					println("Service started");
+				} catch (IOException | JxtaNotInitializedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 
 		}
@@ -87,7 +90,7 @@ public class ScanService extends AbstractCommand {
 			String argValue = argStop.getValue(queryString);
 			if(argValue!=null)
 			{
-				EventsManager.getEventsManager().stopService();
+				com.peersync.events.ScanService.getInstance().stopService();
 				println("Service stopped");
 			}
 
@@ -96,9 +99,15 @@ public class ScanService extends AbstractCommand {
 			String argValue = argRestart.getValue(queryString);
 			if(argValue!=null)
 			{
-				EventsManager.getEventsManager().stopService();
-				EventsManager.getEventsManager().startService();
-				println("Service restarted");
+				com.peersync.events.ScanService.getInstance().stopService();
+				try {
+					com.peersync.events.ScanService.getInstance().startService();
+					println("Service restarted");
+				} catch (IOException | JxtaNotInitializedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 
 		}

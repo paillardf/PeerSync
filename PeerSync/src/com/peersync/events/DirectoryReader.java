@@ -35,12 +35,23 @@ public class DirectoryReader {
 	private EventsStack m_EventsStack = new EventsStack();
 	private SharedFolder currentShareFolder;
 	private ArrayList<SharedFolder> shareFolders;
-	private String peerID;
+	private String peerID=null;
+
+	public String getPeerID()
+	{
+		return peerID;
+	}
+
+	public void setPeerID(String pgid)
+	{
+		peerID=pgid;
+	}
 
 
-	
-	DirectoryReader(String peerID) {
-		this.peerID = peerID;
+
+
+
+	DirectoryReader() {
 		loadDirectoriesToScan();
 	}
 
@@ -108,17 +119,25 @@ public class DirectoryReader {
 	public Set<String> scan()
 	{
 		Set<String> peerGroupWithNewEvents = new HashSet<String>();
-		for (SharedFolder shareFolder : shareFolders) {
-			Map<String,FileInfo> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
-			scanDifferences(currentStack,shareFolder);
-			getEventsStack().save();
-			if(getEventsStack().getEvents().size()>0)
-				peerGroupWithNewEvents.add(shareFolder.getPeerGroupUID());
+		if(peerID==null)
+			Log.d("Can't scan : peerID unavalaible");
+		else
+		{
+
+
+			for (SharedFolder shareFolder : shareFolders) {
+				Map<String,FileInfo> currentStack = DataBaseManager.getInstance().getLastEvents(shareFolder.getUID());
+				scanDifferences(currentStack,shareFolder);
+				getEventsStack().save();
+				if(getEventsStack().getEvents().size()>0)
+					peerGroupWithNewEvents.add(shareFolder.getPeerGroupUID());
+			}
+
 		}
 		return peerGroupWithNewEvents;
 
-
 	}
+
 
 	private void scanDifferences(Map<String,FileInfo> om,SharedFolder shareFolder)
 	{

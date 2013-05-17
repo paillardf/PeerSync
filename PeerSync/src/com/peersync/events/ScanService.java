@@ -1,21 +1,32 @@
 package com.peersync.events;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.jxta.peer.PeerID;
+
 import com.peersync.data.DataBaseManager;
+import com.peersync.exceptions.JxtaNotInitializedException;
+import com.peersync.network.PeerSync;
 
 public class ScanService extends Observable {
 
 
-
+	private static ScanService instance=null;
 
 	private boolean running;
 	private DirectoryReader directoryReader;
 
-	
+
+	public static ScanService getInstance()
+	{
+		if(instance==null)
+			instance = new ScanService();
+		return instance;
+	}
 
 	private boolean getRunning()
 	{
@@ -27,10 +38,10 @@ public class ScanService extends Observable {
 		running=r;
 	}
 
-	public ScanService(String peerID) 
+	private ScanService() 
 	{
 		running=false;
-		directoryReader = new DirectoryReader(peerID);
+		directoryReader = new DirectoryReader();
 	}
 
 
@@ -39,8 +50,18 @@ public class ScanService extends Observable {
 
 
 
-	public void startService()
+	public void startService() throws IOException, JxtaNotInitializedException
 	{
+		String pgidStr=null;
+		PeerID pgid = PeerSync.getInstance().getConf().getPeerID();
+		if(pgid==null)
+			throw new JxtaNotInitializedException("Can't start scan service :");
+		else
+			pgidStr= pgid.toString();
+		if(!pgid.equals(directoryReader.getPeerID()))
+				directoryReader.setPeerID(pgidStr);
+		
+		
 		if(!running)
 		{
 			launch();

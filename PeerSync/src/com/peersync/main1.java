@@ -2,7 +2,7 @@ package com.peersync;
 
 import java.io.IOException;
 
-import com.commands.ShellConsole;
+import com.peersync.cli.ShellConsole;
 import com.peersync.network.PeerSync;
 import com.peersync.tools.Constants;
 
