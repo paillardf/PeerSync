@@ -1,4 +1,4 @@
-package com.peersync.commands;
+package com.peersync.cli;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +8,7 @@ import javax.management.RuntimeErrorException;
 import org.apache.derby.impl.sql.compile.QueryTreeNode;
 
 
-abstract class AbstractArgument {
+public abstract class AbstractArgument {
 	
 	protected String shortcut;
 	protected String name;
@@ -35,6 +35,13 @@ abstract class AbstractArgument {
 		else if(mShortcut.find()) 
 			queryString=queryString.replaceFirst(getRegexShortcut(), " ");
 		return queryString;
+	}
+	
+	public String getValue(String queryString)
+	{
+		if(checkPresence(queryString))
+			return "";
+		return null;
 	}
 	
 	public String getShortcut() {

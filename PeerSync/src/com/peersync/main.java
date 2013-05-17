@@ -3,13 +3,11 @@ package com.peersync;
 
 import java.io.IOException;
 
-import com.peersync.network.PeerSync;
-
 import com.peersync.tools.Constants;
 
 public class main {
 
-
+	public static final char BACKSPACE = '\b';
 	
 	public static void main(String[] args) {
 
@@ -26,10 +24,6 @@ public class main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-
-		
-		
 	}
 
 }

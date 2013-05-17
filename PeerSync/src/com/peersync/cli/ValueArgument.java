@@ -1,4 +1,4 @@
-package com.peersync.commands;
+package com.peersync.cli;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

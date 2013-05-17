@@ -1,8 +1,11 @@
-package com.peersync.commands;
+package com.peersync.cli;
 
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
-abstract class AbstractCommand {
+import com.peersync.models.FileInfo;
+
+public abstract class AbstractCommand {
 
 	// Set Shortcut(vérifier que pas de doublons)
 	// Set Nom (vérifier que pas de doublons)
@@ -27,8 +30,16 @@ abstract class AbstractCommand {
 
 
 
-	abstract public void exec(String QueryString);
+	public final void exec(String queryString)
+	{
+		if(parse(queryString))
+			requestHandler(queryString);
+		else
+			help();
+	}
 
+	public abstract void requestHandler(String queryString);
+	
 	public void setRootParser(OperatorNode r)
 	{
 		rootParser=r;
@@ -51,12 +62,13 @@ abstract class AbstractCommand {
 		println("OPTIONS");
 		println(" ");
 		//les arguments
-		for(AbstractArgument arg : allArguments.getArguments())
+		for(Entry<String, AbstractArgument> entry : allArguments.getArguments().entrySet())
 		{
 			print("\t");
+			AbstractArgument arg = entry.getValue();
 			if(arg.getShortcut()!=null)
 				print(arg.getShortcut()+", ");
-			print(arg.getName());
+			print(entry.getKey());
 			if(arg instanceof ValueArgument)
 				print(" <value>");
 			println(" : "+arg.getDescription());
@@ -82,37 +94,10 @@ abstract class AbstractCommand {
 
 
 
-	public boolean checkGroupValidity(String queryString)
+	public boolean parse(String queryString)
 	{
 	StringRef sref = new StringRef(queryString);
-		return rootParser.parse(sref,true);
-		//		for (ArgumentsList alo : exclusivesArgumentsGroups)
-		//		{
-		//			boolean found =false;
-		//			for(AbstractArgument arg : alo.getArguments())
-		//			{
-		//				if(arg.checkPresence(queryString) && !found)
-		//					found = true;
-		//				else if(arg.checkPresence(queryString) && found)
-		//					return false;
-		//			}
-		//		}
-		//		
-		//		for (ArgumentsList ala : dependantsArgumentsGroups)
-		//		{
-		//			int nbOk = 0;
-		//			int total = ala.getArguments().size();
-		//			for(AbstractArgument arg : ala.getArguments())
-		//			{
-		//				if(arg.checkPresence(queryString))
-		//					nbOk++;
-		//				
-		//			}
-		//			if(nbOk!=0 && nbOk!=total)
-		//				return false;
-		//				
-		//		}
-		//		return true;
+		return rootParser.parse(sref);
 
 
 	}

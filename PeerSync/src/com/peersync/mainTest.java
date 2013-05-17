@@ -22,7 +22,9 @@ public class mainTest {
 	
 	public static void main(String[] args) throws NoSuchProviderException, KeyStoreException, IOException, PeerGroupException, CertificateException {
 
-		
+		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\folder\\log.properties");
+//		System.setProperty("net.jxta.logging.Logging", "FINEST");
+//		System.setProperty("net.jxta.level", "FINEST");
 		// Preparing data 
 		String MyKeyStoreFileName = "MyKeyStoreFile"; 
 		String MyKeyStoreLocation = "." + File.separator + "MyKeyStoreLocation"; 

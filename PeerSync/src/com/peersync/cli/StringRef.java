@@ -1,4 +1,4 @@
-package com.peersync.commands;
+package com.peersync.cli;
 
 public class StringRef
 {

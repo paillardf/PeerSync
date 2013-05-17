@@ -1,12 +1,12 @@
-package com.peersync.commands;
+package com.peersync.cli;
 
 import java.util.ArrayList;
 
 
 
 public class OperatorNode extends Node{
-	
-	
+
+
 
 	private Operator operator;
 	private ArrayList<Node> childs;
@@ -44,11 +44,32 @@ public class OperatorNode extends Node{
 	{
 		childs.add(n);
 	}
-
-	public boolean parse(StringRef queryString,boolean master)
+	
+	public boolean parse(StringRef queryString)
 	{
-		
+		return parse(queryString,true);
+	}
+
+	private boolean parse(StringRef queryString,boolean master)
+	{
 		if(operator==Operator.OR)
+		{
+			for(Node n : childs)
+			{
+				if(n instanceof OperatorNode)
+					((OperatorNode)n).parse(queryString,false);
+				else if (n instanceof ArgumentNode)
+				{
+					AbstractArgument arg = ((ArgumentNode) n).getArgument();
+					if(arg.checkPresence(queryString.getData()))
+						queryString.setData(arg.removeArgument(queryString.getData()));
+				}
+
+			}
+
+		}
+
+		else if(operator==Operator.XOR)
 		{
 			boolean found = false;
 			for(Node n : childs)
@@ -98,7 +119,7 @@ public class OperatorNode extends Node{
 				return false;
 
 		}
-		
+
 		if(master && queryString.getData().replace(" ", "").length()>0)
 			return false;
 		return true;
@@ -115,8 +136,8 @@ public class OperatorNode extends Node{
 			res +="[";
 			for(Node n : childs)
 			{
-				if(!first && operator==Operator.OR)
-					res+=" | ";
+				if(!first)
+					res+=" "+operator.getDisplayedOperator()+" ";
 				if(n instanceof OperatorNode)
 					res += ((OperatorNode)n).toString();
 				else if (n instanceof ArgumentNode)
@@ -130,7 +151,7 @@ public class OperatorNode extends Node{
 						res+=" <value> ";
 				}
 
-				
+
 
 				first = false;
 			}
