@@ -1,6 +1,5 @@
 package com.peersync.cli;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;

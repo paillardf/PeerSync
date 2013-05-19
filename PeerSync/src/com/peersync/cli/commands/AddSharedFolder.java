@@ -10,7 +10,6 @@ import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.SharedFolder;
-import com.peersync.tools.Constants;
 
 public class AddSharedFolder extends AbstractCommand {
 

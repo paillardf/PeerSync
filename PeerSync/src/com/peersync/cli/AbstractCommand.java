@@ -1,9 +1,6 @@
 package com.peersync.cli;
 
-import java.util.ArrayList;
 import java.util.Map.Entry;
-
-import com.peersync.models.FileInfo;
 
 public abstract class AbstractCommand {
 

@@ -1,11 +1,9 @@
 package com.peersync.cli;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -13,6 +11,8 @@ import java.util.regex.Pattern;
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
+
+import com.peersync.cli.jlineCustom.FileCompleter;
 
 
 
@@ -84,7 +84,7 @@ public class ShellConsole {
 
 	private void commandRoute(String command)
 	{
-
+		
 		String pattern = BEGIN+FACSPACES+ARG+FACSPACES+JOKER+END;
 		Pattern p = Pattern.compile(pattern);
 		java.util.regex.Matcher m = p.matcher(command);
@@ -110,20 +110,35 @@ public class ShellConsole {
 	private void mainloop()
 	{
 
+		//FileCompleter fc = new FileCompleter();
+//		List<CharSequence> candidates = new LinkedList<CharSequence>();
+//		fc.complete("C:\\Program Files\\", 2, candidates);
+//		
+//		for(CharSequence s : candidates)
+//		{
+//			System.out.println(s);
+//		}
+		
 		ConsoleReader reader;
 		try {
+			
+			
+			
 			reader = new ConsoleReader();
 
 
 			reader.setPrompt("PeerSyncShell> ");
+			reader.setCompletionHandler(new com.peersync.cli.jlineCustom.CandidateListCompletionHandler());
+			
+			
+			final List<Completer> completors = Arrays.asList(
+				    new StringsCompleter(availableCommands),
+				    new FileCompleter());
 
-			List<Completer> completors = new LinkedList<Completer>();
-
-			completors.add(new StringsCompleter(availableCommands));
-
-			for (Completer c : completors) {
-				reader.addCompleter(c);
-			}
+			reader.addCompleter(new com.peersync.cli.jlineCustom.ArgumentCompleter(completors));
+			
+			//reader.addCompleter(new ArgumentCompleter(new StringsCompleter("foo", "bar", "baz")));
+			//reader.addCompleter(new ArgumentCompleter(new FileNameCompleter()));
 
 			String line;
 			PrintWriter out = new PrintWriter(reader.getOutput());

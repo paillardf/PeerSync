@@ -52,73 +52,34 @@ public class OperatorNode extends Node{
 
 	private boolean parse(StringRef queryString,boolean master)
 	{
-		if(operator==Operator.OR)
-		{
+
+			int nbOk=0;
 			for(Node n : childs)
 			{
 				if(n instanceof OperatorNode)
-					((OperatorNode)n).parse(queryString,false);
-				else if (n instanceof ArgumentNode)
-				{
-					AbstractArgument arg = ((ArgumentNode) n).getArgument();
-					if(arg.checkPresence(queryString.getData()))
-						queryString.setData(arg.removeArgument(queryString.getData()));
-				}
-
-			}
-
-		}
-
-		else if(operator==Operator.XOR)
-		{
-			boolean found = false;
-			for(Node n : childs)
-			{
-				boolean tmp=false;
-				if(n instanceof OperatorNode)
-					tmp = ((OperatorNode)n).parse(queryString,false);
-				else if (n instanceof ArgumentNode)
-				{
-					AbstractArgument arg = ((ArgumentNode) n).getArgument();
-					tmp = arg.checkPresence(queryString.getData());
-					if(tmp)
-						queryString.setData(arg.removeArgument(queryString.getData()));
-				}
-
-				if(found && tmp)
-					return false;
-				else if(!found && tmp)
-					found = true;
-			}
-
-		}
-		else if(operator==Operator.AND)
-		{
-			int nbOk = 0;
-			int total = childs.size();
-			for(Node n : childs)
-			{
-				if(n instanceof OperatorNode)
-				{
-					if (((OperatorNode)n).parse(queryString,false))
+					if(((OperatorNode)n).parse(queryString,false))
 						nbOk++;
-				}
+					else if(operator==Operator.AND)
+						return false;
 				else if (n instanceof ArgumentNode)
 				{
 					AbstractArgument arg = ((ArgumentNode) n).getArgument();
 					if(arg.checkPresence(queryString.getData()))
 					{
-						nbOk++;
 						queryString.setData(arg.removeArgument(queryString.getData()));
+						nbOk++;
 					}
+					else if(operator==Operator.AND)
+						return false;
+						
 				}
-
+				if((operator==Operator.XOR || operator==Operator.XOR_ONE) && nbOk>1)
+					return false;
 
 			}
-			if(nbOk!=0 && nbOk!=total)
+			if((operator==Operator.OR_ONE_MIN || operator==Operator.XOR_ONE)&& nbOk==0)
 				return false;
 
-		}
 
 		if(master && queryString.getData().replace(" ", "").length()>0)
 			return false;

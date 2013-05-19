@@ -1,15 +1,16 @@
 package com.peersync.cli;
 
-import java.util.Hashtable;
-import java.util.Map;
 
 // Juste pour le polymorphisme
 public abstract class Node {
 	public enum Operator
 	{
+		// Peut être plutot juste AND, OR et XOR avec des options (nbmin, nbmax?)
 		AND,
-		OR,
-		XOR;
+		OR, //0..*
+		XOR,//0..1
+		OR_ONE_MIN,//1..*
+		XOR_ONE;//1
 
 
 
@@ -23,6 +24,10 @@ public abstract class Node {
 				return "|";
 			case XOR :
 				return "X";
+			case OR_ONE_MIN :
+				return "|+";
+			case XOR_ONE :
+				return "X1";
 			default :
 				return null;
 			}

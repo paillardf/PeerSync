@@ -17,7 +17,7 @@ public class ScanService extends AbstractCommand {
 	public ScanService()
 	{
 		setDescription("Demarre, arrete ou redemarre le service de scan");
-		OperatorNode root = new OperatorNode(Operator.XOR);
+		OperatorNode root = new OperatorNode(Operator.XOR_ONE);
 		{
 			BooleanArgument a;
 			try {
