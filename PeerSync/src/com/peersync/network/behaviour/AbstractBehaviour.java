@@ -14,7 +14,7 @@ public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 
 	private Thread.State statue = Thread.State.RUNNABLE;
 	protected BasicPeerGroup myPeerGroup;
-	private long nextExecutionTime = 0;
+	protected long nextExecutionTime = 0;
 	
 	public AbstractBehaviour(BasicPeerGroup myPeerGroup) {
 		this.myPeerGroup = myPeerGroup;

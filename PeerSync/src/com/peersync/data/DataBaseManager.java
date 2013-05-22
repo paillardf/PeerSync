@@ -1,5 +1,6 @@
 package com.peersync.data;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,6 +22,7 @@ import com.peersync.models.FileWithLocalSource;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
+import com.peersync.network.content.model.FileAvailability;
 import com.peersync.tools.Constants;
 
 public class DataBaseManager extends DbliteConnection{
@@ -506,7 +508,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -881,6 +882,19 @@ public class DataBaseManager extends DbliteConnection{
 			System.err.println(e.getMessage());
 		}
 		return res;
+	}
+
+	//retourne la disponibilité d'un fichier à partir de son hash
+	public FileAvailability getFileAvailability(String hash) {
+		// TODO Good luck
+		return null;
+	}
+	
+	//Retourne le chemin absolue vers le premier fichier correspondant au hash 
+	public String getAvailableFilePath(String hash) {
+		// TODO Auto-generated method stub
+		return null;
+		
 	}
 
 

@@ -14,8 +14,8 @@ public class SyncPeerGroup extends BasicPeerGroup {
 	
 	public SyncPeerGroup(PeerGroup netPeerGroup, NetworkConfigurator conf, PeerGroupID psepeergroupid, String peerGroupName)  {
 		super(netPeerGroup, conf,  psepeergroupid,  peerGroupName);
-		behaviourList.add(new DiscoveryBehaviour(this));
-		//behaviourList.add(new StackSyncBehaviour(this));
+		//behaviourList.add(new DiscoveryBehaviour(this));
+		behaviourList.add(new StackSyncBehaviour(this));
 		//behaviourList.add(new ContentBehaviour(this));
 		
 	}

@@ -125,10 +125,12 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		if(myPeerGroup.getNetPeerGroup().getPeerGroupID().toString().equals(event.getPeerGroupID().toString())){
 			//NETPEERGROUPEVENT
 		}else{
-
+			//PEERGROUPEVENT
+			nextExecutionTime=0;
 			switch (event.getID()) {
 			case PeerGroupEvent.RDV_CONNECTION:
 				lastStackVersionAdvertismentEvent = 0;
+				
 				break;
 			case PeerGroupEvent.STACK_UPDATE:
 				lastStackVersionAdvertismentEvent = 0;

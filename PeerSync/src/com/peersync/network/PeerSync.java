@@ -9,7 +9,9 @@ import net.jxta.peergroup.PeerGroup;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 
+import com.peersync.data.DataBaseManager;
 import com.peersync.events.ScanService;
+import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.PeerGroupManager;
@@ -119,7 +121,8 @@ public class PeerSync {
 			pg.initialize();
 			pg.start();
 			
-			
+			scanService.startService();
+			DataBaseManager.getInstance().saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:/PeerSyncTest/"+getConf().getName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);

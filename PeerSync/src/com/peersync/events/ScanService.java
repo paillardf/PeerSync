@@ -64,8 +64,9 @@ public class ScanService extends Observable {
 		
 		if(!running)
 		{
-			launch();
 			setRunning(true);
+			launch();
+			
 		}
 
 
