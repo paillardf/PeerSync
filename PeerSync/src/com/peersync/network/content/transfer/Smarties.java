@@ -21,8 +21,61 @@ public class Smarties {
 	private Map<Long,Integer> indexDirectory = new HashMap<Long,Integer >();
 	private Map<Integer,Long> beginsDirectory = new HashMap<Integer,Long >(); // \o/
 	private ArrayList< Set<ID> > providers = new ArrayList<Set<ID>>();
-	
+
 	private String hash;
+
+	public Smarties(String hash)
+	{
+		this.hash=hash;
+	}
+	
+	public SegmentToDownload getBestChoice()
+	{
+		ArrayList<Integer> resIntermediaire = new ArrayList<Integer>();
+		ArrayList<Integer> resFinal = new ArrayList<Integer>();
+		SegmentToDownload sd = null;
+		int min = getMinProviders();
+		if(min>0)
+		{
+			for(int i=0;i<providers.size();i++)
+			{
+
+				if(providers.get(i).size()==min && i+1<providers.size())
+					resIntermediaire.add(i);
+			}
+			long maxSize = 0;
+			for(int secondPass: resIntermediaire)
+			{
+				long begin = beginsDirectory.get(secondPass);
+				long length = beginsDirectory.get(secondPass+1)-begin;
+				if(length>maxSize)
+					maxSize=length;
+
+
+			}
+
+			for(int thirdPass: resIntermediaire)
+			{
+				long begin = beginsDirectory.get(thirdPass);
+				long length = beginsDirectory.get(thirdPass+1)-begin;
+				if(length==maxSize)
+					resFinal.add(thirdPass);
+
+
+			}
+
+
+			int choice = (int)(Math.random() * (resFinal.size()));
+			choice = resFinal.get(choice);
+			long begin = beginsDirectory.get(choice);
+			long length = beginsDirectory.get(choice+1)-begin;
+			BytesSegment bs = new BytesSegment(begin, length);
+			sd = new SegmentToDownload(hash,bs,providers.get(choice));
+		}
+
+		return sd;
+
+	}
 
 	public void display()
 	{
@@ -40,49 +93,48 @@ public class Smarties {
 
 	public void addFileAvailability(FileAvailability fa,ID id)
 	{
-		for(BytesSegment bs : fa.getSegments())
+		if(fa.getHash().equals(hash))
 		{
-			long beginSegment = bs.offset;
-			long endSegment = beginSegment+bs.length;
-
-			long previousBegin = getPreviousBegin(beginSegment);
-			long previousEnd = getPreviousBegin(endSegment);
-			Set<ID> tmp = new HashSet<ID>();
-			if(previousEnd!=-1)
-				tmp= cloneIDs(indexDirectory.get(previousEnd));
-
-			addAProvider(previousBegin,beginSegment,id);
-
-
-
-			int firstIndex = indexDirectory.get(beginSegment);
-			int i=firstIndex+1;
-			//Iteration sur index compris entre begin et end
-			for( ;i<providers.size();i++)
+			for(BytesSegment bs : fa.getSegments())
 			{
-				if(beginsDirectory.get(i)>endSegment)
-					break;
-				else
-					addAProvider( i,id);
+				long beginSegment = bs.offset;
+				long endSegment = beginSegment+bs.length;
+
+				long previousBegin = getPreviousBegin(beginSegment);
+				long previousEnd = getPreviousBegin(endSegment);
+				Set<ID> tmp = new HashSet<ID>();
+				if(previousEnd!=-1)
+					tmp= cloneIDs(indexDirectory.get(previousEnd));
+
+				addAProvider(previousBegin,beginSegment,id);
+
+
+
+				int firstIndex = indexDirectory.get(beginSegment);
+				int i=firstIndex+1;
+				//Iteration sur index compris entre begin et end
+				for( ;i<providers.size();i++)
+				{
+					if(beginsDirectory.get(i)>endSegment)
+						break;
+					else
+						addAProvider( i,id);
+				}
+				//Fin : test si le end est bien pris en compte. Sinon, on ajoute
+
+				if(beginsDirectory.get(i-1)<endSegment)
+				{
+					long test = getPreviousBegin(endSegment);
+
+
+					addProviders(test,endSegment,tmp);
+
+					//addAProvider(test,endSegment,null);
+
+					System.out.println("END :"+endSegment+"   "+beginsDirectory.get(i-1));
+				}
+
 			}
-			//Fin : test si le end est bien pris en compte. Sinon, on ajoute
-
-			if(beginsDirectory.get(i-1)<endSegment)
-			{
-				long test = getPreviousBegin(endSegment);
-
-
-				addProviders(test,endSegment,tmp);
-
-				//addAProvider(test,endSegment,null);
-
-				System.out.println("END :"+endSegment+"   "+beginsDirectory.get(i-1));
-			}
-
-
-
-
-
 		}
 
 	}
@@ -170,14 +222,14 @@ public class Smarties {
 
 	}
 
-	public Set<ID> cloneIDs(int index)
+	private Set<ID> cloneIDs(int index)
 	{
 		Set<ID> returnValue = new HashSet<ID>();
 		returnValue.addAll(providers.get(index));
 		return returnValue;
 	}
 
-	public long getPreviousBegin(long begin)
+	private long getPreviousBegin(long begin)
 	{
 		Set<Long> results=new HashSet<Long>();
 		if(indexDirectory.containsKey(begin))
@@ -197,29 +249,9 @@ public class Smarties {
 
 	}
 
-	public SegmentToDownload getBestChoice()
-	{
-		ArrayList<Integer> resIntermediaire = new ArrayList<Integer>();
-		SegmentToDownload sd = null;
-		int min = getMinProviders();
-		if(min>0)
-		{
-			for(int i=0;i<providers.size();i++)
-			{
+	
 
-				if(providers.get(i).size()==min && i+1<providers.size())
-					resIntermediaire.add(i);
-			}
-			int choice = (int)(Math.random() * (resIntermediaire.size()));
-			BytesSegment bs = new BytesSegment(beginsDirectory.get(choice), beginsDirectory.get(choice+1));
-			sd = new SegmentToDownload(hash,bs,providers.get(resIntermediaire.get(choice)));
-		}
-
-		return sd;
-
-	}
-
-	public int getMinProviders()
+	private int getMinProviders()
 	{
 		int result = Integer.MAX_VALUE;
 		for(Set<ID> csid : providers)

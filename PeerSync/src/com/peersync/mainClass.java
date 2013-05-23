@@ -18,10 +18,9 @@ public class mainClass {
 	public static void main( String[] args ) {
 		
 		FileAvailability fa = new FileAvailability("test");
-		fa.addSegment(21, 20);
-		fa.addSegment(0, 20);
+	
 		
-		fa.addSegment(10, 100);
+		fa.addSegment(0, 30);
 		System.out.println("FA 1");
 		for(BytesSegment bs : fa.getSegments())
 		{
@@ -29,7 +28,7 @@ public class mainClass {
 		}
 		
 		FileAvailability fa2 = new FileAvailability("test");
-		fa2.addSegment(80, 300);
+		fa2.addSegment(30, 30);
 
 		System.out.println("FA 2");
 		for(BytesSegment bs : fa2.getSegments())
@@ -39,7 +38,7 @@ public class mainClass {
 		
 		//fa.substract(fa2);
 		
-		Smarties n = new Smarties();
+		Smarties n = new Smarties("test");
 		ID faID = IDFactory.newPeerGroupID();
 		ID fa2ID = IDFactory.newPeerGroupID();
 		System.out.println("FA1 : "+faID);
