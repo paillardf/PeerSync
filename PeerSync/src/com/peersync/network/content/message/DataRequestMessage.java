@@ -55,7 +55,6 @@ public class DataRequestMessage extends AbstractSyncMessage{
 	private PipeAdvertisement adv;
 	private long offs;
 	private int len;
-	private int qid;
 	private String hash;
 
 	/**
@@ -217,20 +216,7 @@ public class DataRequestMessage extends AbstractSyncMessage{
 		return len;
 	}
 
-	/**
-	 * Sets the query ID of this request.
-	 */
-	public void setQueryID(int qid) {
-		this.qid = qid;
-	}
-
-	/**
-	 * Returns query ID of this request.
-	 */
-	public int getQueryID() {
-		return qid;
-	}
-
+	
 	/**
 	 * Sets the response pipe of this request.
 	 */
@@ -252,5 +238,8 @@ public class DataRequestMessage extends AbstractSyncMessage{
 
 	public String getHash() {
 		return hash;
+	}
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 }

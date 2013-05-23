@@ -54,7 +54,6 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 
 
 
-	private int qid;
 	private boolean eofReached;
 	private List<FileAvailability> filesAvailability;
 
@@ -173,20 +172,6 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 		return doc;
 	}
 
-
-	/**
-	 * Sets the query ID of this response.
-	 */
-	public void setQueryID(int qid) {
-		this.qid = qid;
-	}
-
-	/**
-	 * Returns query ID of this response.
-	 */
-	public int getQueryID() {
-		return qid;
-	}
 
 	/**
 	 * Sets the EOF status of this response.

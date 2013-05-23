@@ -6,8 +6,11 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -54,13 +57,15 @@ import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PipeAdvertisement;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.network.content.listener.ClientEvent;
+import com.peersync.network.content.listener.SyncContentProviderListener;
 import com.peersync.network.content.message.AbstractSyncMessage;
 import com.peersync.network.content.message.AvailabilityRequestMessage;
 import com.peersync.network.content.message.AvailabilityResponseMessage;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
-import com.peersync.network.content.model.SyncContentShare;
+import com.peersync.network.content.model.SyncFolderShare;
 import com.peersync.network.content.transfer.SyncActiveTransfer;
 import com.peersync.network.content.transfer.SyncActiveTransferTracker;
 import com.peersync.network.content.transfer.SyncActiveTransferTrackerListener;
@@ -81,14 +86,19 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 	 /**
      * Message namespace used to identify our message elements.
      */
-    protected static final String MSG_NAMESPACE = "PeerSyncCont";
+    public static final String MSG_NAMESPACE = "PeerSyncCont";
     /**
      * Message element name used to identify our data requests/responses.
      */
-    protected static final String MSG_ELEM_NAME = "PeerSyncDR";
+    public static final String MSG_ELEM_NAME = "PeerSyncDR";
+	
+	private final CopyOnWriteArrayList<SyncContentProviderListener> syncListeners =
+			new CopyOnWriteArrayList<SyncContentProviderListener>();
 	
 	private final CopyOnWriteArrayList<ContentProviderListener> listeners =
 			new CopyOnWriteArrayList<ContentProviderListener>();
+	
+	
 	private final Queue<PipeMsgEvent> msgQueue =
             new ArrayBlockingQueue<PipeMsgEvent>(MAX_QUEUE_SIZE);
 	
@@ -127,6 +137,10 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 
 
 	private DataBaseManager dataBase;
+
+
+	private final Map<ID, SyncFolderShare> shares =
+            new HashMap<ID, SyncFolderShare>();
 
 
 
@@ -485,24 +499,37 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // ActiveTransferTrackerListener interface methods:
-
+   
     /**
-     * {@inheritDoc}
+     * Notify our listeners that a new client is connected
+     * 
+     * @param id  of the client pipe witch was opened
      */
-    //TODO
-    public void sessionCreated(ActiveTransfer transfer) {
-//        DefaultContentShare share = transfer.getContentShare();
-//        share.fireShareSessionOpened(transfer);
+    private void fireClientConnection(ID id) {
+    	ClientEvent event = null;
+        for (SyncContentProviderListener listener : syncListeners) {
+        	
+			if(event == null){
+        		event = new ClientEvent(this, id);
+        	}
+           listener.clientConnection(event);
+        }
     }
-
+    
     /**
-     * {@inheritDoc}
+     * Notify our listeners that a client is disconnected
+     * 
+     * @param id  of the client pipe witch was opened
      */
-    public void sessionCollected(ActiveTransfer transfer) {
-//        DefaultContentShare share = transfer.getContentShare();
-//        share.fireShareSessionClosed(transfer);
+    private void fireClientDisconnection(ID id) {
+    	ClientEvent event = null;
+        for (SyncContentProviderListener listener : syncListeners) {
+        	
+			if(event == null){
+        		event = new ClientEvent(this, id);
+        	}
+           listener.clientDisconnection(event);
+        }
     }
 
 
@@ -520,9 +547,10 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
     }
 
 
-	private SyncContentShare getShare(ID id) {
-		return null;
-		//TODO
+	private SyncFolderShare getShare(ID id) {
+		synchronized(shares) {
+            return shares.get(id);
+        }
 	}
 
 
@@ -538,6 +566,15 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 		listeners.remove(listener);
 	}
 
+	public void addSyncContentProviderListener(SyncContentProviderListener listener) {
+		syncListeners.add(listener);
+
+	}
+
+	public void removeSyncContentProviderListener(SyncContentProviderListener listener) {
+		syncListeners.remove(listener);
+	}
+	
 	@Override
 	public ContentTransfer retrieveContent(ContentID contentID)
 			throws UnsupportedOperationException {
@@ -560,7 +597,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 
 	@Override
 	public ContentTransfer retrieveContent(ContentShareAdvertisement adv) {
-		Logging.logCheckedFine(LOG, "retrieveContent(", contentID, ")");
+	//	Logging.logCheckedFine(LOG, "retrieveContent(", contentID, ")");
 
 		synchronized(this) {
 			if (!running) return null;
@@ -594,11 +631,11 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 
 		List<ContentShare> result = new ArrayList<ContentShare>(1);
 		ID id = content.getContentID();
-		DefaultContentShare share;
+		SyncFolderShare share;
 		synchronized(shares) {
 			share = getShare(id);
 			if (share == null) {
-				share = new DefaultContentShare(this, content, pAdv);
+				share = new SyncFolderShare(this, content, pAdv);
 				shares.put(id, share);
 				result.add(share);
 			}
@@ -636,23 +673,23 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 	@Override
 	public void findContentShares(int maxNum, ContentProviderListener listener)
 			throws UnsupportedOperationException {
-		//		 List<ContentShare> shareList = new ArrayList<ContentShare>();
-		//
-		//	        synchronized(shares) {
-		//	            shareList = new ArrayList<ContentShare>(
-		//	                    Math.min(maxNum, shares.size()));
-		//	            for (ContentShare share: shares.values()) {
-		//	                if (shareList.size() >= maxNum) {
-		//	                    break;
-		//	                }
-		//	                shareList.add(share);
-		//	            }
-		//	        }
-		//
-		//	        listener.contentSharesFound(
-		//	                new ContentProviderEvent.Builder(this, shareList)
-		//	                    .lastRecord(true)
-		//	                    .build());
+				 List<ContentShare> shareList = new ArrayList<ContentShare>();
+		
+			        synchronized(shares) {
+			            shareList = new ArrayList<ContentShare>(
+			                    Math.min(maxNum, shares.size()));
+			            for (ContentShare share: shares.values()) {
+			                if (shareList.size() >= maxNum) {
+			                    break;
+			                }
+			                shareList.add(share);
+			            }
+			        }
+		
+			        listener.contentSharesFound(
+			                new ContentProviderEvent.Builder(this, shareList)
+			                    .lastRecord(true)
+			                    .build());
 
 	}
 
@@ -679,7 +716,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 			StringBuilder name = new StringBuilder();
 			name.append(group.getPeerGroupName());
 			name.append(" - ");
-			name.append(CopyOfSyncContentProvider.class.getName());
+			name.append(SyncContentProvider.class.getName());
 			name.append(" pool");
 
 			threadGroup = new ThreadGroup(name.toString());
@@ -698,5 +735,22 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 
 		}
 	}
+
+	
+	 //////////////////////////////////////////////////////////////////////////
+    // ActiveTransferTrackerListener interface methods:
+
+	
+	 
+    public void sessionCreated(SyncActiveTransfer transfer) {
+        ID id = transfer.getOutputPipe().getPipeID();
+        fireClientConnection(id);
+    }
+
+    
+    public void sessionCollected(SyncActiveTransfer transfer) {
+    	ID id = transfer.getOutputPipe().getPipeID();
+    	fireClientDisconnection(id);
+    }
 
 }

@@ -24,6 +24,7 @@ public abstract class AbstractSyncMessage {
 	private static Logger LOG =
 			Logger.getLogger(DataRequestMessage.class.getName());
 	protected PipeAdvertisement adv;
+	protected int qid;
 
 
 	/**
@@ -73,5 +74,19 @@ public abstract class AbstractSyncMessage {
 	 */
 	public abstract Document getDocument(MimeMediaType asMimeType) ;
 
+	
+	/**
+     * Sets the query ID of this request.
+     */
+    public void setQueryID(int qid) {
+        this.qid = qid;
+    }
+
+    /**
+     * Returns query ID of this request.
+     */
+    public int getQueryID() {
+        return qid;
+    }
 
 }

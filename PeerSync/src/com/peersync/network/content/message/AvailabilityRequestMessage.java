@@ -57,7 +57,6 @@ public class AvailabilityRequestMessage extends AbstractSyncMessage{
     
     private PipeAdvertisement adv;
     private ContentID id;
-    private int qid;
 
     /**
      * Default constructor.
@@ -163,19 +162,7 @@ public class AvailabilityRequestMessage extends AbstractSyncMessage{
 
  
 
-    /**
-     * Sets the query ID of this request.
-     */
-    public void setQueryID(int qid) {
-        this.qid = qid;
-    }
-
-    /**
-     * Returns query ID of this request.
-     */
-    public int getQueryID() {
-        return qid;
-    }
+    
 
     /**
      * Sets the response pipe of this request.
@@ -199,5 +186,8 @@ public class AvailabilityRequestMessage extends AbstractSyncMessage{
 	public List<String> getFilesHash() {
 		return filesHash;
 		
+	}
+	public void setFilesHash(List<String> filesHash) {
+		this.filesHash = filesHash;
 	}
 }

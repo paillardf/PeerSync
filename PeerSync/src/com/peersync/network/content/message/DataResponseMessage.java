@@ -62,7 +62,6 @@ public class DataResponseMessage extends AbstractSyncMessage {
 
 	private long offs;
 	private int len;
-	private int qid;
 	private boolean eofReached;
 	private FileAvailability fileAvailability;
 
@@ -232,19 +231,7 @@ public class DataResponseMessage extends AbstractSyncMessage {
 		return len;
 	}
 
-	/**
-	 * Sets the query ID of this response.
-	 */
-	public void setQueryID(int qid) {
-		this.qid = qid;
-	}
-
-	/**
-	 * Returns query ID of this response.
-	 */
-	public int getQueryID() {
-		return qid;
-	}
+	
 
 	/**
 	 * Sets the EOF status of this response.

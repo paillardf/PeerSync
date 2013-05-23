@@ -1,14 +1,7 @@
 package com.peersync.network.content.transfer;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
-import com.peersync.network.content.model.SyncContentShare;
-
-import net.jxta.content.Content;
-import net.jxta.document.Document;
 import net.jxta.endpoint.Message;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.pipe.OutputPipe;
@@ -105,14 +98,14 @@ public class SyncActiveTransfer {
         destPipe.close();
     }
 
-//    /**
-//     * Gets the output pipe for sending responses back to this client.
-//     *
-//     * @return output pipe
-//     */
-//    public OutputPipe getOutputPipe() {
-//        return destPipe;
-//    }
+    /**
+     * Gets the output pipe for sending responses back to this client.
+     *
+     * @return output pipe
+     */
+    public OutputPipe getOutputPipe() {
+        return destPipe;
+    }
 
 	public boolean send(Message msg) throws IOException {
 		lastAccess = System.currentTimeMillis();
