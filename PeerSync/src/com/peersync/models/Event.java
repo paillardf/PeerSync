@@ -4,7 +4,6 @@ import net.jxta.document.Element;
 import net.jxta.document.StructuredDocument;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.tools.Constants;
 public class Event {
 
 	private long m_date;
@@ -17,6 +16,7 @@ public class Event {
 	private int m_status;
 	private String m_oldHash;
 	private int m_isFile;
+	private long length;
 	
 	public static final int STATUS_OK = 0;
 	public static final int STATUS_UNSYNC = 1;
@@ -35,6 +35,7 @@ public class Event {
 	public static final String NEWHASH_TAG = "new_hash";
 	public static final String OLDHASH_TAG = "old_hash";
 	public static final String ISFILE_TAG = "isfile";
+	public static final String FILESIZE_TAG = "filesize";
 
 	
 //	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,int status) 
@@ -70,7 +71,7 @@ public class Event {
 //
 //	}
 
-	public Event(String shareFolderUID,long date, String relFilePath,int isFile,String newHash,String oldHash,int action,String owner,int status) 
+	public Event(String shareFolderUID,long date, String relFilePath,long length,int isFile,String newHash,String oldHash,int action,String owner,int status) 
 	{
 
 		setDate(date);
@@ -81,7 +82,9 @@ public class Event {
 		setNewHash(newHash);
 		setOldHash(oldHash);
 		setStatus(status);
-		m_isFile = isFile; 
+		m_isFile = isFile;
+		this.length= length;
+			
 
 	}
 	
@@ -221,7 +224,20 @@ public class Event {
 		eventElement.appendChild(resp.createElement(NEWHASH_TAG, ""+getNewHash()));
 		eventElement.appendChild(resp.createElement(OLDHASH_TAG, ""+getOldHash()));
 		eventElement.appendChild(resp.createElement(ISFILE_TAG, ""+isFile()));
+		eventElement.appendChild(resp.createElement(FILESIZE_TAG, ""+getLenght()));
 		
+	}
+
+
+
+	public long getLenght() {
+		return length;
+	}
+
+
+
+	public void setLenght(long lenght) {
+		this.length = lenght;
 	}
 
 

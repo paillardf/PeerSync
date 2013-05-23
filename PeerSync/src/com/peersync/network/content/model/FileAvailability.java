@@ -2,69 +2,154 @@ package com.peersync.network.content.model;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.logging.Logger;
 
 import net.jxta.document.Element;
+import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
+import net.jxta.document.StructuredDocumentFactory;
+import net.jxta.document.StructuredTextDocument;
 import net.jxta.document.XMLElement;
+import net.jxta.id.ID;
 
 public class FileAvailability {
-    private static Logger LOG =
-            Logger.getLogger(FileAvailability.class.getName());
-    
-    private String hash;
-    private List<BitesSegment> segments = new ArrayList<BitesSegment>();
-    
-    
-    private static final String tagBegin = "avBegin";
-    private static final String tagEnd = "avEnd";
-    private static final String tagAvailability = "FileAvailability";
+	private static Logger LOG =
+			Logger.getLogger(FileAvailability.class.getName());
 
-    /**
-     * Default constructor.
-     */
-    public FileAvailability(String hash) {
-    	this.hash = hash;
-    }
+	private String hash;
+	private ArrayList<BytesSegment> segments = new ArrayList<BytesSegment>();
 
-    
-    public FileAvailability(XMLElement elem) {
-    	this.hash = elem.getTextValue();
-    	Enumeration elements = elem.getChildren();
+
+	private static final String tagOffset = "avOffset";
+	private static final String tagLength = "avLength";
+	private static final String tagAvailability = "FileAvailability";
+
+
+
+	/**
+	 * Default constructor.
+	 */
+	public FileAvailability(String hash) {
+		this.hash = hash;
+	}
+	
+
+
+
+	public FileAvailability(XMLElement elem) {
+		this.hash = elem.getTextValue();
+		Enumeration elements = elem.getChildren();
 		while (elements.hasMoreElements()) {
 			XMLElement elemAv = (XMLElement) elements.nextElement();
 			if(elemAv.getName().equals(tagAvailability)){
-				addSegment(Long.parseLong(elemAv.getAttribute(tagBegin).getValue()),
-						Long.parseLong(elemAv.getAttribute(tagEnd).getValue()));
+				addSegment(Long.parseLong(elemAv.getAttribute(tagOffset).getValue()),
+						Long.parseLong(elemAv.getAttribute(tagLength).getValue()));
 			}
 		}
-    }
-    
-    
-    public void addSegment(long begin, long end){
-    	//TODO
-    }
+	}
 
-	public List<BitesSegment> getSegments() {
+
+	public void addSegment(long offset, long length){
+
+
+		BytesSegment tmp = new BytesSegment(offset,length);
+		BytesSegment tmp2 = null;
+
+
+
+		for(int i=0;i<segments.size();i++)
+		{
+			if((tmp2 =segments.get(i).tryToMerge(tmp))!=null)
+			{
+				do
+				{
+					tmp=tmp2;
+					segments.remove(i);
+				}while(segments.size()>i && (tmp2=segments.get(i).tryToMerge(tmp))!=null);
+				segments.add(i,tmp);
+				return;
+
+			}
+			else if(segments.get(i).isSupTo(tmp))
+			{
+				segments.add(i,tmp);
+				return;
+			}
+
+		}
+		segments.add(tmp);
+
+
+
+	}
+
+
+	public void substract(FileAvailability fa){
+		ArrayList<BytesSegment> otherSegment= fa.getSegments();
+		int otherSegmentCursor = 0;
+		int i=0;
+		while(i<segments.size())
+		{
+			while(otherSegmentCursor+1< otherSegment.size() && !otherSegment.get(otherSegmentCursor).isSupTo(segments.get(i)))
+			{
+				otherSegmentCursor++;
+			}
+			ArrayList<BytesSegment> tmp = segments.get(i).tryToSubstract(otherSegment.get(otherSegmentCursor));
+			if(tmp!=null )
+			{
+				segments.remove(i);
+				for(int j=0;j<tmp.size();j++)
+				{
+					BytesSegment bs = tmp.get(j);
+
+					if(!bs.isEmpty())
+					{
+						if(j>0)
+							i++;
+						segments.add(i,bs);
+
+					}
+				}
+			}
+			i++;
+		}
+		
+
+	}
+
+
+
+
+
+
+
+	public ArrayList<BytesSegment> getSegments() {
 		// TODO Auto-generated method stub
-		return null;
+		return segments;
 	}
 
 	public String getHash() {
 		return hash;
 	}
 
-
+	public StructuredDocument toXML()
+	{
+		StructuredTextDocument doc = (StructuredTextDocument)StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, tagAvailability);
+		appendSegment(doc, doc);
+		return doc;
+	}
+	
 	public void appendSegment(StructuredDocument doc, Element parent) {
 		for (int j = 0; j < segments.size(); j++) {
-			BitesSegment bs = segments.get(j);
+			BytesSegment bs = segments.get(j);
 			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);    
-			avE.addAttribute(tagBegin, ""+bs.begin);
-			avE.addAttribute(tagEnd,""+ bs.end);
+			avE.addAttribute(tagOffset, ""+bs.offset);
+			avE.addAttribute(tagLength,""+ bs.length);
 			parent.appendChild(avE);
 		}         
-		
+
 	}
-    
+
+
+
 }

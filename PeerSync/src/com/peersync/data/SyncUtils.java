@@ -65,7 +65,7 @@ public class SyncUtils {
 				}
 				
 				
-				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSource(peerGroupID);
+				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSourceForAPeerGroup(peerGroupID);
 				
 				for (FileWithLocalSource fileWithLocalSource : files) {
 					File f = new File(fileWithLocalSource.getLocalSourcePath());
@@ -91,7 +91,7 @@ public class SyncUtils {
 					db.updateEventStatus(folderToRemove.getRelFilePath(), folderToRemove.getFileHash(), folderToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
 					if(!res)
 					{
-						Event e = new Event(folderToRemove.getSharedFolderUID(),System.currentTimeMillis(), folderToRemove.getFileHash(),0,null,null,Event.ACTION_CREATE,  peerID ,Event.STATUS_OK);
+						Event e = new Event(folderToRemove.getSharedFolderUID(),System.currentTimeMillis(), folderToRemove.getFileHash(),-1,0,null,null,Event.ACTION_CREATE,  peerID ,Event.STATUS_OK);
 						e.save();
 					}
 				}

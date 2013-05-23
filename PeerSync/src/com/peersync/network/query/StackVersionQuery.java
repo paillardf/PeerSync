@@ -214,7 +214,7 @@ public class StackVersionQuery implements QueryHandler{
 							//new Event(shareFolderId, date, filepath, isFile, newHash, oldHash, action, owner, status)
 							Enumeration eventParams = eventElement.getChildren();
 
-							long date = 0;
+							long date = 0,filesize=0;
 							String path = null, newHash = null, oldHash = null, owner = null;
 							int isFile = 0, action = 0, status;
 
@@ -227,6 +227,8 @@ public class StackVersionQuery implements QueryHandler{
 									date = Long.parseLong(eventParam.getValue());
 								}else if (eventParam.getName().compareTo(Event.PATH_TAG)==0){
 									path = eventParam.getValue();
+								}else if (eventParam.getName().compareTo(Event.FILESIZE_TAG)==0){
+									filesize = Long.parseLong(eventParam.getValue());
 								}else if (eventParam.getName().compareTo(Event.ISFILE_TAG)==0){
 									isFile = Integer.parseInt(eventParam.getValue());
 								}else if (eventParam.getName().compareTo(Event.NEWHASH_TAG)==0){
@@ -245,6 +247,7 @@ public class StackVersionQuery implements QueryHandler{
 									new Event(shareFolderId,
 											date,
 											path,
+											filesize,
 											isFile,
 											newHash,
 											oldHash,

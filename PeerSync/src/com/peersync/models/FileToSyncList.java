@@ -23,12 +23,12 @@ public class FileToSyncList {
 	
 	public void refreshFilesToDownload()
 	{
-		filesToDownload = DataBaseManager.getInstance().getFilesToDownload(peerGroupId);
+		filesToDownload = DataBaseManager.getInstance().getFilesToDownloadForAPeerGroup(peerGroupId);
 	}
 	
 	public void refreshFilesWithLocalSource()
 	{
-		filesWithLocalSource = DataBaseManager.getInstance().getFilesWithLocalSource(peerGroupId);
+		filesWithLocalSource = DataBaseManager.getInstance().getFilesWithLocalSourceForAPeerGroup(peerGroupId);
 	}
 
 	public ArrayList<FileWithLocalSource> getFilesWithLocalSource() {
