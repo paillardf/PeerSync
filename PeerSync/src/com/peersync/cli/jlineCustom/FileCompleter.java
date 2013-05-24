@@ -95,11 +95,13 @@ implements Completer
 	}
 
 	protected int matchFiles(String untouchedBuffer,final String buffer, final String translated, final File[] files, final List<CharSequence> candidates) {
+		int matches = 0;
 		if (files != null) {
 
+			
 
 
-			int matches = 0;
+			
 
 			// first pass: just count the matches
 			for (File file : files) {
@@ -121,7 +123,7 @@ implements Completer
 						if(matches==1)
 							candidates.add(quoteIfWhitespaces(res));
 						else
-							candidates.add(res);
+							candidates.add(render(file, name).toString());
 					}	
 					else
 					{
@@ -129,7 +131,7 @@ implements Completer
 						if(matches==1)
 							candidates.add(quoteIfWhitespaces(res));
 						else
-							candidates.add(res);
+							candidates.add(render(file, name).toString());
 					}
 				}
 			}
@@ -142,8 +144,16 @@ implements Completer
 		}
 		else
 			candidates.add(untouchedBuffer); 
-		
-		
+		if(matches>1)
+		{
+			int index = 0;
+			if(OS_IS_WINDOWS)
+				index  = buffer.lastIndexOf("\\");
+			else
+				index = buffer.lastIndexOf(separator());
+
+			return index + separator().length();
+		}
 		return 0;
 
 		//		final int index = buffer.lastIndexOf(separator());

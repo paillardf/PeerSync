@@ -20,6 +20,9 @@ import java.util.Set;
 import jline.console.ConsoleReader;
 import jline.console.CursorBuffer;
 import jline.console.completer.CompletionHandler;
+import jline.internal.Configuration;
+
+import com.peersync.tools.Log;
 
 /**
  * A {@link CompletionHandler} that deals with multiple distinct completions
@@ -42,6 +45,7 @@ public class CandidateListCompletionHandler
         IOException
     {
         CursorBuffer buf = reader.getCursorBuffer();
+       
 
         // if there is only one completion, then fill in the buffer
         if (candidates.size() == 1) {
@@ -57,12 +61,15 @@ public class CandidateListCompletionHandler
             return true;
         }
         else if (candidates.size() > 1) {
-            String value = getUnambiguousCompletions(candidates);
+   
+    		String value = getUnambiguousCompletions(candidates);
+    		
+            value=value.replace("'", "\\'");
             if(value.contains(" "))
 				value =  "'"+value;
             setBuffer(reader, value, pos);
         }
-
+  
         printCandidates(reader, candidates);
 
         // redraw the current console buffer
@@ -161,7 +168,7 @@ public class CandidateListCompletionHandler
                 break;
             }
         }
-
+        
         return candidate.toString();
     }
 
