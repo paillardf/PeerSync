@@ -1,5 +1,9 @@
 package com.peersync;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
 
@@ -38,6 +42,9 @@ public class mainClass {
 		
 		//fa.substract(fa2);
 		
+		FileAvailability Mafa = new FileAvailability("test");
+		Mafa.addSegment(10, 20);
+		
 		Smarties n = new Smarties("test");
 		ID faID = IDFactory.newPeerGroupID();
 		ID fa2ID = IDFactory.newPeerGroupID();
@@ -45,17 +52,19 @@ public class mainClass {
 		System.out.println("FA2 : "+fa2ID);
 		n.addFileAvailability(fa, faID);
 		n.addFileAvailability(fa2,fa2ID );
-		n.display();
+		n.display(Mafa);
 		
-		SegmentToDownload bs = n.getBestChoice();
+		SegmentToDownload bs = n.getBestChoice(Mafa);
 		System.out.println("Segment Choisi : "+bs.getSegment().offset+"  "+(bs.getSegment().offset+bs.getSegment().length));
 //		for(BytesSegment bs : fa.getSegments())
 //		{
 //			System.out.println("Segment : "+bs.offset+"  "+(bs.offset+bs.length));
 //		}
 		
+		
 
 		}
+	
 	}
 
 

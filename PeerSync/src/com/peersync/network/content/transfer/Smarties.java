@@ -1,10 +1,8 @@
 package com.peersync.network.content.transfer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -18,9 +16,9 @@ public class Smarties {
 
 
 
-	private Map<Long,Integer> indexDirectory = new HashMap<Long,Integer >();
-	private Map<Integer,Long> beginsDirectory = new HashMap<Integer,Long >(); // \o/
-	private ArrayList< Set<ID> > providers = new ArrayList<Set<ID>>();
+	private HashMap<Long,Integer> indexDirectory = new HashMap<Long,Integer >();
+	private HashMap<Integer,Long> beginsDirectory = new HashMap<Integer,Long >(); // \o/
+	private ArrayList< HashSet<ID> > providers = new ArrayList<HashSet<ID>>();
 
 	private String hash;
 
@@ -28,7 +26,21 @@ public class Smarties {
 	{
 		this.hash=hash;
 	}
-	
+
+	public Smarties(Smarties smarties) {
+
+		providers=(ArrayList<HashSet<ID>>)smarties.getProviders().clone();
+		indexDirectory=(HashMap<Long,Integer>)smarties.getIndexDirectory().clone();
+		beginsDirectory=(HashMap<Integer,Long>)smarties.getBeginsDirectory().clone();
+	}
+
+
+	public SegmentToDownload getBestChoice(FileAvailability fa)
+	{
+		Smarties masked = mask(fa);
+		return masked.getBestChoice();
+	}
+
 	public SegmentToDownload getBestChoice()
 	{
 		ArrayList<Integer> resIntermediaire = new ArrayList<Integer>();
@@ -77,6 +89,9 @@ public class Smarties {
 
 	}
 
+
+
+
 	public void display()
 	{
 		System.out.println("Display Smarties");
@@ -88,6 +103,13 @@ public class Smarties {
 				System.out.println(id);
 			}
 		}
+	}
+	
+	
+	public void display(FileAvailability fa)
+	{
+		Smarties masked = mask(fa);
+		masked.display();
 	}
 
 
@@ -102,7 +124,7 @@ public class Smarties {
 
 				long previousBegin = getPreviousBegin(beginSegment);
 				long previousEnd = getPreviousBegin(endSegment);
-				Set<ID> tmp = new HashSet<ID>();
+				HashSet<ID> tmp = new HashSet<ID>();
 				if(previousEnd!=-1)
 					tmp= cloneIDs(indexDirectory.get(previousEnd));
 
@@ -129,9 +151,7 @@ public class Smarties {
 
 					addProviders(test,endSegment,tmp);
 
-					//addAProvider(test,endSegment,null);
-
-					System.out.println("END :"+endSegment+"   "+beginsDirectory.get(i-1));
+		
 				}
 
 			}
@@ -139,9 +159,22 @@ public class Smarties {
 
 	}
 
+	// Pour le clonage
+	private HashMap<Integer,Long> getBeginsDirectory() {
+		return beginsDirectory;
+	}
+
+	private HashMap<Long,Integer> getIndexDirectory() {
+		return indexDirectory;
+	}
+
+	private ArrayList< HashSet<ID> > getProviders() {
+		return providers;
+	}
+
 	private void addAProvider(int index,ID id)
 	{
-		Set<ID> toAdd = providers.get(index);
+		HashSet<ID> toAdd = providers.get(index);
 		if(id!=null)
 		{
 			toAdd.add(id);
@@ -149,7 +182,7 @@ public class Smarties {
 		}
 	}
 
-	private void addProviders(long previousBegin,long begin,Set<ID> ids)
+	private void addProviders(long previousBegin,long begin,HashSet<ID> ids)
 	{
 
 		int index;
@@ -172,7 +205,7 @@ public class Smarties {
 
 	private void addAProvider(long previousBegin,long begin,ID id)
 	{
-		Set<ID> toAdd = new HashSet<ID>();
+		HashSet<ID> toAdd = new HashSet<ID>();
 		int index;
 		if(previousBegin!=-1)
 		{
@@ -200,6 +233,7 @@ public class Smarties {
 
 	private void updateTheDirectory(long begin,int index)
 	{
+		HashMap<Integer, Long> tmp = new HashMap<Integer, Long>();
 		if(!indexDirectory.containsKey(begin))
 		{
 			for(Entry<Long,Integer> entry : indexDirectory.entrySet()) {
@@ -208,7 +242,7 @@ public class Smarties {
 					beginsDirectory.remove(entry.getValue());
 					int newIndex = entry.getValue()+1;
 					entry.setValue(newIndex);
-					beginsDirectory.put(newIndex, entry.getKey());
+					tmp.put(newIndex, entry.getKey());
 				}
 
 
@@ -218,38 +252,92 @@ public class Smarties {
 			indexDirectory.put(begin,index);
 			beginsDirectory.put(index, begin);
 		}
+		beginsDirectory.putAll(tmp);
+		
 
 
 	}
 
-	private Set<ID> cloneIDs(int index)
+	private Smarties mask(FileAvailability fa)
 	{
-		Set<ID> returnValue = new HashSet<ID>();
-		returnValue.addAll(providers.get(index));
+		Smarties result = new Smarties(this);
+		if(fa.getHash().equals(hash))
+		{
+			//Pour tous les segments de fa, on met supprime tous les intervalles disponibles de smarties
+			for(BytesSegment bs : fa.getSegments())
+			{
+				long beginSegment = bs.offset;
+				long endSegment = beginSegment+bs.length;
+				HashMap<Long, Integer> resultIndexDirectory = result.getIndexDirectory();
+
+				long previousBegin = result.getPreviousBegin(beginSegment);
+				long previousEnd = result.getPreviousBegin(endSegment);
+				HashSet<ID> tmp = new HashSet<ID>();
+				if(previousEnd!=-1)
+					tmp= result.cloneIDs(resultIndexDirectory.get(previousEnd));
+				result.addProviders(previousBegin,beginSegment,new HashSet<ID>());
+				ArrayList<HashSet<ID>> t = result.getProviders();
+				for(int i=resultIndexDirectory.get(beginSegment)+1;i<result.getProviders().size() && i<=resultIndexDirectory.get(previousEnd);i++)
+				{
+					result.eraseIndex(i);
+				}
+				//Traitement du dernier
+				previousEnd = result.getPreviousBegin(endSegment);
+				result.addProviders(previousEnd,endSegment,tmp);
+			}
+		}
+		return result;
+	}
+
+
+	private void eraseIndex(int index)
+	{
+		long value = beginsDirectory.get(index);
+		beginsDirectory.remove(index);
+		indexDirectory.remove(value);
+		
+		providers.remove(index);
+		for(Entry<Long,Integer> entry : indexDirectory.entrySet()) {
+			
+			if(entry.getValue()>index)
+			{
+				beginsDirectory.remove(entry.getValue());
+				int newIndex = entry.getValue()-1;
+				entry.setValue(newIndex);
+				beginsDirectory.put(newIndex, entry.getKey());
+			}
+		}
+		
+	}
+
+	private HashSet<ID> cloneIDs(int index)
+	{
+		HashSet<ID> returnValue = (HashSet<ID>)providers.get(index).clone();
 		return returnValue;
 	}
 
 	private long getPreviousBegin(long begin)
 	{
-		Set<Long> results=new HashSet<Long>();
+		long result=Long.MIN_VALUE;
 		if(indexDirectory.containsKey(begin))
 			return begin;
 		else
 		{
 			for(Entry<Long,Integer> entry : indexDirectory.entrySet()) {
-				if(entry.getKey()<begin)
-					results.add(entry.getKey());
+				if(entry.getKey()<begin && entry.getKey()>result)
+					result=entry.getKey();
+				else
+					return result==Long.MIN_VALUE?-1:result;
 
 			}
-			if(results.size()==0)
-				return -1;
-			else
-				return Collections.max(results);
+			return result==Long.MIN_VALUE?-1:result;
 		}
 
 	}
 
-	
+
+
+
 
 	private int getMinProviders()
 	{
