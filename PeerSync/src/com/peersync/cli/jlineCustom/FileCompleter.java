@@ -138,7 +138,7 @@ implements Completer
 
 			if(matches==0)
 			{
-				candidates.add(buffer); 
+				candidates.add(untouchedBuffer); 
 				return 0;
 			}
 		}
