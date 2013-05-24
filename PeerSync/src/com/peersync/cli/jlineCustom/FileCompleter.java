@@ -15,7 +15,7 @@ implements Completer
 {
 	// TODO: Handle files with spaces in them
 	//Meilleur gestion de Windows (winRegexp, changement des / en \ dans la completion)
-	// TODO : gérer les noms de fichiers comportant des '
+	// TODO : gï¿½rer les noms de fichiers comportant des '
 
 	private static final boolean OS_IS_WINDOWS;
 	private static final String winRegexp =  "^[a-zA-Z]:.*$";
@@ -39,10 +39,13 @@ implements Completer
 			buffer = buffer.replace('/', '\\');
 		}
 		
+		
 		if(buffer.startsWith("'"))
 			buffer = buffer.replaceFirst("'", "");
-		if(buffer.endsWith("'"))
+		if(!buffer.endsWith("\\'") && buffer.endsWith("'"))
 			buffer = buffer.substring(0,buffer.length()-1);
+		
+		buffer=buffer.replace("\\'", "'");
 		String translated = buffer;
 
 		File homeDir = getUserHome();
@@ -109,7 +112,11 @@ implements Completer
 					CharSequence name = file.getName() + (matches == 1 && file.isDirectory() ? separator() : "");
 					if(!render(file, name).toString().startsWith(buffer))
 					{
-						String tmp = buffer.substring(0,buffer.lastIndexOf("\\")+1);
+						String tmp = new String();
+						if(OS_IS_WINDOWS)
+							tmp = buffer.substring(0,buffer.lastIndexOf("\\")+1);
+						else
+							tmp = buffer.substring(0,buffer.lastIndexOf("/")+1);
 						String res = tmp+render(file, name).toString();
 						if(matches==1)
 							candidates.add(quoteIfWhitespaces(res));
@@ -129,32 +136,34 @@ implements Completer
 
 			if(matches==0)
 			{
-				candidates.add(buffer); //Enjoy the hack...
+				candidates.add(buffer); 
 				return 0;
 			}
 		}
 		else
-			candidates.add(untouchedBuffer); //Enjoy the hack...
+			candidates.add(untouchedBuffer); 
+		
+		
 		return 0;
 
 		//		final int index = buffer.lastIndexOf(separator());
 		//
-		//		Log.d("----------------");
-		//		for(CharSequence cs : candidates)
-		//			Log.d(cs.toString());
-		//		Log.d("----------------");
+
 		//		return index + separator().length();
 	}
 
 	protected String quoteIfWhitespaces(String s)
 	{
-		
+		s=s.replace("'", "\\'");
 		if(s.contains(" "))
 				return "'"+s+"' ";
 		else
 			return s;
 
 	}
+	
+	
+	
 	protected CharSequence render(final File file, final CharSequence name) {
 		return name;
 	}

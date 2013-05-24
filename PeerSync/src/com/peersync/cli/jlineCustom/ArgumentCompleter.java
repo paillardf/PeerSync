@@ -258,7 +258,7 @@ public class ArgumentCompleter
                     argpos = arg.length();
                 }
                 
-                if ((i == buffer.length()) || (isDelimiter(buffer, i) && !quoteDelimited) || (quoteDelimited && buffer.charAt(i)=='\''))  {
+                if ((i == buffer.length()) || (isDelimiter(buffer, i) && !quoteDelimited) || (quoteDelimited && buffer.charAt(i)=='\'' && ((i-1>=0 && buffer.charAt(i-1)!='\\') || i-1<0 )))  {
                     if (arg.length() > 0) {
                     	if(quoteDelimited && i < buffer.length())
                     		arg.append(buffer.charAt(i));
