@@ -63,13 +63,11 @@ public class BytesSegment{
 				bResult = b1;
 				eResult= b2;
 				eResult=eResult-bResult;
-				if(bResult!=eResult)
 					returnValue.add(new BytesSegment(bResult,eResult));
 
 				bResult = e2;
 				eResult= e1;
 				eResult=eResult-bResult;
-				if(bResult!=eResult)
 					returnValue.add(new BytesSegment(bResult,eResult));
 				return returnValue;
 			}

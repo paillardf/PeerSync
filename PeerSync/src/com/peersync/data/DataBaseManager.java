@@ -1,6 +1,10 @@
 package com.peersync.data;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,6 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import net.jxta.document.MimeMediaType;
+import net.jxta.document.StructuredDocument;
+import net.jxta.document.StructuredDocumentFactory;
+import net.jxta.document.XMLElement;
 
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
@@ -48,15 +57,18 @@ public class DataBaseManager extends DbliteConnection{
 	private static final String DBSHAREDFOLDERSTABLE = "sharedFolder";
 	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 	private static final String PEERGROUPFIELD = "peerGroup";
-	
 	private static final String EVENT_SIZEFIELD = "filesize";
 
 	private static final String FILESINFO_TABLE = "FilesInfo";
 	private static final String FILESINFO_ABSOLUTEPATHFIELD = "absolutePath";
 	private static final String FILESINFO_UPDATEDATEFIELD = "dateModif";
-	private static final String LOCALFILESAVAILABILITY_TABLE = "FilesAvailability";
-
 	
+	
+	private static final String DOWNLOADINGILESAVAILABILITY_TABLE = "FilesAvailability";
+	private static final String DOWNLOADINGFILESAVAILABILITY_HASH = "hash";
+	private static final String DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY = "FileAvailability";
+	
+
 
 	private static final int VERSION = 1;
 
@@ -106,10 +118,10 @@ public class DataBaseManager extends DbliteConnection{
 				FILESINFO_UPDATEDATEFIELD+ " long, "+
 				"PRIMARY KEY("+FILESINFO_ABSOLUTEPATHFIELD+"));");
 		
-		update("create table "+FILESINFO_TABLE+" "+
-				"("+FILESINFO_ABSOLUTEPATHFIELD+" text, "+
-				FILESINFO_UPDATEDATEFIELD+ " long, "+
-				"PRIMARY KEY("+FILESINFO_ABSOLUTEPATHFIELD+"));");
+		update("create table "+DOWNLOADINGILESAVAILABILITY_TABLE+" "+
+				"("+DOWNLOADINGFILESAVAILABILITY_HASH+" text, "+
+				DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+ " text, "+
+				"PRIMARY KEY("+DOWNLOADINGFILESAVAILABILITY_HASH+"));");
 
 
 	}
@@ -362,6 +374,73 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
+	
+	public ArrayList<FileAvailability> getLocalFilesAvailabilityForAPeerGroup(String peerGroupID)
+	{
+		ArrayList<FileAvailability>  res = new ArrayList<FileAvailability>();
+		ArrayList <SharedFolder> sfs = getSharedFoldersOfAPeerGroup(peerGroupID);
+		for(SharedFolder sf : sfs)
+		{
+			res.addAll(getLocalFilesAvailabilityInASharedFolder(sf.getUID()));
+		}
+		return res;
+	}
+	
+	
+	
+	
+	
+	/**
+	 *  Retourne les derniers événements en base de données, pour chaque fichier.
+	 *  Ne prends pas en compte les événements "Suppression", les events avec un status différent de "OK", ni les dossiers
+	 * 	@param shareFolderUID 
+	 * 	@return  Map nom_de_fichier,hash
+	 */
+	public ArrayList<FileAvailability> getLocalFilesAvailabilityInASharedFolder(String shareFolderUID)
+	{
+		ArrayList<FileAvailability>  res = new ArrayList<FileAvailability>() ;
+
+
+		try
+		{
+
+			String sql = "select e1."+NEWHASHFIELD+",e1."+EVENT_SIZEFIELD+" where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"=\""+shareFolderUID+"\" and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
+		
+
+			ResultSet rs = query(sql);
+
+
+
+
+			while(rs.next())
+			{
+
+				// read the result set
+				if(rs.getString(NEWHASHFIELD)!=null)
+				{
+					FileAvailability fa = new FileAvailability(rs.getString(NEWHASHFIELD));
+					fa.addSegment(0, rs.getLong(EVENT_SIZEFIELD));
+					res.add(fa);
+
+				}
+				else
+					System.err.println("PB de shared folder");
+			}
+		}
+		catch(SQLException e)
+		{
+			// if the error message is "out of memory", 
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		}
+
+
+		return res;
+	}
+	
+	
+	
 	public ArrayList<FileAvailable> getFilesAvailableForAPeerGroup(String peerGroupID)
 	{
 		ArrayList<FileAvailable>  res = new ArrayList<FileAvailable>();
@@ -587,6 +666,99 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 
+	public void cleanDonwloadingFileAvailabilities()
+	{
+		String sqlQuery = "Delete from "+DOWNLOADINGILESAVAILABILITY_TABLE+
+					" where "+DOWNLOADINGFILESAVAILABILITY_HASH+" NOT IN"+
+					" (select e1."+NEWHASHFIELD+
+					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
+					" and e1."+ISFILEFIELD+"=1"+
+					" and  e1."+DATEFIELD+" = " +
+					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+"))";
+		try {
+				update(sqlQuery);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void eraseFileAvailability(String hash)
+	{
+		String sqlQuery = "Delete from "+DOWNLOADINGILESAVAILABILITY_TABLE+
+					" where "+DOWNLOADINGFILESAVAILABILITY_HASH+" = \""+hash+"\"";
+		try {
+				update(sqlQuery);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void saveFileAvailability(FileAvailability fa)
+	{
+		boolean update = false;
+		try {
+			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+
+					" from "+DOWNLOADINGILESAVAILABILITY_TABLE+" where "+DOWNLOADINGFILESAVAILABILITY_HASH+"=\""+fa.getHash()+"\"");
+
+			while(rs.next())
+			{
+				if(rs.getString(DOWNLOADINGFILESAVAILABILITY_HASH)!=null)
+					update = true;
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			if(update)
+				update("Update "+DOWNLOADINGILESAVAILABILITY_TABLE+" set "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+"='"+fa.toXML().toString()+"' where "+DOWNLOADINGFILESAVAILABILITY_HASH+"=\""+fa.getHash()+"\"");
+			else
+			{
+				update("insert into "+DOWNLOADINGILESAVAILABILITY_TABLE+ " ("+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+") values (\""+fa.getHash() + "\", '"+fa.toXML().toString()+"')");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public ArrayList<FileAvailability> getDownloadingFilesAvailibility()
+	{
+		ArrayList<FileAvailability> res = new ArrayList<FileAvailability>();
+		try {
+			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+
+					" from "+DOWNLOADINGILESAVAILABILITY_TABLE);
+
+			while(rs.next())
+			{
+				String hash  = rs.getString(DOWNLOADINGFILESAVAILABILITY_HASH);
+				String fileAvailabilitiy = rs.getString(DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY);
+				try {
+					Reader r = new StringReader(fileAvailabilitiy);
+					StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, r);
+				
+				FileAvailability fa = new FileAvailability((XMLElement)doc);
+				res.add(fa);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res;
+		
+	}
+	
+	
+	
+	
 
 	/** Récupère la version de pile pour chaque owner pour un dossier donné
 	 * 	@param UID: UID du SharedFolder que l\"on veut analyser

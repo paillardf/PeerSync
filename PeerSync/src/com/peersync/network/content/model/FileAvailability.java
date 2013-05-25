@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 
+import net.jxta.document.Attributable;
+import net.jxta.document.Document;
 import net.jxta.document.Element;
 import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
-import net.jxta.document.StructuredTextDocument;
 import net.jxta.document.XMLElement;
-import net.jxta.id.ID;
+import net.jxta.impl.document.DOMXMLDocument;
+import net.jxta.impl.document.DOMXMLElement;
+import net.jxta.impl.document.LiteXMLElement;
 
 public class FileAvailability {
 	private static Logger LOG =
@@ -23,6 +26,9 @@ public class FileAvailability {
 	private static final String tagOffset = "avOffset";
 	private static final String tagLength = "avLength";
 	private static final String tagAvailability = "FileAvailability";
+	
+	//TODO : voir la gestion du tag root et du hash
+	private static final String tagRoot = "root";
 
 
 
@@ -83,6 +89,36 @@ public class FileAvailability {
 
 	}
 
+	
+	public void substract(BytesSegment bs){
+
+		int i=0;
+		while(i<segments.size())
+		{
+		
+			ArrayList<BytesSegment> tmp = segments.get(i).tryToSubstract(bs);
+			if(tmp!=null )
+			{
+				segments.remove(i);
+				for(int j=0;j<tmp.size();j++)
+				{
+					BytesSegment tmpBs = tmp.get(j);
+
+					if(!tmpBs.isEmpty())
+					{
+						if(j>0)
+							i++;
+						segments.add(i,tmpBs);
+
+					}
+				}
+			}
+			i++;
+		}
+		
+
+	}
+	
 
 	public void substract(FileAvailability fa){
 		ArrayList<BytesSegment> otherSegment= fa.getSegments();
@@ -134,18 +170,28 @@ public class FileAvailability {
 
 	public StructuredDocument toXML()
 	{
-		StructuredTextDocument doc = (StructuredTextDocument)StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, tagAvailability);
-		appendSegment(doc, doc);
+		StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, tagRoot);
+		for (int j = 0; j < segments.size(); j++) {
+			BytesSegment bs = segments.get(j);
+			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);  
+			doc.appendChild(avE); 
+			avE.addAttribute(tagOffset, ""+bs.offset);
+			avE.addAttribute(tagLength,""+ bs.length);
+			
+		}
+		
+		//appendSegment(doc, doc);
 		return doc;
 	}
 	
 	public void appendSegment(StructuredDocument doc, Element parent) {
 		for (int j = 0; j < segments.size(); j++) {
 			BytesSegment bs = segments.get(j);
-			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);    
+			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);  
+			parent.appendChild(avE); 
 			avE.addAttribute(tagOffset, ""+bs.offset);
 			avE.addAttribute(tagLength,""+ bs.length);
-			parent.appendChild(avE);
+			
 		}         
 
 	}
