@@ -4,8 +4,6 @@ import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 
-import com.peersync.network.behaviour.ContentBehaviour;
-import com.peersync.network.behaviour.DiscoveryBehaviour;
 import com.peersync.network.behaviour.StackSyncBehaviour;
 
 public class SyncPeerGroup extends BasicPeerGroup {

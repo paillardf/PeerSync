@@ -3,8 +3,6 @@ package com.peersync.data;
 import java.io.File;
 import java.util.ArrayList;
 
-import net.jxta.peer.PeerID;
-
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.FileWithLocalSource;

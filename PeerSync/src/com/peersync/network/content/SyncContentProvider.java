@@ -66,6 +66,7 @@ import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.content.model.SyncFolderShare;
+import com.peersync.network.content.transfer.FilesInfoManager;
 import com.peersync.network.content.transfer.SyncActiveTransfer;
 import com.peersync.network.content.transfer.SyncActiveTransferTracker;
 import com.peersync.network.content.transfer.SyncActiveTransferTrackerListener;
@@ -104,7 +105,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 	
 	private static ModuleSpecID specID;
 
-	
+	private FilesInfoManager filesInfoManager = new FilesInfoManager();
 
 	 //////////////////////////////////////////////////////////////////////////
     // Constructors and initializers:

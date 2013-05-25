@@ -9,22 +9,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.omg.CORBA.INITIALIZE;
-
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.XMLDocument;
 import net.jxta.document.XMLElement;
-import net.jxta.endpoint.ByteArrayMessageElement;
 import net.jxta.endpoint.Message;
 import net.jxta.endpoint.MessageElement;
 import net.jxta.endpoint.TextDocumentMessageElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
-import net.jxta.impl.content.defprovider.DataRequest;
-import net.jxta.impl.content.defprovider.DataResponse;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.pipe.InputPipe;
@@ -41,7 +36,7 @@ import com.peersync.network.content.message.AvailabilityRequestMessage;
 import com.peersync.network.content.message.AvailabilityResponseMessage;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
-import com.peersync.network.content.model.BitesSegment;
+import com.peersync.network.content.model.BytesSegment;
 import com.peersync.network.content.model.FileAvailability;
 
 class PipeManager implements PipeMsgListener{
@@ -239,7 +234,7 @@ class PipeManager implements PipeMsgListener{
 			if(needsFileAvailabilityUpdate()&&!queryFileAvailabilityRunning()){
 				message = createFileAvailabilityMessage();
 			}else{
-				BitesSegment bs = getBestSegment(pipeAdv.getPipeID());
+				BytesSegment bs = getBestSegment(pipeAdv.getPipeID());
 				return createDataRequestMessage(bs);
 			}
 		}
@@ -251,14 +246,14 @@ class PipeManager implements PipeMsgListener{
 		return message;
 	}
 
-	private BitesSegment getBestSegment(ID pipeID) {
+	private BytesSegment getBestSegment(ID pipeID) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 
-	private DataRequestMessage createDataRequestMessage(BitesSegment bs) {
+	private DataRequestMessage createDataRequestMessage(BytesSegment bs) {
 		DataRequestMessage req = new DataRequestMessage();
 		req.setHash(bs.getHash());
 		req.setOffset(bs.offset);
@@ -372,36 +367,6 @@ class PipeManager implements PipeMsgListener{
 			new IllegalArgumentException(getClass().getName() +
 					" only supports XMLElement");
 		}
-
-
-		//				try {
-		//
-		//					doc = StructuredDocumentFactory.newStructuredDocument(msge);
-		//					resp = new DataResponse(doc);
-		//
-		//				} catch (IOException iox) {
-		//
-		//					Logging.logCheckedWarning(LOG, "Could not process message\n", iox);
-		//					return;
-		//
-		//				}
-		//
-		//				if (it.hasNext()) {
-		//
-		//					try {
-		//
-		//						bmsge = (ByteArrayMessageElement) it.next();
-		//						data = bmsge.getBytes();
-		//
-		//					} catch (ClassCastException ccx) {
-		//
-		//						Logging.logCheckedWarning(LOG, "Second message element not byte array\n", ccx);
-		//
-		//					}
-		//				}
-		//
-		//				fireTransferProgress(received) //TODO
-		//				processDataResponse(resp, data);
 	}
 
 	private void processRequest(AbstractSyncMessage req) {
@@ -415,12 +380,12 @@ class PipeManager implements PipeMsgListener{
 	}
 
 	private void processAvailabilityResponse(AvailabilityResponseMessage req) {
-		// TODO Auto-generated method stub
+		syncFolderTranfert.filesInfoManager.addFilesAvailability(fileAvailability, getID());
 
 	}
 
 	private void processDataResponse(DataRequestMessage req) {
-		// TODO Auto-generated method stub
+		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(req.getHash(), req.getOffset(), req.getLength());
 
 	}
 

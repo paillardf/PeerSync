@@ -12,7 +12,7 @@ import com.peersync.network.content.model.BytesSegment;
 import com.peersync.network.content.model.FileAvailability;
 
 
-public class Smarties {
+public class SmartFileInfo {
 
 
 
@@ -22,22 +22,22 @@ public class Smarties {
 
 	private String hash;
 
-	public Smarties(String hash)
+	public SmartFileInfo(String hash)
 	{
 		this.hash=hash;
 	}
 
-	public Smarties(Smarties smarties) {
+	public SmartFileInfo(SmartFileInfo smartFileInfo) {
 
-		providers=(ArrayList<HashSet<ID>>)smarties.getProviders().clone();
-		indexDirectory=(HashMap<Long,Integer>)smarties.getIndexDirectory().clone();
-		beginsDirectory=(HashMap<Integer,Long>)smarties.getBeginsDirectory().clone();
+		providers=(ArrayList<HashSet<ID>>)smartFileInfo.getProviders().clone();
+		indexDirectory=(HashMap<Long,Integer>)smartFileInfo.getIndexDirectory().clone();
+		beginsDirectory=(HashMap<Integer,Long>)smartFileInfo.getBeginsDirectory().clone();
 	}
 
 
 	public SegmentToDownload getBestChoice(FileAvailability fa)
 	{
-		Smarties masked = mask(fa);
+		SmartFileInfo masked = mask(fa);
 		return masked.getBestChoice();
 	}
 
@@ -108,7 +108,7 @@ public class Smarties {
 	
 	public void display(FileAvailability fa)
 	{
-		Smarties masked = mask(fa);
+		SmartFileInfo masked = mask(fa);
 		masked.display();
 	}
 
@@ -258,9 +258,9 @@ public class Smarties {
 
 	}
 
-	private Smarties mask(FileAvailability fa)
+	private SmartFileInfo mask(FileAvailability fa)
 	{
-		Smarties result = new Smarties(this);
+		SmartFileInfo result = new SmartFileInfo(this);
 		if(fa.getHash().equals(hash))
 		{
 			//Pour tous les segments de fa, on met supprime tous les intervalles disponibles de smarties

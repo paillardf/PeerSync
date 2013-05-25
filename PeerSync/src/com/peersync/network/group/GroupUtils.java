@@ -1,15 +1,8 @@
 package com.peersync.network.group;
 
 import java.net.URI;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Map;
 
-import javax.crypto.EncryptedPrivateKeyInfo;
-
-import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.AdvertisementFactory;
-import net.jxta.document.Element;
 import net.jxta.document.MimeMediaType;
 import net.jxta.document.XMLDocument;
 import net.jxta.document.XMLElement;
@@ -21,22 +14,11 @@ import net.jxta.impl.peergroup.CompatibilityUtils;
 import net.jxta.impl.peergroup.StdPeerGroup;
 import net.jxta.impl.peergroup.StdPeerGroupParamAdv;
 import net.jxta.impl.protocol.PSEConfigAdv;
-import net.jxta.membership.MembershipService;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.ModuleSpecID;
 import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PeerGroupAdvertisement;
-import net.jxta.rendezvous.RendezVousService;
-import net.jxta.rendezvous.RendezvousEvent;
-import net.jxta.rendezvous.RendezvousListener;
-
-import com.peersync.data.SyncUtils;
-import com.peersync.models.PeerGroupEvent;
-import com.peersync.network.behaviour.AbstractBehaviour;
-import com.peersync.network.behaviour.ContentBehaviour;
-import com.peersync.network.behaviour.DiscoveryBehaviour;
-import com.peersync.network.behaviour.StackSyncBehaviour;
 
 public class GroupUtils {
 

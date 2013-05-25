@@ -82,6 +82,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	// Initialized at construction
 	private final ScheduledExecutorService executor;
 	private final PeerGroup peerGroup;
+	public FilesInfoManager filesInfoManager;
 
 	// Managed over the course of the transfer
 	private List<DefaultContentShareAdvertisementImpl> sourcesRemaining =
@@ -136,12 +137,14 @@ accessor.close(); //TODO
 			SyncContentProvider origin,
 			ScheduledExecutorService schedExecutor,
 			PeerGroup group,
+			FilesInfoManager filesInfoM,
 			ContentID contentID) {
 		super(origin, schedExecutor, group, contentID, "SyncContentTransfer");
 		setSourceLocationInterval(SOURCE_LOCATION_INTERVAL);
 		setDiscoveryThreshold(DISCOVERY_THRESHOLD);
 		executor = schedExecutor;
 		peerGroup = group;
+		filesInfoManager = filesInfoM;
 
 
 	}

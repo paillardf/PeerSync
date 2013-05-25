@@ -2,10 +2,7 @@ package com.peersync;
 
 import java.util.ArrayList;
 
-import net.jxta.annotation.NeedsRedesign;
-
 import com.peersync.data.DataBaseManager;
-import com.peersync.network.content.model.BytesSegment;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.tools.Constants;
 
@@ -24,8 +21,7 @@ public class mainClass {
 		fa.addSegment(5,10);
 
 		
-		
-		
+	
 		
 		Constants.getInstance().PEERNAME = "client2";
 		DataBaseManager.getInstance().saveFileAvailability(fa);
