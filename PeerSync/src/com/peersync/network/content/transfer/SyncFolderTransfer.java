@@ -106,19 +106,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 
 
 
-	/*
-	 * File myFile = new File (filename);
-//Create the accessor with read-write access.
-RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
-int lastNumBytes = 26;
-long startingPosition = accessor.length() - lastNumBytes;
-
-accessor.seek(startingPosition);
-accessor.writeInt(x);
-accessor.writeShort(y);
-accessor.writeByte(z);
-accessor.close(); //TODO
-	 */
+	
 
 	//////////////////////////////////////////////////////////////////////////
 	// Constructors:

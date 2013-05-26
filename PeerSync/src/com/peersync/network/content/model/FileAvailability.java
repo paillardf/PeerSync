@@ -21,7 +21,8 @@ public class FileAvailability {
 
 	private String hash;
 	private ArrayList<BytesSegment> segments = new ArrayList<BytesSegment>();
-
+	
+	public static final String tagHash = "FileHash";
 
 	private static final String tagOffset = "avOffset";
 	private static final String tagLength = "avLength";
@@ -171,24 +172,19 @@ public class FileAvailability {
 	public StructuredDocument toXML()
 	{
 		StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, tagRoot);
-		for (int j = 0; j < segments.size(); j++) {
-			BytesSegment bs = segments.get(j);
-			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);  
-			doc.appendChild(avE); 
-			avE.addAttribute(tagOffset, ""+bs.offset);
-			avE.addAttribute(tagLength,""+ bs.length);
-			
-		}
-		
-		//appendSegment(doc, doc);
+		appendSegment(doc);
 		return doc;
 	}
 	
-	public void appendSegment(StructuredDocument doc, Element parent) {
+	public void appendSegment(StructuredDocument doc) {
+		
+		Element e = doc.createElement(tagHash, getHash());       	
+		doc.appendChild(e);
+		
 		for (int j = 0; j < segments.size(); j++) {
 			BytesSegment bs = segments.get(j);
 			XMLElement avE = (XMLElement)doc.createElement(tagAvailability);  
-			parent.appendChild(avE); 
+			e.appendChild(avE); 
 			avE.addAttribute(tagOffset, ""+bs.offset);
 			avE.addAttribute(tagLength,""+ bs.length);
 			

@@ -52,8 +52,7 @@ import net.jxta.id.IDFactory;
 public class DataResponseMessage extends AbstractSyncMessage {
 	private static Logger LOG =
 			Logger.getLogger(DataResponseMessage.class.getName());
-	private static final String tagRoot = "DataResponse";
-	private static final String tagID = "FileHash";
+	public static final String tagRoot = "DataResponse";
 	private static final String tagOffs = "Offs";
 	private static final String tagLen = "Len";
 	private static final String tagQueryID = "QID";
@@ -61,7 +60,7 @@ public class DataResponseMessage extends AbstractSyncMessage {
 	private static final String attrReached = "reached";
 
 	private long offs;
-	private int len;
+	private long len;
 	private boolean eofReached;
 	private FileAvailability fileAvailability;
 
@@ -118,7 +117,7 @@ public class DataResponseMessage extends AbstractSyncMessage {
 		int i;
 		long l;
 
-		if (elem.getName().equals(tagID)) {
+		if (elem.getName().equals(FileAvailability.tagHash)) {
 			fileAvailability = new FileAvailability(elem);
 			return true;
 		} else if (elem.getName().equals(tagOffs)) {
@@ -179,14 +178,13 @@ public class DataResponseMessage extends AbstractSyncMessage {
 			xmlDoc.addAttribute("xmlns:jxta", "http://jxta.org");
 		}
 
-		e = doc.createElement(tagID, fileAvailability.getHash());//TODO
-		doc.appendChild(e);
-		fileAvailability.appendSegment(doc, e);
+		
+		fileAvailability.appendSegment(doc);
 
 		e = doc.createElement(tagOffs, Long.toString(getOffset()));
 		doc.appendChild(e);
 
-		e = doc.createElement(tagLen, Integer.toString(getLength()));
+		e = doc.createElement(tagLen, Long.toString(getLength()));
 		doc.appendChild(e);
 
 		e = doc.createElement(tagQueryID, Integer.toString(getQueryID()));
@@ -220,14 +218,14 @@ public class DataResponseMessage extends AbstractSyncMessage {
 	/**
 	 * Sets the length of this response.
 	 */
-	public void setLength(int len) {
+	public void setLength(long len) {
 		this.len = len;
 	}
 
 	/**
 	 * Returns length of this response.
 	 */
-	public int getLength() {
+	public long getLength() {
 		return len;
 	}
 

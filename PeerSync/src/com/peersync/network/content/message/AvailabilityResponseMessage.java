@@ -44,8 +44,8 @@ import com.peersync.network.content.model.FileAvailability;
 public class AvailabilityResponseMessage extends AbstractSyncMessage {
 	private static Logger LOG =
 			Logger.getLogger(AvailabilityResponseMessage.class.getName());
-	private static final String tagRoot = "AvailabilityResponse";
-	private static final String tagID = "FileHash";
+	public static final String tagRoot = "AvailabilityResponse";
+	
 
 	private static final String tagQueryID = "QID";
 	private static final String tagEOF = "EOF";
@@ -111,7 +111,7 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 		int i;
 		long l;
 
-		if (elem.getName().equals(tagID)) {
+		if (elem.getName().equals(FileAvailability.tagHash)) {
 			filesAvailability.add(new FileAvailability(elem));
 			return true;
 
@@ -154,9 +154,8 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 		for (int i = 0; i < filesAvailability.size(); i++) {
 			FileAvailability f = filesAvailability.get(i);
 
-			e = doc.createElement(tagID, f.getHash());       	
-			doc.appendChild(e);
-			f.appendSegment(doc , e);
+		
+			f.appendSegment(doc);
 			
 		}
 		e = doc.createElement(tagQueryID, Integer.toString(getQueryID()));

@@ -15,11 +15,14 @@ import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.XMLDocument;
 import net.jxta.document.XMLElement;
+import net.jxta.endpoint.ByteArrayMessageElement;
 import net.jxta.endpoint.Message;
 import net.jxta.endpoint.MessageElement;
 import net.jxta.endpoint.TextDocumentMessageElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
+import net.jxta.impl.content.defprovider.DataResponse;
+import net.jxta.impl.content.defprovider.DefaultContentProvider;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.pipe.InputPipe;
@@ -44,18 +47,17 @@ class PipeManager implements PipeMsgListener{
 
 	class PipeQuery{
 		private long lastAccess = System.currentTimeMillis();
-		private String type;
-		private int id;
 
 		/**
 		 * Logger instance.
 		 */
 		private final Logger LOG =
 				Logger.getLogger(PipeManager.class.getName());
+		private AbstractSyncMessage message;
 
 		public PipeQuery(AbstractSyncMessage message) {
-			type = message.getTagRoot();
-			id = message.getQueryID();
+			this.message = message;
+			
 		}
 
 		public synchronized boolean isIdle() {
@@ -63,7 +65,14 @@ class PipeManager implements PipeMsgListener{
 		}
 
 		public String getType() {
-			return type;
+			return message.getTagRoot();
+		}
+
+		public void cancel() {
+			if(getType().equals(DataRequestMessage.tagRoot)){
+				syncFolderTranfert.filesInfoManager.cancelBookFileSegment((DataRequestMessage)message);
+			}
+			
 		}
 	}
 
@@ -220,6 +229,7 @@ class PipeManager implements PipeMsgListener{
 		synchronized (this) {
 			for (int i = pipeQueries.size()-1; i >= + pipeQueries.size(); i--) {
 				if(pipeQueries.get(i).isIdle()){
+					pipeQueries.get(i).cancel();
 					pipeQueries.remove(i);
 				}
 			}
@@ -253,9 +263,9 @@ class PipeManager implements PipeMsgListener{
 
 
 
-	private DataRequestMessage createDataRequestMessage(BytesSegment bs) {
+	private DataRequestMessage createDataRequestMessage(BytesSegment bs, String hash) {
 		DataRequestMessage req = new DataRequestMessage();
-		req.setHash(bs.getHash());
+		req.setHash(hash);
 		req.setOffset(bs.offset);
 		req.setLength(bs.length);
 		req.setQueryID(nextQueryId());
@@ -297,7 +307,6 @@ class PipeManager implements PipeMsgListener{
 		for (PipeMsgEvent pme : workQueue) {
 
 			msg = pme.getMessage();
-
 			try {
 				processMessage(msg);
 			} catch (Exception x) {
@@ -354,25 +363,28 @@ class PipeManager implements PipeMsgListener{
 			}
 			doc = (XMLElement) root;
 			AbstractSyncMessage req;
-			if (doc.getName().equals(DataRequestMessage.tagRoot)) {
-				req = new DataRequestMessage(doc);
-			}else if(doc.getName().equals(AvailabilityRequestMessage.tagRoot)){
-				req = new AvailabilityRequestMessage(doc);
+			byte[] data =null;
+			if (doc.getName().equals(DataResponseMessage.tagRoot)) {
+				req = new DataResponseMessage(doc);
+				ByteArrayMessageElement bmsge = (ByteArrayMessageElement) msge;
+		        data = bmsge.getBytes();
+			}else if(doc.getName().equals(AvailabilityResponseMessage.tagRoot)){
+				req = new AvailabilityResponseMessage(doc);
 			}else{
 				throw new IllegalArgumentException(getClass().getName() +
 						" doesn't support this request");
 			}
-			processRequest(req);
+			processRequest(req, data);
 		} catch (IOException e) {
 			new IllegalArgumentException(getClass().getName() +
 					" only supports XMLElement");
 		}
 	}
 
-	private void processRequest(AbstractSyncMessage req) {
+	private void processRequest(AbstractSyncMessage req, byte[] data) {
 
 		if(req instanceof DataResponseMessage){
-			processDataResponse((DataRequestMessage) req);
+			processDataResponse((DataRequestMessage) req, data);
 		}else if(req instanceof AvailabilityResponseMessage){
 			processAvailabilityResponse((AvailabilityResponseMessage) req);
 		}
@@ -384,8 +396,8 @@ class PipeManager implements PipeMsgListener{
 
 	}
 
-	private void processDataResponse(DataRequestMessage req) {
-		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(req.getHash(), req.getOffset(), req.getLength());
+	private void processDataResponse(DataRequestMessage req, byte[] data) {
+		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(req.getHash(), req.getOffset(), req.getLength(), data);
 
 	}
 

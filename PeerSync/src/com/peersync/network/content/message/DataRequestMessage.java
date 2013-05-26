@@ -54,7 +54,7 @@ public class DataRequestMessage extends AbstractSyncMessage{
 
 	private PipeAdvertisement adv;
 	private long offs;
-	private int len;
+	private long len;
 	private String hash;
 
 	/**
@@ -174,7 +174,7 @@ public class DataRequestMessage extends AbstractSyncMessage{
 		e = doc.createElement(tagOffs, Long.toString(getOffset()));
 		doc.appendChild(e);
 
-		e = doc.createElement(tagLen, Integer.toString(getLength()));
+		e = doc.createElement(tagLen, Long.toString(getLength()));
 		doc.appendChild(e);
 
 		e = doc.createElement(tagQueryID, Integer.toString(getQueryID()));
@@ -205,14 +205,14 @@ public class DataRequestMessage extends AbstractSyncMessage{
 	/**
 	 * Sets the length of this request.
 	 */
-	public void setLength(int len) {
-		this.len = len;
+	public void setLength(long length) {
+		this.len = length;
 	}
 
 	/**
 	 * Returns length of this request.
 	 */
-	public int getLength() {
+	public long getLength() {
 		return len;
 	}
 
