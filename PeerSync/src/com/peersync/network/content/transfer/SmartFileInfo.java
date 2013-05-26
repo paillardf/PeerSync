@@ -35,12 +35,67 @@ public class SmartFileInfo {
 	}
 
 
+	public SegmentToDownload getBestChoice(FileAvailability fa,ID pipeID)
+	{
+		SmartFileInfo masked = mask(fa);
+		return masked.getBestChoice(pipeID);
+	}
+	
 	public SegmentToDownload getBestChoice(FileAvailability fa)
 	{
 		SmartFileInfo masked = mask(fa);
 		return masked.getBestChoice();
 	}
 
+	public SegmentToDownload getBestChoice(ID pipeID)
+	{
+		ArrayList<Integer> resIntermediaire = new ArrayList<Integer>();
+		ArrayList<Integer> resFinal = new ArrayList<Integer>();
+		SegmentToDownload sd = null;
+		int min = getMinProviders(pipeID);
+		if(min>0)
+		{
+			for(int i=0;i<providers.size();i++)
+			{
+
+				if(providers.get(i).size()==min && i+1<providers.size())
+					resIntermediaire.add(i);
+			}
+			long maxSize = 0;
+			for(int secondPass: resIntermediaire)
+			{
+				long begin = beginsDirectory.get(secondPass);
+				long length = beginsDirectory.get(secondPass+1)-begin;
+				if(length>maxSize)
+					maxSize=length;
+
+
+			}
+
+			for(int thirdPass: resIntermediaire)
+			{
+				long begin = beginsDirectory.get(thirdPass);
+				long length = beginsDirectory.get(thirdPass+1)-begin;
+				if(length==maxSize)
+					resFinal.add(thirdPass);
+
+
+			}
+
+
+			int choice = (int)(Math.random() * (resFinal.size()));
+			choice = resFinal.get(choice);
+			long begin = beginsDirectory.get(choice);
+			long length = beginsDirectory.get(choice+1)-begin;
+			BytesSegment bs = new BytesSegment(begin, length);
+			sd = new SegmentToDownload(hash,bs,providers.get(choice));
+		}
+
+		return sd;
+
+	}
+	
+	
 	public SegmentToDownload getBestChoice()
 	{
 		ArrayList<Integer> resIntermediaire = new ArrayList<Integer>();
@@ -337,7 +392,18 @@ public class SmartFileInfo {
 
 
 
+	private int getMinProviders(ID pipeID)
+	{
+		int result = Integer.MAX_VALUE;
+		for(Set<ID> csid : providers)
+		{
+			if(csid.size()<result && csid.size()>0 && csid.contains(pipeID))
+				result= csid.size();
+		}
+		return result==Integer.MAX_VALUE?-1:result;
 
+	}
+	
 
 	private int getMinProviders()
 	{
