@@ -1165,7 +1165,6 @@ public class DataBaseManager extends DbliteConnection{
 
 
 			ResultSet rs = query(sqlQuery);
-			Set<String> setHash = new HashSet<String>();
 			while(rs.next())
 			{
 				
