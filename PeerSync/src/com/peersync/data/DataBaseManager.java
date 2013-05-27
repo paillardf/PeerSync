@@ -140,9 +140,9 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 
-	/** Vérifie que les events sont bien taggés avec le bon SharedFolder.
-	 * 	Dans le cas contraire, update la base de données pour revenir à une situation correcte.
-	 * 	Cas d\"appel de cette méthode : Ajout d\"un sous SharedFolder au sein d\"un SharedFolder existant.
+	/** Vï¿½rifie que les events sont bien taggï¿½s avec le bon SharedFolder.
+	 * 	Dans le cas contraire, update la base de donnï¿½es pour revenir ï¿½ une situation correcte.
+	 * 	Cas d\"appel de cette mï¿½thode : Ajout d\"un sous SharedFolder au sein d\"un SharedFolder existant.
 	 */
 	public void checkEventsIntegrity()
 	{
@@ -193,7 +193,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 	/** Raccourcis pour appeler {@link #getLastEventOfAFile(String, String)} avec uniquement un chemin absolu de fichier
-	 * @param absFilePath : Chemin absolu du fichier dont on veut récupérer le dernier événement
+	 * @param absFilePath : Chemin absolu du fichier dont on veut rï¿½cupï¿½rer le dernier ï¿½vï¿½nement
 	 */
 	public Event getLastEventOfAFile(String absFilePath)
 	{
@@ -227,9 +227,9 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 
 	}
-	/** Récupère le dernier événement pour un fichier donné
-	 * 	@param relFilePath : Chemin relatif du fichier dont on veut récupérer le dernier événement
-	 * 	@param sharedFolderUID : UID du Shared Folder où se trouve le fichier en question
+	/** Rï¿½cupï¿½re le dernier ï¿½vï¿½nement pour un fichier donnï¿½
+	 * 	@param relFilePath : Chemin relatif du fichier dont on veut rï¿½cupï¿½rer le dernier ï¿½vï¿½nement
+	 * 	@param sharedFolderUID : UID du Shared Folder oï¿½ se trouve le fichier en question
 	 * 	@return le dernier event concernant le fichier
 	 */
 	public Event getLastEventOfAFile(String relFilePath,String sharedFolderUID)
@@ -270,8 +270,8 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 
-	/** Récupère le dernier événement pour un fichier donné
-	 * 	@param e : Event à sauvegarder
+	/** Rï¿½cupï¿½re le dernier ï¿½vï¿½nement pour un fichier donnï¿½
+	 * 	@param e : Event ï¿½ sauvegarder
 	 */
 	public void saveEvent(Event e)
 	{
@@ -294,7 +294,7 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 
-	/** Obtient la liste de tous les événements dont on dispose
+	/** Obtient la liste de tous les ï¿½vï¿½nements dont on dispose
 	 * 	Appel {@link #loadEventsStack(String,long, String)}
 	 * 	@return EventsStack
 	 */
@@ -303,9 +303,9 @@ public class DataBaseManager extends DbliteConnection{
 		return loadEventsStack("*",-1,"*");
 	}
 
-	/** Obtient la liste des événements d\"un Shared Folder donné
+	/** Obtient la liste des ï¿½vï¿½nements d\"un Shared Folder donnï¿½
 	 * 	Appel {@link #loadEventsStack(String,long, String)}
-	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
+	 * 	@param UIDFolder : UID du Shared Folder dont on veut rï¿½cupï¿½rer les ï¿½vï¿½nements
 	 * 	@return EventsStack
 	 */
 	public EventsStack loadEventsStack(String UIDFolder)
@@ -314,10 +314,10 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 
-	/** Obtient la liste des événements d\"un Shared Folder donné depuis une date donnée
+	/** Obtient la liste des ï¿½vï¿½nements d\"un Shared Folder donnï¿½ depuis une date donnï¿½e
 	 * 	Appel {@link #loadEventsStack(String,long, String)}
-	 * 	@param UIDFolder : UID du Shared Folder dont on veut récupérer les événements
-	 * 	@param date : date (en ms depuis l\"epoch) à partir de laquelle on veut récupérer les événements
+	 * 	@param UIDFolder : UID du Shared Folder dont on veut rï¿½cupï¿½rer les ï¿½vï¿½nements
+	 * 	@param date : date (en ms depuis l\"epoch) ï¿½ partir de laquelle on veut rï¿½cupï¿½rer les ï¿½vï¿½nements
 	 * 	@return EventsStack
 	 */
 	public EventsStack loadEventsStack(String UIDFolder,long date)
@@ -325,10 +325,10 @@ public class DataBaseManager extends DbliteConnection{
 		return loadEventsStack(UIDFolder,date,"*");
 	}
 
-	/** Obtient la liste des événements d\"un Shared Folder donné depuis une date donnée et pour un propriétaire donné
-	 * 	@param sharedFolderUID : UID du Shared Folder dont on veut récupérer les événements. Joker possible : "*"
-	 * 	@param date : date (en ms depuis l\"epoch) à partir de laquelle on veut récupérer les événements. Joker possible : -1
-	 *  @param owner : pour ne récupérer que les events dont l\""actionneur" est "owner". Joker possible : "*"
+	/** Obtient la liste des ï¿½vï¿½nements d\"un Shared Folder donnï¿½ depuis une date donnï¿½e et pour un propriï¿½taire donnï¿½
+	 * 	@param sharedFolderUID : UID du Shared Folder dont on veut rï¿½cupï¿½rer les ï¿½vï¿½nements. Joker possible : "*"
+	 * 	@param date : date (en ms depuis l\"epoch) ï¿½ partir de laquelle on veut rï¿½cupï¿½rer les ï¿½vï¿½nements. Joker possible : -1
+	 *  @param owner : pour ne rï¿½cupï¿½rer que les events dont l\""actionneur" est "owner". Joker possible : "*"
 	 * 	@return EventsStack
 	 */
 	public EventsStack loadEventsStack(String sharedFolderUID,long date,String owner)
@@ -391,8 +391,8 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 	/**
-	 *  Retourne les derniers événements en base de données, pour chaque fichier.
-	 *  Ne prends pas en compte les événements "Suppression", les events avec un status différent de "OK", ni les dossiers
+	 *  Retourne les derniers ï¿½vï¿½nements en base de donnï¿½es, pour chaque fichier.
+	 *  Ne prends pas en compte les ï¿½vï¿½nements "Suppression", les events avec un status diffï¿½rent de "OK", ni les dossiers
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
@@ -456,8 +456,8 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 	/**
-	 *  Retourne les derniers événements en base de données, pour chaque fichier.
-	 *  Ne prends pas en compte les événements "Suppression", les events avec un status différent de "OK", ni les dossiers
+	 *  Retourne les derniers ï¿½vï¿½nements en base de donnï¿½es, pour chaque fichier.
+	 *  Ne prends pas en compte les ï¿½vï¿½nements "Suppression", les events avec un status diffï¿½rent de "OK", ni les dossiers
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
@@ -507,8 +507,8 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 	/**
-	 *  Retourne les derniers événements en base de données, pour chaque fichier.
-	 *  Ne prends pas en compte les événements "Suppression", ni les events avec un status différent de "OK"
+	 *  Retourne les derniers ï¿½vï¿½nements en base de donnï¿½es, pour chaque fichier.
+	 *  Ne prends pas en compte les ï¿½vï¿½nements "Suppression", ni les events avec un status diffï¿½rent de "OK"
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
@@ -558,7 +558,7 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 	/** Obtient le chemin (absolu) d\"un dossier de partage 
-	 * 	@param UID : UID du Shared Folder dont on veut récupérer le chemin absolu
+	 * 	@param UID : UID du Shared Folder dont on veut rï¿½cupï¿½rer le chemin absolu
 	 * 	@return chemin absolu du dossier de partage 
 	 */
 	public String getSharedFolderRootPath(String UID)
@@ -760,7 +760,7 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 
-	/** Récupère la version de pile pour chaque owner pour un dossier donné
+	/** Rï¿½cupï¿½re la version de pile pour chaque owner pour un dossier donnï¿½
 	 * 	@param UID: UID du SharedFolder que l\"on veut analyser
 	 * 	@return SharedFolderVersion
 	 */
@@ -1143,7 +1143,7 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
-	//retourne la disponibilité d'un fichier à partir de son hash
+	//retourne la disponibilitï¿½ d'un fichier ï¿½ partir de son hash
 	public FileAvailability getFileAvailability(String hash) {
 		// TODO Good luck
 		return null;
@@ -1156,9 +1156,28 @@ public class DataBaseManager extends DbliteConnection{
 		
 	}
 
-	public boolean needsToBeDownloaded(String hash) {
-		// TODO Auto-generated method stub
+	public long getFileSize(String hash) {
 		
+		long res = 0;
+		try {
+			String sqlQuery = "select "+EVENT_SIZEFIELD+
+					" from "+DBEVENTSTABLE+" e1 where "+NEWHASHFIELD+"=\""+hash+"\" LIMIT 1";
+
+
+			ResultSet rs = query(sqlQuery);
+			Set<String> setHash = new HashSet<String>();
+			while(rs.next())
+			{
+				
+				res = rs.getLong(EVENT_SIZEFIELD);
+	
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
 	}
 
 
