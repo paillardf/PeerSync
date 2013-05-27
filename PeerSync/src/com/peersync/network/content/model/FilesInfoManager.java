@@ -1,8 +1,9 @@
-package com.peersync.network.content.transfer;
+package com.peersync.network.content.model;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,12 @@ import java.util.Map;
 import net.jxta.id.ID;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.models.ClassicFile;
+import com.peersync.models.Event;
+import com.peersync.models.FileToDownload;
 import com.peersync.network.content.message.DataRequestMessage;
-import com.peersync.network.content.model.BytesSegment;
-import com.peersync.network.content.model.FileAvailability;
 import com.peersync.tools.Constants;
+import com.peersync.tools.FileUtils;
 
 
 public class FilesInfoManager {
@@ -34,6 +37,7 @@ public class FilesInfoManager {
 	}
 
 	private DataBaseManager dataBase;
+
 
 	public FilesInfoManager() {
 		dataBase = DataBaseManager.getInstance();
@@ -70,15 +74,39 @@ public class FilesInfoManager {
 					File myFile = new File (Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"\\"+hash+".tmp");
 					//Create the accessor with read-write access.
 					RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
+					if(!myFile.exists()){
+						accessor.setLength(dataBase );
+					}
+
 
 					accessor.seek(offset);
 					accessor.write(data, 0, length);
 					accessor.close(); 
-
+					
 					fAv.realFileAvailability.addSegment(offset, length);
 					dataBase.saveFileAvailability(fAv.realFileAvailability);
+					if(fAv.realFileAvailability.getSegments().size()==1){
+						BytesSegment segment = fAv.realFileAvailability.getSegments().get(0);
+						if(segment.offset == 0 && segment.length == dataBase.getFileSize()){ // FICHIER COMPLET
+							DataBaseManager.exclusiveAccess.lock();
+							
+							DataBaseManager db = DataBaseManager.getInstance();
+							ArrayList<ClassicFile> files = db.getFilesToSyncConcernByThisHash(hash);
+							for (ClassicFile classicFile : files) {
+								
+								if(FileUtils.copy(myFile, new File(classicFile.getAbsFilePath())))
+									db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_OK);
+							}
+							DataBaseManager.exclusiveAccess.unlock();
+							myFile.delete();
+						}
+					}
+					
+					
+					
 				}catch(IOException e){
-					//fAv.futurFileAvailability.substract(new BytesSegment(offset, length));
+					//FIXME
+					fAv.futurFileAvailability.substract(new BytesSegment(offset, length));
 				}
 			}
 		}
@@ -104,19 +132,35 @@ public class FilesInfoManager {
 	}
 
 
-	public SegmentToDownload getBestFileAvailability(String hash) {
+	public SegmentToDownload getBestFileAvailability(String sharedFolderUID, ID pipeID) {
 
-		SmartFileInfo fAv = remoteFilesAvailability.get(hash);
-		if(fAv==null){
-			return null;
-		}
-		synchronized (localFileAvailability) {
-			if(!localFileAvailability.containsKey(hash)){
-				localFileAvailability.put(hash, new DownloadingFile(hash));
+		synchronized (localFileAvailability){
+			ArrayList<FileToDownload> listFile = getFilesToDownload(sharedFolderUID);
+
+			for (FileToDownload fileToDownload : listFile) {
+				String hash = fileToDownload.getFileHash();
+				SmartFileInfo fAv = remoteFilesAvailability.get(hash);
+				if(fAv==null){
+					continue;
+				}
+				if(!localFileAvailability.containsKey(hash)){
+					localFileAvailability.put(hash, new DownloadingFile(hash));
+				}
+				DownloadingFile localFAv = localFileAvailability.get(hash);
+				SegmentToDownload bestChoice = fAv.getBestChoice(localFAv.futurFileAvailability, pipeID);
+				if(bestChoice!=null){
+					localFAv.futurFileAvailability.addSegment(bestChoice.getSegment().offset, bestChoice.getSegment().length);
+					return bestChoice;
+				}
+					
 			}
-			DownloadingFile localFAv = localFileAvailability.get(hash);
-			return fAv.getBestChoice(localFAv.realFileAvailability);
+			return null;	
 		}
+	}
+
+
+	public ArrayList<FileToDownload> getFilesToDownload(String sharedFolderUID) {
+		return dataBase.getFilesToDownloadForASharedFolder(sharedFolderUID);
 	}
 
 }

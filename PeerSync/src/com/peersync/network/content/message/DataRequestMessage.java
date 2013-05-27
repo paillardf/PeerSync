@@ -6,6 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.logging.Logger;
+
+import com.peersync.network.content.model.FileAvailability;
+
 import net.jxta.logging.Logging;
 import net.jxta.content.ContentID;
 import net.jxta.document.AdvertisementFactory;
@@ -46,7 +49,6 @@ public class DataRequestMessage extends AbstractSyncMessage{
 	private static Logger LOG =
 			Logger.getLogger(DataRequestMessage.class.getName());
 	public static final String tagRoot = "DataRequest";
-	private static final String tagID = "FileHash";
 	private static final String tagOffs = "Offs";
 	private static final String tagLen = "Len";
 	private static final String tagQueryID = "QID";
@@ -103,7 +105,7 @@ public class DataRequestMessage extends AbstractSyncMessage{
 		int i;
 		long l;
 
-		if (elem.getName().equals(tagID)) {
+		if (elem.getName().equals(FileAvailability.tagHash)) {
 			hash = elem.getTextValue();
 			return true;
 		} else if (elem.getName().equals(tagOffs)) {
@@ -168,7 +170,7 @@ public class DataRequestMessage extends AbstractSyncMessage{
 			xmlDoc.addAttribute("xmlns:jxta", "http://jxta.org");
 		}
 
-		e = doc.createElement(tagID, hash);
+		e = doc.createElement(FileAvailability.tagHash, hash);
 		doc.appendChild(e);
 
 		e = doc.createElement(tagOffs, Long.toString(getOffset()));

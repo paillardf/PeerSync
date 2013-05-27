@@ -6,7 +6,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -40,8 +39,6 @@ import net.jxta.endpoint.TextDocumentMessageElement;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
-import net.jxta.impl.content.defprovider.ActiveTransfer;
-import net.jxta.impl.content.defprovider.DefaultContentShare;
 import net.jxta.impl.content.defprovider.TooManyClientsException;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
@@ -65,11 +62,12 @@ import com.peersync.network.content.message.AvailabilityResponseMessage;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
+import com.peersync.network.content.model.FilesInfoManager;
 import com.peersync.network.content.model.SyncFolderShare;
-import com.peersync.network.content.transfer.FilesInfoManager;
 import com.peersync.network.content.transfer.SyncActiveTransfer;
 import com.peersync.network.content.transfer.SyncActiveTransferTracker;
 import com.peersync.network.content.transfer.SyncActiveTransferTrackerListener;
+import com.peersync.network.content.transfer.SyncFolderTransfer;
 
 public class SyncContentProvider implements
 ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
@@ -407,7 +405,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
             
             byteOut = new ByteArrayOutputStream();
             written = tracker.getData(req.getHash(),
-                    req.getOffset(), req.getLength(), byteOut);
+                    req.getOffset(), (int)req.getLength(), byteOut);
 
             // Send response
             resp = new DataResponseMessage(req,fAv);
@@ -584,7 +582,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 		synchronized(this) {
 			if (!running) return null;
 		}
-		return null;
+		return new SyncFolderTransfer(this, executor, peerGroup,filesInfoManager, contentID);
 
 		//        synchronized(shares) {
 		//            ContentShare share = getShare(contentID);

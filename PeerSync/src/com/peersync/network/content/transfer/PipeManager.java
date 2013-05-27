@@ -41,6 +41,7 @@ import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.BytesSegment;
 import com.peersync.network.content.model.FileAvailability;
+import com.peersync.network.content.model.SegmentToDownload;
 
 class PipeManager implements PipeMsgListener{
 
@@ -244,8 +245,8 @@ class PipeManager implements PipeMsgListener{
 			if(needsFileAvailabilityUpdate()&&!queryFileAvailabilityRunning()){
 				message = createFileAvailabilityMessage();
 			}else{
-				BytesSegment bs = getBestSegment(pipeAdv.getPipeID());
-				return createDataRequestMessage(bs);
+				SegmentToDownload bs = getBestSegment();
+				message = createDataRequestMessage(bs);
 			}
 		}
 		if(message!=null){
@@ -256,18 +257,17 @@ class PipeManager implements PipeMsgListener{
 		return message;
 	}
 
-	private BytesSegment getBestSegment(ID pipeID) {
-		// TODO Auto-generated method stub
-		return null;
+	private SegmentToDownload getBestSegment() {
+		return syncFolderTranfert.filesInfoManager.getBestFileAvailability(syncFolderTranfert.sharedFolderUID ,getID());
 	}
 
 
 
-	private DataRequestMessage createDataRequestMessage(BytesSegment bs, String hash) {
+	private DataRequestMessage createDataRequestMessage(SegmentToDownload bs) {
 		DataRequestMessage req = new DataRequestMessage();
-		req.setHash(hash);
-		req.setOffset(bs.offset);
-		req.setLength(bs.length);
+		req.setHash(bs.getHash());
+		req.setOffset(bs.getSegment().offset);
+		req.setLength(bs.getSegment().length);
 		req.setQueryID(nextQueryId());
 		req.setResponsePipe(responsePipeAdv);
 		return req;
@@ -384,7 +384,7 @@ class PipeManager implements PipeMsgListener{
 	private void processRequest(AbstractSyncMessage req, byte[] data) {
 
 		if(req instanceof DataResponseMessage){
-			processDataResponse((DataRequestMessage) req, data);
+			processDataResponse((DataResponseMessage) req, data);
 		}else if(req instanceof AvailabilityResponseMessage){
 			processAvailabilityResponse((AvailabilityResponseMessage) req);
 		}
@@ -396,9 +396,10 @@ class PipeManager implements PipeMsgListener{
 
 	}
 
-	private void processDataResponse(DataRequestMessage req, byte[] data) {
-		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(req.getHash(), req.getOffset(), req.getLength(), data);
-
+	private void processDataResponse(DataResponseMessage req, byte[] data) {
+		FileAvailability fAvUpdate = req.getFileAvailability();
+		syncFolderTranfert.filesInfoManager.addFileAvailability(fAvUpdate, getID());
+		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(fAvUpdate.getHash(), req.getOffset(), (int) req.getLength(), data);
 	}
 
 	private void sendRequest(AbstractSyncMessage req) {
@@ -477,10 +478,8 @@ class PipeManager implements PipeMsgListener{
 
 	public void update() {
 		processMessages();
-		
 		AbstractSyncMessage req;
 		while((req=getRequest())!=null){
-			
 			sendRequest(req);
 		}
 

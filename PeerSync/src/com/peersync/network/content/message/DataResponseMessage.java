@@ -249,4 +249,8 @@ public class DataResponseMessage extends AbstractSyncMessage {
 	public String getTagRoot() {
 		return tagRoot;
 	}
+	
+	public FileAvailability getFileAvailability() {
+		return fileAvailability;
+	}
 }

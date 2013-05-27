@@ -1,4 +1,4 @@
-package com.peersync.network.content.transfer;
+package com.peersync.network.content.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,8 +8,6 @@ import java.util.Set;
 
 import net.jxta.id.ID;
 
-import com.peersync.network.content.model.BytesSegment;
-import com.peersync.network.content.model.FileAvailability;
 
 
 public class SmartFileInfo {

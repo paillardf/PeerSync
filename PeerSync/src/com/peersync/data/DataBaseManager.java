@@ -1156,6 +1156,11 @@ public class DataBaseManager extends DbliteConnection{
 		
 	}
 
+	public boolean needsToBeDownloaded(String hash) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 
