@@ -108,8 +108,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 	 //////////////////////////////////////////////////////////////////////////
     // Constructors and initializers:
 	 private static final String MODULE_SPEC_ID =
-	            "urn:jxta:uuid-AC3AA08FC4A14C15A78A84B4D4F87554"
-	            + "CDC361792F3F4EF2A6488BE56396AAEB99";
+	            "urn:jxta:cbid-2D1CD0471C6F4A6EB395AF948C5EA93A2D1CD0471C6F4A6EB395AF948C5EA93A06";
     /**
      * Static initializer.
      */
@@ -751,5 +750,10 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
     	ID id = transfer.getOutputPipe().getPipeID();
     	fireClientDisconnection(id);
     }
+
+	public ID getPipeID() {
+		return pipeAdv.getID();
+		
+	}
 
 }

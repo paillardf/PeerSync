@@ -21,8 +21,6 @@ import net.jxta.endpoint.MessageElement;
 import net.jxta.endpoint.TextDocumentMessageElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
-import net.jxta.impl.content.defprovider.DataResponse;
-import net.jxta.impl.content.defprovider.DefaultContentProvider;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.pipe.InputPipe;
@@ -39,21 +37,22 @@ import com.peersync.network.content.message.AvailabilityRequestMessage;
 import com.peersync.network.content.message.AvailabilityResponseMessage;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
-import com.peersync.network.content.model.BytesSegment;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.content.model.SegmentToDownload;
 
 class PipeManager implements PipeMsgListener{
 
-
+	/**
+	 * Logger instance.
+	 */
+	private final Logger LOG =
+			Logger.getLogger(PipeManager.class.getName());
+	
+	
 	class PipeQuery{
 		private long lastAccess = System.currentTimeMillis();
 
-		/**
-		 * Logger instance.
-		 */
-		private final Logger LOG =
-				Logger.getLogger(PipeManager.class.getName());
+		
 		private AbstractSyncMessage message;
 
 		public PipeQuery(AbstractSyncMessage message) {
@@ -100,7 +99,6 @@ class PipeManager implements PipeMsgListener{
 	private static final int MAX_OUTSTANDING =
 			Integer.getInteger(PipeManager.class.getName()
 					+ ".maxOutstanding", 2).intValue();
-	private static final Logger LOG = null;
 	/**
 	 * Maximum incoming message queue size.  Once full, additional incoming
 	 * requests will be dropped.
@@ -109,17 +107,12 @@ class PipeManager implements PipeMsgListener{
 			Integer.getInteger(SyncFolderTransfer.class.getName()
 					+ ".maxQueue", SyncFolderTransfer.MAX_OUTSTANDING_PIPE * MAX_OUTSTANDING * 2).intValue();
 
-	/**
-	 * Maximum number of bytes to request at one time.
-	 */
-	private static final int MAX_REQUEST_LENGTH =
-			Integer.getInteger(SyncFolderTransfer.class.getName()
-					+ ".maxRequestLength", 50000).intValue();
+	
 
 	private long lastActivity = System.currentTimeMillis();
 	private long lastFileAvailabilityUpdate = 0;
 	private List<PipeQuery> pipeQueries = new ArrayList<PipeQuery>();
-	private List<FileAvailability> fileAvailability = new ArrayList<FileAvailability>();
+	//private List<FileAvailability> fileAvailability = new ArrayList<FileAvailability>();
 
 	private int queryID = 0;
 	private SyncFolderTransfer syncFolderTranfert;
@@ -129,7 +122,8 @@ class PipeManager implements PipeMsgListener{
 	private InputPipe responsePipe;
 	private final BlockingQueue<PipeMsgEvent> msgQueue =
 			new ArrayBlockingQueue<PipeMsgEvent>(MAX_QUEUE_SIZE);
-	private OutputPipe outputPipe;;
+	private OutputPipe outputPipe;
+	private boolean running = false;
 
 
 	public PipeManager(SyncFolderTransfer syncFolderTranfert, PipeAdvertisement pipeAdv, PeerGroup peerGroup) {
@@ -141,8 +135,13 @@ class PipeManager implements PipeMsgListener{
 	public void init() throws Exception{
 		if(!setupOutputPipe()||!setupResponsePipe())
 			throw new Exception("Pipe Manager can't create needed Pipe");
+		
+		running = true;
 	}
 
+	public boolean isRunning() {
+		return running;
+	}
 
 	private boolean setupOutputPipe() {
 		try{
@@ -153,8 +152,7 @@ class PipeManager implements PipeMsgListener{
 
 		} catch (IOException iox) {
 
-			Logging.logCheckedWarning(LOG, "Could not resolve source pipe for Source: ",
-					pipeAdv, iox);
+			Logging.logCheckedWarning(LOG, "Could not resolve source pipe for Source: ",		pipeAdv, iox);
 			return false;
 
 		}
@@ -204,7 +202,7 @@ class PipeManager implements PipeMsgListener{
 
 	public synchronized boolean needsUpdate() {
 		synchronized (this) {
-			return (msgQueue.size()>0||getRequest()!=null);			
+			return (msgQueue.size()>0||canQuery());			
 		}
 	}
 
@@ -241,17 +239,19 @@ class PipeManager implements PipeMsgListener{
 	private AbstractSyncMessage getRequest(){
 		AbstractSyncMessage message = null;
 
-		if(canQuery()){
-			if(needsFileAvailabilityUpdate()&&!queryFileAvailabilityRunning()){
+		if(canQuery()&&!queryFileAvailabilityRunning()){
+			if(needsFileAvailabilityUpdate()){
 				message = createFileAvailabilityMessage();
 			}else{
 				SegmentToDownload bs = getBestSegment();
-				message = createDataRequestMessage(bs);
+				if(bs!=null){
+					message = createDataRequestMessage(bs);
+				}
+				
 			}
 		}
 		if(message!=null){
 			lastActivity = System.currentTimeMillis();
-			pipeQueries.add(new PipeQuery(message));
 		}
 
 		return message;
@@ -307,10 +307,14 @@ class PipeManager implements PipeMsgListener{
 		for (PipeMsgEvent pme : workQueue) {
 
 			msg = pme.getMessage();
+			
+			
 			try {
+				
 				processMessage(msg);
+				
 			} catch (Exception x) {
-				Logging.logCheckedWarning(LOG, "Uncaught exception\n", x);
+				x.printStackTrace();
 			}
 
 		}
@@ -328,7 +332,7 @@ class PipeManager implements PipeMsgListener{
 		ListIterator it;
 		XMLElement doc;
 
-		Logging.logCheckedFiner(LOG, "Incoming message: ", msg);
+
 
 		it = msg.getMessageElementsOfNamespace(SyncContentProvider.MSG_NAMESPACE);
 
@@ -374,14 +378,27 @@ class PipeManager implements PipeMsgListener{
 				throw new IllegalArgumentException(getClass().getName() +
 						" doesn't support this request");
 			}
-			processRequest(req, data);
+			
+			boolean isquery = false;
+			for (int i = 0; i < pipeQueries.size(); i++) {
+				if(pipeQueries.get(i).message.getQueryID()==req.getQueryID()){
+					pipeQueries.remove(i);
+					isquery = true;
+					break;
+				}
+			}
+			if(!isquery)
+				return;
+			
+			
+			processResponce(req, data);
 		} catch (IOException e) {
 			new IllegalArgumentException(getClass().getName() +
 					" only supports XMLElement");
 		}
 	}
 
-	private void processRequest(AbstractSyncMessage req, byte[] data) {
+	private void processResponce(AbstractSyncMessage req, byte[] data) {
 
 		if(req instanceof DataResponseMessage){
 			processDataResponse((DataResponseMessage) req, data);
@@ -392,7 +409,8 @@ class PipeManager implements PipeMsgListener{
 	}
 
 	private void processAvailabilityResponse(AvailabilityResponseMessage req) {
-		syncFolderTranfert.filesInfoManager.addFilesAvailability(fileAvailability, getID());
+		lastFileAvailabilityUpdate = System.currentTimeMillis();
+		syncFolderTranfert.filesInfoManager.addFilesAvailability(req.getFilesAvailability(), getID());
 
 	}
 
@@ -423,7 +441,7 @@ class PipeManager implements PipeMsgListener{
 
 		} catch (IOException iox) {
 
-			Logging.logCheckedWarning(LOG, "IOException during message send\n", iox);
+		//	Logging.logCheckedWarning(LOG, "IOException during message send\n", iox);
 
 		}
 		
@@ -439,7 +457,10 @@ class PipeManager implements PipeMsgListener{
 			} else {
 				msgQueue.clear();
 			}
-			syncFolderTranfert.notifyAll();
+			synchronized (syncFolderTranfert) {
+				syncFolderTranfert.notifyAll();
+			}
+			
 		}
 	}
 
@@ -457,7 +478,7 @@ class PipeManager implements PipeMsgListener{
 			}
 			msgQueue.clear();
 			pipeQueries.clear();
-			fileAvailability.clear();
+			running = false;
 		}
 
 	}
@@ -477,6 +498,8 @@ class PipeManager implements PipeMsgListener{
 
 
 	public void update() {
+		if(!isRunning())
+			return;
 		processMessages();
 		AbstractSyncMessage req;
 		while((req=getRequest())!=null){

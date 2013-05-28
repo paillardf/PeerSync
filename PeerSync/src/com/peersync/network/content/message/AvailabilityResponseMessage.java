@@ -1,5 +1,6 @@
 package com.peersync.network.content.message;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -62,6 +63,7 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 	 * Default constructor.
 	 */
 	public AvailabilityResponseMessage() {
+		filesAvailability = new ArrayList<FileAvailability>();
 	}
 
 	/**
@@ -76,6 +78,7 @@ public class AvailabilityResponseMessage extends AbstractSyncMessage {
 	 * Build response object from existing XML document.
 	 */
 	public AvailabilityResponseMessage(Element root) {
+		filesAvailability = new ArrayList<FileAvailability>();
 		initialize(root);
 	}
 

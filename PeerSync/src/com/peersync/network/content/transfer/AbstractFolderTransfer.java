@@ -1062,7 +1062,7 @@ public abstract class AbstractFolderTransfer
             } while(running);
 
         } catch (RuntimeException rtx) {
-
+        	rtx.printStackTrace();
             Logging.logCheckedFine(LOG, "Caught runtime exception\n\n", rtx);
             throw(rtx);
 

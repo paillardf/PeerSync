@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import net.jxta.content.Content;
+import net.jxta.content.ContentID;
 import net.jxta.document.AdvertisementFactory;
+import net.jxta.document.MimeMediaType;
+import net.jxta.id.IDFactory;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
@@ -14,6 +18,7 @@ import com.peersync.events.ScanService;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
+import com.peersync.network.content.model.FolderDocument;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
@@ -54,13 +59,16 @@ public class PeerSync {
 
 		PORT =  Constants.getInstance().PORT;
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
-		new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/").mkdirs();
+		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");
+		
 		File prefFolder = new File(Constants.getInstance().PREFERENCES_PATH()); 
-		if(Log.DEBUG)
+		if(Log.DEBUG){
 			NetworkManager.RecursiveDelete(prefFolder); 
+			NetworkManager.RecursiveDelete(confFile);
+		}
 		prefFolder.mkdirs();
-
-
+		confFile.mkdirs();
+		
 
 		//ksm.createNewKeys(Constants.PsePeerGroupID.toString(), Constants.PeerGroupKey.toCharArray());
 		//		ksm.addNewKeys(Constants.PsePeerGroupID.toString(), Constants.PSE_SAMPLE_GROUP_ROOT_CERT,
@@ -108,12 +116,12 @@ public class PeerSync {
 					RendezVousAdvertisement.getAdvertisementType(),
 					new RendezVousAdvertisement.Instantiator()
 					);
-			ScanService.getInstance().startService();
+			scanService = ScanService.getInstance();
+			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
 			
 			//TODO TEST
-			
 			KeyStoreManager ks = KeyStoreManager.getInstance();
 			ks.createNewKeys(Constants.PsePeerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
 			SyncPeerGroup pg = new SyncPeerGroup(netPeerGroup,conf,  Constants.PsePeerGroupID, Constants.PsePeerGroupName);
@@ -121,8 +129,21 @@ public class PeerSync {
 			pg.initialize();
 			pg.start();
 			
-			scanService.startService();
-			DataBaseManager.getInstance().saveSharedFolder(new SharedFolder("5000", Constants.PsePeerGroupID.toString(), "C:/PeerSyncTest/"+getConf().getName()));
+		
+			String shareFolderName = "shareFolderDeouf";
+			ContentID shareFolderID = IDFactory.newContentID( Constants.PsePeerGroupID, false, shareFolderName.getBytes("UTF-8"));
+			
+			DataBaseManager.getInstance().saveSharedFolder(new SharedFolder(shareFolderID.toString(), Constants.PsePeerGroupID.toString(), "C:\\PeerSyncTest\\"+getConf().getName()));
+		
+		
+
+			FolderDocument fileDoc = new FolderDocument( MimeMediaType.AOS);
+			Content content = new Content(shareFolderID, null, fileDoc);
+			
+			
+			pg.shareContent(content);
+		
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);

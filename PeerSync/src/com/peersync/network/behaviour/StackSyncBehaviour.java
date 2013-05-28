@@ -71,7 +71,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 			parseAdvertisement(TheAdvEnum);
 			myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
-					null, null,  100, this);
+					StackAdvertisement.ShareFolderTAG, null,  100, this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -96,7 +96,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
 				if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 
-					Log.d(NAME, "Adv recu" + stackVersionAdvertisement.getShareFolderList().size());
+					Log.d(NAME, "Adv recu" + stackVersionAdvertisement);
 
 					ArrayList<SharedFolderVersion> shareFolderVersion = 
 							SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());

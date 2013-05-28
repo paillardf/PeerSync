@@ -202,15 +202,26 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 				criticalEntry();
 
 				boolean progress = false;
-				for (int i = 0; i< pipesManager.size(); i++) {
-					if(pipesManager.get(i).needsUpdate()){
-						pipesManager.get(i).update();
-						progress = true;
+				for (int i = pipesManager.size()-1; i>=0 ; i--) {
+					if(pipesManager.get(i).isRunning()){
+						if(pipesManager.get(i).needsUpdate()){
+							pipesManager.get(i).update();
+							progress = true;
+						}
+					}else{
+						pipesManager.remove(i);
 					}
+					
+					
 				}
 
-				if(!progress)
-					wait();
+				if(!progress){
+					synchronized (this) {
+						wait();
+					}
+					
+				}
+				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}finally{
@@ -278,6 +289,11 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 
 			DefaultContentShareAdvertisementImpl adv = sourcesRemaining.remove(0);
 			sourcesTried.add(adv);
+			if(adv.getPipeAdvertisement().getID().equals(((SyncContentProvider)this.getContentProvider()).getPipeID())){
+				continue;
+			}
+			
+			
 
 			boolean exist = false;
 			try {

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.jxta.credential.AuthenticationCredential;
 import net.jxta.credential.Credential;
@@ -31,7 +33,7 @@ public class BasicPeerGroup  implements Observer{
 	private final static String TAG ="BasicPeerGroup";
 	private String peerGroupName;
 	private PeerGroupID peerGroupId;
-	private PeerGroup peerGroup;
+	protected PeerGroup peerGroup;
 	protected ArrayList<AbstractBehaviour> behaviourList = new ArrayList<AbstractBehaviour>();
 	private GroupThread thread;
 	private Thread.State statue = Thread.State.BLOCKED;
@@ -133,14 +135,23 @@ public class BasicPeerGroup  implements Observer{
 		Credential MyCredential = membership.join(memberAuthenticator);
 		Log.d(TAG,"Group has been joined");
 		peerGroup = myLocalGroup;
+		initPeerGroupParameters();
+		
+	}
+	
+	protected void initPeerGroupParameters(){
 		peerGroup.getRendezVousService().setAutoStart(true, 30000);
 	}
 
-
 	@Override
 	public void update(Observable o, Object arg) {
+		if(thread!=null){
+			 synchronized (thread) {
+				 thread.notifyAll();
+             }
+		}
 		if(o instanceof ScanService){
-			if(((String)arg).equals(getNetPeerGroup().getPeerID().toString())){
+			if(((String)arg).equals(getPeerGroup().getPeerGroupID().toString())){
 				notifyPeerGroupBehaviour(new PeerGroupEvent(PeerGroupEvent.STACK_UPDATE,getPeerGroupID() ,null ));
 
 			}
@@ -189,6 +200,7 @@ public class BasicPeerGroup  implements Observer{
 	private class GroupThread extends Thread{
 
 		private long timeToSleep = 0;
+		private Timer timer = new Timer();
 
 		@Override
 		public void run() {
@@ -203,7 +215,23 @@ public class BasicPeerGroup  implements Observer{
 					}
 					timeToSleep= timeToSleep-System.currentTimeMillis();
 					if(timeToSleep>0){
-						sleep(timeToSleep);
+						
+						timer.schedule(new TimerTask() {
+							
+							@Override
+							public void run() {
+								if(thread!=null){
+									 synchronized (thread) {
+										 thread.notifyAll();
+						             }
+								}
+							}
+						}, timeToSleep);
+						synchronized (this) {
+							wait();
+						}
+						
+						
 					}
 					timeToSleep = 0;
 				}

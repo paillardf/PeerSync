@@ -98,12 +98,15 @@ public class ScanService extends Observable {
 				else
 				{
 					DataBaseManager.exclusiveAccess.lock();
+					directoryReader.loadDirectoriesToScan();
 					Set<String> peerGroupWithNewEvents = directoryReader.scan();
 					for (String peerGroupId : peerGroupWithNewEvents)
 					{
+						setChanged();
 						notifyObservers(peerGroupId);
 					}
-					setChanged();
+					
+					
 					DataBaseManager.exclusiveAccess.unlock();
 				}
 

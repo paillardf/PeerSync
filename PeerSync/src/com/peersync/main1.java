@@ -2,8 +2,11 @@ package com.peersync;
 
 import java.io.IOException;
 
+import net.jxta.id.IDFactory;
+
 import com.peersync.cli.ShellConsole;
 import com.peersync.network.PeerSync;
+import com.peersync.network.content.SyncContentProvider;
 import com.peersync.tools.Constants;
 
 public class main1 {
@@ -15,6 +18,10 @@ public class main1 {
 //		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client2\\log.properties");
 //		System.setProperty("net.jxta.logging.Logging", "FINEST");
 //		System.setProperty("net.jxta.level", "FINEST");
+		
+		
+//		System.out.println(IDFactory.newModuleSpecID(IDFactory.newModuleClassID()).toString());
+//		System.exit(-1);
 		Constants.getInstance().PEERNAME = "client2";
 		Constants.getInstance().PORT = 9788;
 		try {

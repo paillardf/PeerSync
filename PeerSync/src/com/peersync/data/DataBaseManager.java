@@ -1,8 +1,6 @@
 package com.peersync.data;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.sql.ResultSet;
@@ -388,6 +386,53 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 	
+	/**
+	 *  Retourne les derniers �v�nements en base de donn�es, pour chaque fichier.
+	 *  Ne prends pas en compte les �v�nements "Suppression", les events avec un status diff�rent de "OK", ni les dossiers
+	 * 	@param shareFolderUID 
+	 * 	@return  Map nom_de_fichier,hash
+	 */
+	private FileAvailability getLocalFilesAvailabilityForAFile(String hash)
+	{
+
+		try
+		{
+
+			String sql = "select e1."+NEWHASHFIELD+", e1."+EVENT_SIZEFIELD+" from "+DBEVENTSTABLE+" e1 where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and e1."+NEWHASHFIELD+"=\""+hash+"\" and  e1."+DATEFIELD+" = " +
+					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
+		
+
+			ResultSet rs = query(sql);
+
+
+
+
+			while(rs.next())
+			{
+
+				// read the result set
+				if(rs.getString(NEWHASHFIELD)!=null)
+				{
+					FileAvailability fa = new FileAvailability(rs.getString(NEWHASHFIELD));
+					fa.addSegment(0, rs.getLong(EVENT_SIZEFIELD));
+					return fa;
+
+				}
+				else
+					System.err.println("PB de shared folder");
+			}
+		}
+		catch(SQLException e)
+		{
+			// if the error message is "out of memory", 
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		}
+
+
+		return null;
+	}
+	
 	
 	
 	/**
@@ -756,6 +801,32 @@ public class DataBaseManager extends DbliteConnection{
 		
 	}
 	
+	
+	private FileAvailability getDownloadingFilesAvailibility(String hash)
+	{
+		try {
+			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+
+					" from "+DOWNLOADINGILESAVAILABILITY_TABLE+" where "+DOWNLOADINGFILESAVAILABILITY_HASH+"=\""+hash+"\"");
+
+			while(rs.next())
+			{
+
+				String fileAvailabilitiy = rs.getString(DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY);
+				try {
+					Reader r = new StringReader(fileAvailabilitiy);
+					StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, r);
+				
+				return new FileAvailability((XMLElement)doc);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
+	}
 	
 	
 	
@@ -1145,8 +1216,13 @@ public class DataBaseManager extends DbliteConnection{
 
 	//retourne la disponibilit� d'un fichier � partir de son hash
 	public FileAvailability getFileAvailability(String hash) {
-		// TODO Good luck
-		return null;
+		FileAvailability fa = getLocalFilesAvailabilityForAFile(hash);
+		if(fa!=null)
+			return fa;
+		fa = getDownloadingFilesAvailibility(hash);
+		if(fa!=null)
+			return fa;
+		return new FileAvailability(hash);
 	}
 	
 	//Retourne le chemin absolue vers le premier fichier correspondant au hash 

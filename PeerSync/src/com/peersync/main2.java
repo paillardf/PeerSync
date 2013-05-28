@@ -11,8 +11,8 @@ public class main2 {
 	
 	public static void main(String[] args) {
 //		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client3\\log.properties");
-//		System.setProperty("net.jxta.logging.Logging", "FINEST");
-//		System.setProperty("net.jxta.level", "FINEST");
+		System.setProperty("net.jxta.logging.Logging", "FINEST");
+		System.setProperty("net.jxta.level", "FINEST");
 		Constants.getInstance().PEERNAME = "client3";
 		Constants.getInstance().PORT = 9787;
 		try {

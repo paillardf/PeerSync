@@ -15,6 +15,7 @@ import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.FileToDownload;
 import com.peersync.network.content.message.DataRequestMessage;
+import com.peersync.network.content.transfer.SyncFolderTransfer;
 import com.peersync.tools.Constants;
 import com.peersync.tools.FileUtils;
 
@@ -75,7 +76,7 @@ public class FilesInfoManager {
 					//Create the accessor with read-write access.
 					RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
 					if(!myFile.exists()){
-						accessor.setLength(dataBase );
+						accessor.setLength(dataBase.getFileSize(hash) );
 					}
 
 
@@ -87,7 +88,7 @@ public class FilesInfoManager {
 					dataBase.saveFileAvailability(fAv.realFileAvailability);
 					if(fAv.realFileAvailability.getSegments().size()==1){
 						BytesSegment segment = fAv.realFileAvailability.getSegments().get(0);
-						if(segment.offset == 0 && segment.length == dataBase.getFileSize()){ // FICHIER COMPLET
+						if(segment.offset == 0 && segment.length == dataBase.getFileSize(hash)){ // FICHIER COMPLET
 							DataBaseManager.exclusiveAccess.lock();
 							
 							DataBaseManager db = DataBaseManager.getInstance();
@@ -132,6 +133,14 @@ public class FilesInfoManager {
 	}
 
 
+	/**
+	 * Maximum number of bytes to request at one time.
+	 */
+	private static final int MAX_REQUEST_LENGTH =
+			Integer.getInteger(SyncFolderTransfer.class.getName()
+					+ ".maxRequestLength", 50000).intValue();
+	
+	
 	public SegmentToDownload getBestFileAvailability(String sharedFolderUID, ID pipeID) {
 
 		synchronized (localFileAvailability){
@@ -149,6 +158,7 @@ public class FilesInfoManager {
 				DownloadingFile localFAv = localFileAvailability.get(hash);
 				SegmentToDownload bestChoice = fAv.getBestChoice(localFAv.futurFileAvailability, pipeID);
 				if(bestChoice!=null){
+					bestChoice.getSegment().offset = Math.min(MAX_REQUEST_LENGTH, bestChoice.getSegment().offset);
 					localFAv.futurFileAvailability.addSegment(bestChoice.getSegment().offset, bestChoice.getSegment().length);
 					return bestChoice;
 				}

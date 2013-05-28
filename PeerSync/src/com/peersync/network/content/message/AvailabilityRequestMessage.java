@@ -62,6 +62,7 @@ public class AvailabilityRequestMessage extends AbstractSyncMessage{
      * Default constructor.
      */
     public AvailabilityRequestMessage() {
+    	
     }
 
     /**
