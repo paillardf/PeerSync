@@ -39,6 +39,7 @@ import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.content.model.SegmentToDownload;
+import com.peersync.tools.Log;
 
 class PipeManager implements PipeMsgListener{
 
@@ -264,12 +265,7 @@ class PipeManager implements PipeMsgListener{
 
 
 	private DataRequestMessage createDataRequestMessage(SegmentToDownload bs) {
-		DataRequestMessage req = new DataRequestMessage();
-		req.setHash(bs.getHash());
-		req.setOffset(bs.getSegment().offset);
-		req.setLength(bs.getSegment().length);
-		req.setQueryID(nextQueryId());
-		req.setResponsePipe(responsePipeAdv);
+		DataRequestMessage req = new DataRequestMessage(bs.getHash(),nextQueryId(), bs.getSegment().offset, bs.getSegment().length, responsePipeAdv);
 		return req;
 	}
 
@@ -370,7 +366,7 @@ class PipeManager implements PipeMsgListener{
 			byte[] data =null;
 			if (doc.getName().equals(DataResponseMessage.tagRoot)) {
 				req = new DataResponseMessage(doc);
-				ByteArrayMessageElement bmsge = (ByteArrayMessageElement) msge;
+				ByteArrayMessageElement bmsge = (ByteArrayMessageElement) it.next();
 		        data = bmsge.getBytes();
 			}else if(doc.getName().equals(AvailabilityResponseMessage.tagRoot)){
 				req = new AvailabilityResponseMessage(doc);
@@ -378,27 +374,27 @@ class PipeManager implements PipeMsgListener{
 				throw new IllegalArgumentException(getClass().getName() +
 						" doesn't support this request");
 			}
-			
-			boolean isquery = false;
+		
+			PipeQuery pipeQ = null;
 			for (int i = 0; i < pipeQueries.size(); i++) {
 				if(pipeQueries.get(i).message.getQueryID()==req.getQueryID()){
-					pipeQueries.remove(i);
-					isquery = true;
+					pipeQ = pipeQueries.get(i);
 					break;
 				}
 			}
-			if(!isquery)
+			if(pipeQ==null)
 				return;
 			
 			
-			processResponce(req, data);
+			processResponse(req, data);
+			pipeQueries.remove(pipeQ);
 		} catch (IOException e) {
 			new IllegalArgumentException(getClass().getName() +
 					" only supports XMLElement");
 		}
 	}
 
-	private void processResponce(AbstractSyncMessage req, byte[] data) {
+	private void processResponse(AbstractSyncMessage req, byte[] data) {
 
 		if(req instanceof DataResponseMessage){
 			processDataResponse((DataResponseMessage) req, data);
@@ -415,8 +411,14 @@ class PipeManager implements PipeMsgListener{
 	}
 
 	private void processDataResponse(DataResponseMessage req, byte[] data) {
+		
+		
+
+		
 		FileAvailability fAvUpdate = req.getFileAvailability();
 		syncFolderTranfert.filesInfoManager.addFileAvailability(fAvUpdate, getID());
+		if(req.getQueryID()%10==0)
+			Log.d(getClass().getSimpleName(), "from " + req.getOffset() +" to "+ (int) req.getLength());
 		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(fAvUpdate.getHash(), req.getOffset(), (int) req.getLength(), data);
 	}
 

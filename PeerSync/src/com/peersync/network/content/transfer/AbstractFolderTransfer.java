@@ -153,16 +153,6 @@ public abstract class AbstractFolderTransfer
     private int sourceLocationInterval = DEFAULT_SOURCE_LOCATION_INTERVAL;
 
     /**
-     * The number of of allSources considered to be "enough".
-     */
-    private int enoughSources = getEnoughLocationCount();
-
-    /**
-     * The number of of allSources considered to be "many".
-     */
-    private int manySources = getManyLocationCount();
-
-    /**
      * The discovery threshold to use.
      */
     private int discoveryThreshold = DEFAULT_DISCOVERY_THRESHOLD;
@@ -601,18 +591,9 @@ public abstract class AbstractFolderTransfer
      * @return number of advertisements to discover before transfer will
      *  be attempted
      */
-    protected abstract int getEnoughLocationCount();
+    protected abstract boolean hasEnoughLocationCount();
 
-    /**
-     * Gets the number of source location advertisements that must be
-     * obtained before source location will be shut down.  This should
-     * represent some happy medium between having too few allSources to be
-     * efficient and having too many allSources to practically use.
-     *
-     * @return number of advertisements to discover before source location
-     *  will be stopped
-     */
-    protected abstract int getManyLocationCount();
+  
 
     /**
      * Determines whether or not the advertisement provided is of use
@@ -862,9 +843,10 @@ public abstract class AbstractFolderTransfer
     private boolean checkSources() {
         ContentSourceLocationState newState;
         synchronized(lockObject) {
-            if (allSources.size() >= manySources) {
-                newState = ContentSourceLocationState.LOCATING_HAS_MANY;
-            } else if (allSources.size() >= enoughSources) {
+//            if (allSources.size() >= getManyLocationCount()) {
+//                newState = ContentSourceLocationState.LOCATING_HAS_MANY;
+//            } else 
+            if (hasEnoughLocationCount()) {
                 newState = ContentSourceLocationState.LOCATING_HAS_ENOUGH;
             } else {
                 newState = ContentSourceLocationState.LOCATING;
@@ -1004,14 +986,14 @@ public abstract class AbstractFolderTransfer
                             break;
                         case COMPLETED:
                             synchronized(lockObject) {
-                                if (content == null) {
-                                    LOG.warning("Transfer attempt returned "
-                                            + attemptResult
-                                            + " but content was not set!");
-                                } else {
+//                                if (content == null) {
+//                                    LOG.warning("Transfer attempt returned "
+//                                            + attemptResult
+//                                            + " but content was not set!");
+//                                } else {
                                     transferState = attemptResult;
                                     running = false;
-                                }
+//                                }
                             }
                             break;
                         }

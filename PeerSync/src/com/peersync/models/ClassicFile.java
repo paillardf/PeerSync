@@ -8,14 +8,16 @@ public class ClassicFile {
 	
 
 	protected String sharedFolderRootPath;
+	private long size;
 	
 
 
 	
 	
-	public ClassicFile(String relFilePath,String fileHash,String sharedFolderUID,String sharedFolderRootPath)
+	public ClassicFile(String relFilePath,String fileHash,long fileSize, String sharedFolderUID,String sharedFolderRootPath)
 	{
 		setRelFilePath(relFilePath);
+		this.size = fileSize;
 		setFileHash(fileHash);
 		setSharedFolderUID(sharedFolderUID);
 		this.sharedFolderRootPath=sharedFolderRootPath;
@@ -70,6 +72,13 @@ public class ClassicFile {
 
 	public String getAbsFilePath() {
 		return sharedFolderRootPath+relFilePath;
+	}
+
+
+
+
+	public long getFileSize() {
+		return size;
 	}
 
 

@@ -63,8 +63,8 @@ public class PeerSync {
 		
 		File prefFolder = new File(Constants.getInstance().PREFERENCES_PATH()); 
 		if(Log.DEBUG){
-			NetworkManager.RecursiveDelete(prefFolder); 
-			NetworkManager.RecursiveDelete(confFile);
+			//NetworkManager.RecursiveDelete(prefFolder); 
+			//NetworkManager.RecursiveDelete(confFile);
 		}
 		prefFolder.mkdirs();
 		confFile.mkdirs();

@@ -7,9 +7,9 @@ public class FileWithLocalSource extends ClassicFile{
 	
 	private String localSourcePath;
 	
-	public FileWithLocalSource(String relFilePath,String fileHash,String sharedFolderUID,String sharedFolderRootPath,String localSourcePath)
+	public FileWithLocalSource(String relFilePath,String fileHash,long fileSize, String sharedFolderUID,String sharedFolderRootPath,String localSourcePath)
 	{
-		super(relFilePath,fileHash,sharedFolderUID,sharedFolderRootPath);
+		super(relFilePath,fileHash,fileSize,sharedFolderUID,sharedFolderRootPath);
 		this.setLocalSourcePath(localSourcePath);
 
 	}

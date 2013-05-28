@@ -21,6 +21,7 @@ import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
 import com.peersync.network.content.SyncContentProvider;
 import com.peersync.network.content.model.FilesInfoManager;
+import com.peersync.tools.Log;
 
 /**
  *
@@ -44,14 +45,9 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	 */
 	private static final int ENOUGH_SOURCES =
 			Integer.getInteger(SyncFolderTransfer.class.getName()
-					+ ".enoughSources", 1).intValue();
+					+ ".enoughSources", 5).intValue();
 
-	/**
-	 * The number of of knownSources considered to be "many".
-	 */
-	private static final int MANY_SOURCES =
-			Integer.getInteger(SyncFolderTransfer.class.getName()
-					+ ".manySources", 10).intValue();
+	
 
 	/**
 	 * The discovery threshold to use.
@@ -146,16 +142,12 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getEnoughLocationCount() {
-		return ENOUGH_SOURCES;
+	protected boolean hasEnoughLocationCount() {
+		return (pipesManager.size()>=MAX_OUTSTANDING_PIPE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected int getManyLocationCount() {
-		return MANY_SOURCES;
-	}
+	
+	
 
 	/**
 	 * {@inheritDoc}
@@ -172,6 +164,11 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	protected ContentTransferState transferAttempt()
 			throws TransferException {
 		running = true;
+		
+
+		//initialize PipesManager
+		checkPipes();
+		
 		periodicTask = executor.scheduleWithFixedDelay(
 
 				new Runnable() {
@@ -189,9 +186,8 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 					}
 
 				}, 0, PERIODIC_CHECK_INTERVAL, TimeUnit.SECONDS);
-
-		//initialize PipesManager
-		checkPipes();
+		
+		
 		while (running) {
 			if (pipesManager.size() == 0) throw(new TransferException("Could not find usable source"));
 
@@ -259,6 +255,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 			if (candidate instanceof DefaultContentShareAdvertisementImpl) {
 				sourcesRemaining.add(
 						(DefaultContentShareAdvertisementImpl) candidate);
+				Log.d("SyncFolderTransfer", "nouveau candidat "+((DefaultContentShareAdvertisementImpl) candidate).getPipeAdvertisement().getPipeID());
 			}
 		}
 
@@ -280,17 +277,22 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 
 
 		while(pipesManager.size()<MAX_OUTSTANDING_PIPE) {
-			if (sourcesRemaining.size() == 0) {
+			DefaultContentShareAdvertisementImpl adv= null;
+			synchronized (sourcesRemaining) {
+				
+			
+			if (sourcesRemaining.size() <= 0) {
 				break;
 			}
 
-			DefaultContentShareAdvertisementImpl adv = sourcesRemaining.remove(0);
+			adv = sourcesRemaining.remove(0);
+			
 			sourcesTried.add(adv);
 			if(adv.getPipeAdvertisement().getID().equals(((SyncContentProvider)this.getContentProvider()).getPipeID())){
 				continue;
 			}
 			
-			
+			}
 
 			boolean exist = false;
 			try {
@@ -312,6 +314,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 
 			PipeManager pipeM ;
 			try {
+				Log.d("SyncFolderTransfer", "nouveau Pipe" +adv.getPipeAdvertisement().getPipeID());
 				pipeM = new PipeManager(this, adv.getPipeAdvertisement(), peerGroup);
 				pipeM.init();
 			} catch (Exception e) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import net.jxta.id.ID;
@@ -26,7 +27,7 @@ public class SmartFileInfo {
 	}
 
 	public SmartFileInfo(SmartFileInfo smartFileInfo) {
-
+		hash = smartFileInfo.hash;
 		providers=(ArrayList<HashSet<ID>>)smartFileInfo.getProviders().clone();
 		indexDirectory=(HashMap<Long,Integer>)smartFileInfo.getIndexDirectory().clone();
 		beginsDirectory=(HashMap<Integer,Long>)smartFileInfo.getBeginsDirectory().clone();
@@ -79,14 +80,16 @@ public class SmartFileInfo {
 
 
 			}
-
-
-			int choice = (int)(Math.random() * (resFinal.size()));
-			choice = resFinal.get(choice);
-			long begin = beginsDirectory.get(choice);
-			long length = beginsDirectory.get(choice+1)-begin;
-			BytesSegment bs = new BytesSegment(begin, length);
-			sd = new SegmentToDownload(hash,bs,providers.get(choice));
+			if(resFinal.size()>0){
+				Random rnd = new Random();
+				int choice = rnd.nextInt(resFinal.size());
+				choice = resFinal.get(choice);
+				long begin = beginsDirectory.get(choice);
+				long length = beginsDirectory.get(choice+1)-begin;
+				BytesSegment bs = new BytesSegment(begin, length);
+				sd = new SegmentToDownload(hash,bs,providers.get(choice));
+			}
+			
 		}
 
 		return sd;

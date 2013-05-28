@@ -59,17 +59,20 @@ public class DataRequestMessage extends AbstractSyncMessage{
 	private long len;
 	private String hash;
 
-	/**
-	 * Default constructor.
-	 */
-	public DataRequestMessage() {
-	}
-
+	
 	/**
 	 * Build request object from existing XML document.
 	 */
 	public DataRequestMessage(Element root) {
 		initialize(root);
+	}
+	
+	public DataRequestMessage(String hash, int queryID,  long offs, long len, PipeAdvertisement adv) {
+		this.hash=hash;
+		this.len = len;
+		this.offs = offs;
+		this.adv = adv;
+		this.setQueryID(queryID);
 	}
 
 	/**

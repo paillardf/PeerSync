@@ -165,24 +165,24 @@ public class SyncActiveTransferTracker {
 	}
 
 
-	public int getData(String hash, long offset, int length,
-			ByteArrayOutputStream byteOut) throws IOException {
-
-		FileCache result = null;
-		synchronized(this) {
-			result = filesCache.get(hash);
-			if (result == null) {
-				//TODO voir si on peut pas faire mieux
-				String path = dataBase.getSharedFileAvailability(hash).getAbsPath();
-				File f = new File(path);
-				result = new FileCache(f);
-				filesCache.put(hash, result);
-			}
-		}
-		
-
-		return result.getData(offset, length, byteOut);
-	}
+//	public int getData(String hash, long offset, int length,
+//			ByteArrayOutputStream byteOut) throws IOException {
+//
+//		FileCache result = null;
+//		synchronized(this) {
+//			result = filesCache.get(hash);
+//			if (result == null) {
+//				//TODO voir si on peut pas faire mieux
+//				String path = dataBase.getSharedFileAvailability(hash).getAbsPath();
+//				File f = new File(path);
+//				result = new FileCache(f);
+//				filesCache.put(hash, result);
+//			}
+//		}
+//		
+//
+//		return result.getData(offset, length, byteOut);
+//	}
 
 
 	/**

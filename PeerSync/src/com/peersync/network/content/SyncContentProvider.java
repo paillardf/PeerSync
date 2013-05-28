@@ -1,7 +1,9 @@
 package com.peersync.network.content;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -69,6 +71,8 @@ import com.peersync.network.content.transfer.SyncActiveTransfer;
 import com.peersync.network.content.transfer.SyncActiveTransferTracker;
 import com.peersync.network.content.transfer.SyncActiveTransferTrackerListener;
 import com.peersync.network.content.transfer.SyncFolderTransfer;
+import com.peersync.tools.Constants;
+import com.peersync.tools.Log;
 
 public class SyncContentProvider implements
 ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
@@ -402,23 +406,43 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 
             SyncActiveTransfer session = tracker.getSession(
                     req.getResponsePipe());
+//            
+//            byteOut = new ByteArrayOutputStream();
+//            written = tracker.getData(req.getHash(),
+//                    req.getOffset(), (int)req.getLength(), byteOut);
+//
+//            // Send response
+//            resp = new DataResponseMessage(req,fAv);
+//            if (written <= 0) {
+//                written = -written;
+//                resp.setEOF(true);
+//            }
+//            resp.setLength(written);
             
-            byteOut = new ByteArrayOutputStream();
-            written = tracker.getData(req.getHash(),
-                    req.getOffset(), (int)req.getLength(), byteOut);
-
-            // Send response
-            resp = new DataResponseMessage(req,fAv);
-            if (written <= 0) {
-                written = -written;
-                resp.setEOF(true);
-            }
-            resp.setLength(written);
             
+            String path = dataBase.getSharedFileAvailability(req.getHash()).getAbsPath();
+//			File f = new File(path);
+            
+            
+        	File myFile = new File (path);
+			//Create the accessor with read-write access.
+			RandomAccessFile accessor = new RandomAccessFile (myFile, "r");
+			
+			
+			accessor.seek(req.getOffset());
+			byte[] data = new byte[(int) req.getLength()];
+			accessor.read(data, 0, (int)req.getLength());
+			
+			resp = new DataResponseMessage(req,fAv);
+			resp.setLength(req.getLength());
+			 resp.setEOF(false);
             //TODO share.fireShareAccessed(session, resp);
 
-            sendResponse(resp, session,
-                    (written == 0) ? null : byteOut.toByteArray());
+			 if(req.getQueryID()%10==0)
+					Log.d(getClass().getSimpleName(), "from " + req.getOffset() +" to "+ (int) req.getLength());
+				
+			 
+            sendResponse(resp, session, data);
 
         } catch (TooManyClientsException tmcx) {
 
@@ -453,7 +477,6 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
         }
 
         Logging.logCheckedFiner(LOG, "Sending response: " + msg);
-
         try {
             if (session.send(msg)) return;
         } catch (IOException iox) {

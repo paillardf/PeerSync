@@ -13,6 +13,7 @@ import net.jxta.id.ID;
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
+import com.peersync.models.SharedFileAvailability;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.transfer.SyncFolderTransfer;
 import com.peersync.tools.Constants;
@@ -20,7 +21,12 @@ import com.peersync.tools.FileUtils;
 
 
 public class FilesInfoManager {
-
+	/**
+	 * Maximum number of bytes to request at one time.
+	 */
+	private static final int MAX_REQUEST_LENGTH =
+			Integer.getInteger(SyncFolderTransfer.class.getName()
+					+ ".maxRequestLength", 100000).intValue();
 
 	private Map<String, SmartFileInfo> remoteFilesAvailability = new HashMap<String, SmartFileInfo>();
 
@@ -31,8 +37,8 @@ public class FilesInfoManager {
 		FileAvailability futurFileAvailability;
 
 		public DownloadingFile(String hash) {
-			realFileAvailability = new FileAvailability(hash);
-			futurFileAvailability = new FileAvailability(hash);
+			realFileAvailability = dataBase.getSharedFileAvailability(hash).getFileAvailability();
+			futurFileAvailability = dataBase.getSharedFileAvailability(hash).getFileAvailability();
 		}
 	}
 
@@ -71,12 +77,20 @@ public class FilesInfoManager {
 			if(fAv!=null){
 
 				try{
+					ArrayList<ClassicFile> files = dataBase.getFilesToSyncConcernByThisHash(hash);
+					
+					if(files.size()==0)
+						return;
+					
 					File myFile = new File (Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"\\"+hash+".tmp");
 					//Create the accessor with read-write access.
 					RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
-					if(!myFile.exists()){
-						accessor.setLength(dataBase.getFileSize(hash) );
+					
+					if(myFile.length()!=files.get(0).getFileSize()){
+						accessor.setLength(files.get(0).getFileSize());
 					}
+					
+					
 
 
 					accessor.seek(offset);
@@ -87,16 +101,18 @@ public class FilesInfoManager {
 					dataBase.saveFileAvailability(fAv.realFileAvailability);
 					if(fAv.realFileAvailability.getSegments().size()==1){
 						BytesSegment segment = fAv.realFileAvailability.getSegments().get(0);
-						if(segment.offset == 0 && segment.length == dataBase.getFileSize(hash)){ // FICHIER COMPLET
+						if(segment.offset == 0 && segment.length == files.get(0).getFileSize()){ // FICHIER COMPLET
 							DataBaseManager.exclusiveAccess.lock();
 							
 							DataBaseManager db = DataBaseManager.getInstance();
-							ArrayList<ClassicFile> files = db.getFilesToSyncConcernByThisHash(hash);
+							
 							for (ClassicFile classicFile : files) {
 								
 								if(FileUtils.copy(myFile, new File(classicFile.getAbsFilePath())))
 									db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_OK);
 							}
+							localFileAvailability.remove(hash);
+							dataBase.eraseFileAvailability(hash);
 							DataBaseManager.exclusiveAccess.unlock();
 							myFile.delete();
 						}
@@ -132,12 +148,7 @@ public class FilesInfoManager {
 	}
 
 
-	/**
-	 * Maximum number of bytes to request at one time.
-	 */
-	private static final int MAX_REQUEST_LENGTH =
-			Integer.getInteger(SyncFolderTransfer.class.getName()
-					+ ".maxRequestLength", 50000).intValue();
+	
 	
 	
 	public SegmentToDownload getBestFileAvailability(String sharedFolderUID, ID pipeID) {
@@ -157,7 +168,7 @@ public class FilesInfoManager {
 				DownloadingFile localFAv = localFileAvailability.get(hash);
 				SegmentToDownload bestChoice = fAv.getBestChoice(localFAv.futurFileAvailability, pipeID);
 				if(bestChoice!=null){
-					bestChoice.getSegment().offset = Math.min(MAX_REQUEST_LENGTH, bestChoice.getSegment().offset);
+					bestChoice.getSegment().length = Math.min(MAX_REQUEST_LENGTH, bestChoice.getSegment().length);
 					localFAv.futurFileAvailability.addSegment(bestChoice.getSegment().offset, bestChoice.getSegment().length);
 					return bestChoice;
 				}
