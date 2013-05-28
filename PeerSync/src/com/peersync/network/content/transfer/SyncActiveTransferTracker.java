@@ -172,7 +172,8 @@ public class SyncActiveTransferTracker {
 		synchronized(this) {
 			result = filesCache.get(hash);
 			if (result == null) {
-				String path = dataBase.getAvailableFilePath(hash);
+				//TODO voir si on peut pas faire mieux
+				String path = dataBase.getSharedFileAvailability(hash).getAbsPath();
 				File f = new File(path);
 				result = new FileCache(f);
 				filesCache.put(hash, result);

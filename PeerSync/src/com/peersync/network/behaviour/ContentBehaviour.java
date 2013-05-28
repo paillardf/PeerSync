@@ -113,7 +113,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 		SyncContentProvider contentProvider = ((SyncPeerGroup)myPeerGroup).getContentProvider();
 
 		for (SharedFolder sf : db.getSharedFoldersOfAPeerGroup(myPeerGroup.getPeerGroupID().toString())) {
-			if(db.getFilesToDownloadForASharedFolder(sf.getUID()).size()>0){
+			if(db.getFilesToDownload(sf.getUID()).size()>0){
 				if(!currentTransfer.containsKey(sf.getUID())){
 					ContentTransfer transfer;
 					try {

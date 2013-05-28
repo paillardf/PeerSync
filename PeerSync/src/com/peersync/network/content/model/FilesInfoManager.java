@@ -13,7 +13,6 @@ import net.jxta.id.ID;
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
-import com.peersync.models.FileToDownload;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.transfer.SyncFolderTransfer;
 import com.peersync.tools.Constants;
@@ -144,9 +143,9 @@ public class FilesInfoManager {
 	public SegmentToDownload getBestFileAvailability(String sharedFolderUID, ID pipeID) {
 
 		synchronized (localFileAvailability){
-			ArrayList<FileToDownload> listFile = getFilesToDownload(sharedFolderUID);
+			ArrayList<ClassicFile> listFile = getFilesToDownload(sharedFolderUID);
 
-			for (FileToDownload fileToDownload : listFile) {
+			for (ClassicFile fileToDownload : listFile) {
 				String hash = fileToDownload.getFileHash();
 				SmartFileInfo fAv = remoteFilesAvailability.get(hash);
 				if(fAv==null){
@@ -169,8 +168,8 @@ public class FilesInfoManager {
 	}
 
 
-	public ArrayList<FileToDownload> getFilesToDownload(String sharedFolderUID) {
-		return dataBase.getFilesToDownloadForASharedFolder(sharedFolderUID);
+	public ArrayList<ClassicFile> getFilesToDownload(String sharedFolderUID) {
+		return dataBase.getFilesToDownload(sharedFolderUID);
 	}
 
 }

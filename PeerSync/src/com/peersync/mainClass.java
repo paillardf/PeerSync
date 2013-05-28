@@ -1,8 +1,12 @@
 package com.peersync;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.ibex.nestedvm.util.Seekable.File;
+
 import com.peersync.data.DataBaseManager;
+import com.peersync.models.SharedFileAvailability;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.tools.Constants;
 
@@ -25,12 +29,19 @@ public class mainClass {
 		
 		Constants.getInstance().PEERNAME = "client2";
 		DataBaseManager.getInstance().saveFileAvailability(fa);
-		ArrayList<FileAvailability> tmp = DataBaseManager.getInstance().getDownloadingFilesAvailibility();
 		
-		for(FileAvailability fa111 : tmp)
-		{
-			System.out.println(fa111.toXML().toString());
+		SharedFileAvailability tmp = DataBaseManager.getInstance().getSharedFileAvailability("test");
+		
+		File f;
+		try {
+			f = new File("C:\\PeerSyncTest\\Client1\\qzd.txt");
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+			System.out.println(tmp.getFileAvailability().toXML().toString());
+			System.out.println(tmp.getFileSize());
 		//DataBaseManager.getInstance().saveFileAvailability(fa);
 		
 //		for(BytesSegment bs : fa.getSegments())

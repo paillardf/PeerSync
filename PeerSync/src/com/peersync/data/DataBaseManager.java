@@ -22,10 +22,9 @@ import net.jxta.document.XMLElement;
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
-import com.peersync.models.FileAvailable;
 import com.peersync.models.FileInfo;
-import com.peersync.models.FileToDownload;
 import com.peersync.models.FileWithLocalSource;
+import com.peersync.models.SharedFileAvailability;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
@@ -219,7 +218,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
@@ -373,16 +371,7 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 	
-	public ArrayList<FileAvailability> getLocalFilesAvailabilityForAPeerGroup(String peerGroupID)
-	{
-		ArrayList<FileAvailability>  res = new ArrayList<FileAvailability>();
-		ArrayList <SharedFolder> sfs = getSharedFoldersOfAPeerGroup(peerGroupID);
-		for(SharedFolder sf : sfs)
-		{
-			res.addAll(getLocalFilesAvailabilityInASharedFolder(sf.getUID()));
-		}
-		return res;
-	}
+
 	
 	
 	
@@ -392,13 +381,15 @@ public class DataBaseManager extends DbliteConnection{
 	 * 	@param shareFolderUID 
 	 * 	@return  Map nom_de_fichier,hash
 	 */
-	private FileAvailability getLocalFilesAvailabilityForAFile(String hash)
+	private SharedFileAvailability getLocalFilesAvailability(String hash)
 	{
 
 		try
 		{
 
-			String sql = "select e1."+NEWHASHFIELD+", e1."+EVENT_SIZEFIELD+" from "+DBEVENTSTABLE+" e1 where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and e1."+NEWHASHFIELD+"=\""+hash+"\" and  e1."+DATEFIELD+" = " +
+			String sql = "select e1."+NEWHASHFIELD+", e1."+EVENT_SIZEFIELD+",(case when e1."+FILEPATHFIELD+"=\"\\\" THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath,fi."+FILESINFO_UPDATEDATEFIELD+" "+
+					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") left join "+FILESINFO_TABLE+" fi on (absPath=fi."+FILESINFO_ABSOLUTEPATHFIELD+") "+
+					"where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and e1."+NEWHASHFIELD+"=\""+hash+"\" and  e1."+DATEFIELD+" = " +
 					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
 		
 
@@ -413,9 +404,11 @@ public class DataBaseManager extends DbliteConnection{
 				// read the result set
 				if(rs.getString(NEWHASHFIELD)!=null)
 				{
+					
 					FileAvailability fa = new FileAvailability(rs.getString(NEWHASHFIELD));
 					fa.addSegment(0, rs.getLong(EVENT_SIZEFIELD));
-					return fa;
+					SharedFileAvailability res = new SharedFileAvailability(fa,rs.getString("absPath"),rs.getLong(EVENT_SIZEFIELD),rs.getLong(FILESINFO_UPDATEDATEFIELD));
+					return res;
 
 				}
 				else
@@ -435,119 +428,10 @@ public class DataBaseManager extends DbliteConnection{
 	
 	
 	
-	/**
-	 *  Retourne les derniers �v�nements en base de donn�es, pour chaque fichier.
-	 *  Ne prends pas en compte les �v�nements "Suppression", les events avec un status diff�rent de "OK", ni les dossiers
-	 * 	@param shareFolderUID 
-	 * 	@return  Map nom_de_fichier,hash
-	 */
-	public ArrayList<FileAvailability> getLocalFilesAvailabilityInASharedFolder(String shareFolderUID)
-	{
-		ArrayList<FileAvailability>  res = new ArrayList<FileAvailability>() ;
-
-
-		try
-		{
-
-			String sql = "select e1."+NEWHASHFIELD+",e1."+EVENT_SIZEFIELD+" where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"=\""+shareFolderUID+"\" and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
-		
-
-			ResultSet rs = query(sql);
-
-
-
-
-			while(rs.next())
-			{
-
-				// read the result set
-				if(rs.getString(NEWHASHFIELD)!=null)
-				{
-					FileAvailability fa = new FileAvailability(rs.getString(NEWHASHFIELD));
-					fa.addSegment(0, rs.getLong(EVENT_SIZEFIELD));
-					res.add(fa);
-
-				}
-				else
-					System.err.println("PB de shared folder");
-			}
-		}
-		catch(SQLException e)
-		{
-			// if the error message is "out of memory", 
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		}
-
-
-		return res;
-	}
 	
 	
+
 	
-	public ArrayList<FileAvailable> getFilesAvailableForAPeerGroup(String peerGroupID)
-	{
-		ArrayList<FileAvailable>  res = new ArrayList<FileAvailable>();
-		ArrayList <SharedFolder> sfs = getSharedFoldersOfAPeerGroup(peerGroupID);
-		for(SharedFolder sf : sfs)
-		{
-			res.addAll(getFilesAvailableInASharedFolder(sf.getUID()));
-		}
-		return res;
-	}
-	
-	
-	
-	
-	/**
-	 *  Retourne les derniers �v�nements en base de donn�es, pour chaque fichier.
-	 *  Ne prends pas en compte les �v�nements "Suppression", les events avec un status diff�rent de "OK", ni les dossiers
-	 * 	@param shareFolderUID 
-	 * 	@return  Map nom_de_fichier,hash
-	 */
-	public ArrayList<FileAvailable> getFilesAvailableInASharedFolder(String shareFolderUID)
-	{
-		ArrayList<FileAvailable>  res = new ArrayList<FileAvailable>() ;
-
-
-		try
-		{
-
-			String sql = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", sf."+ROOTPATHFIELD+", sf."+PEERGROUPFIELD+",(case when e1."+FILEPATHFIELD+"=\"\\\" THEN sf."+ROOTPATHFIELD+" ELSE sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" end) as absPath "+
-					"from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+ISFILEFIELD+" =1 AND sf."+UUIDFIELD+"=\""+shareFolderUID+"\" and e1."+STATUSFIELD+"="+Event.STATUS_OK+" and  e1."+DATEFIELD+" = " +
-					"(select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")";
-		
-
-			ResultSet rs = query(sql);
-
-
-
-
-			while(rs.next())
-			{
-
-				// read the result set
-				if(rs.getString(ROOTPATHFIELD)!=null)
-				{
-					String absolutePath = rs.getString("absPath") ;
-					res.add(new FileAvailable(absolutePath, rs.getString(NEWHASHFIELD), rs.getString(PEERGROUPFIELD)));
-
-				}
-				else
-					System.err.println("PB de shared folder");
-			}
-		}
-		catch(SQLException e)
-		{
-			// if the error message is "out of memory", 
-			// it probably means no database file is found
-			System.err.println(e.getMessage());
-		}
-
-
-		return res;
-	}
 	
 	
 	
@@ -688,16 +572,12 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
 	}
 
-	// get Active group () ret (id, mdp???)
-	// get last event since (ShareFolderVersion) ret (List EventsStack)
-	// add event (List EventsStack, UID folder) ret ();
-	// get file to download (UID folder) ret (list Hash);
+
 
 	public EventsStack getEventsToSync(SharedFolderVersion sfv)
 	{
@@ -772,40 +652,15 @@ public class DataBaseManager extends DbliteConnection{
 	}
 	
 	
-	public ArrayList<FileAvailability> getDownloadingFilesAvailibility()
-	{
-		ArrayList<FileAvailability> res = new ArrayList<FileAvailability>();
-		try {
-			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+
-					" from "+DOWNLOADINGILESAVAILABILITY_TABLE);
 
-			while(rs.next())
-			{
-				String hash  = rs.getString(DOWNLOADINGFILESAVAILABILITY_HASH);
-				String fileAvailabilitiy = rs.getString(DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY);
-				try {
-					Reader r = new StringReader(fileAvailabilitiy);
-					StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, r);
-				
-				FileAvailability fa = new FileAvailability((XMLElement)doc);
-				res.add(fa);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return res;
-		
-	}
 	
 	
-	private FileAvailability getDownloadingFilesAvailibility(String hash)
+	private SharedFileAvailability getDownloadingFilesAvailibility(String hash)
 	{
 		try {
-			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+
+			ResultSet rs = query("select "+DOWNLOADINGFILESAVAILABILITY_HASH+", "+DOWNLOADINGFILESAVAILABILITY_FILEAVAILABILITY+", "+
+					" (select e1."+EVENT_SIZEFIELD+
+					" from "+DBEVENTSTABLE+" e1 where e1."+NEWHASHFIELD+"=\""+hash+"\" LIMIT 1) as size"+
 					" from "+DOWNLOADINGILESAVAILABILITY_TABLE+" where "+DOWNLOADINGFILESAVAILABILITY_HASH+"=\""+hash+"\"");
 
 			while(rs.next())
@@ -816,7 +671,8 @@ public class DataBaseManager extends DbliteConnection{
 					Reader r = new StringReader(fileAvailabilitiy);
 					StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, r);
 				
-				return new FileAvailability((XMLElement)doc);
+					SharedFileAvailability res = new SharedFileAvailability(new FileAvailability((XMLElement)doc),Constants.TEMP_PATH+hash,rs.getLong("size"),-1);
+				return res;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -852,7 +708,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException  e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
@@ -872,7 +727,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
@@ -892,7 +746,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
@@ -924,7 +777,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -958,7 +810,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -991,7 +842,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -1002,9 +852,9 @@ public class DataBaseManager extends DbliteConnection{
 	}
 	
 	
-	public ArrayList<FileToDownload> getFilesToDownloadForASharedFolder(String sharedFolderUID)
+	public ArrayList<ClassicFile> getFilesToDownload(String sharedFolderUID)
 	{
-		ArrayList<FileToDownload> res = new ArrayList<FileToDownload>();
+		ArrayList<ClassicFile> res = new ArrayList<ClassicFile>();
 		try {
 			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+PEERGROUPFIELD+",sf."+ROOTPATHFIELD+
 					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
@@ -1027,55 +877,18 @@ public class DataBaseManager extends DbliteConnection{
 				String peerGroupId = rs.getString(PEERGROUPFIELD);
 				
 				if(setHash.add(fileHash))
-					res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID, rs.getString(ROOTPATHFIELD),peerGroupId));
+					res.add(new ClassicFile(relFilePath, fileHash, sharedFolderUID, rs.getString(ROOTPATHFIELD)));
 
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
 	}
 	
-	public ArrayList<FileToDownload> getFilesToDownloadForAPeerGroup(String peerGroupId)
-	{
-		ArrayList<FileToDownload> res = new ArrayList<FileToDownload>();
-		try {
-			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf."+ROOTPATHFIELD+
-					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")  where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+
-					" and e1."+ISFILEFIELD+"=1"+
-					" and sf."+PEERGROUPFIELD+"=\""+peerGroupId+"\""+
-					" and  e1."+DATEFIELD+" = " +
-					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
-					" and e1."+NEWHASHFIELD+" NOT IN (select e2."+NEWHASHFIELD+
-					" from "+DBEVENTSTABLE+" e2  where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" and e2."+DATEFIELD+" = " +
-					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+"))";
 
-
-			ResultSet rs = query(sqlQuery);
-			Set<String> setHash = new HashSet<String>();
-			while(rs.next())
-			{
-				
-				String relFilePath = rs.getString(FILEPATHFIELD);
-				String fileHash = rs.getString(NEWHASHFIELD);
-				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);
-				
-				if(setHash.add(fileHash))
-					res.add(new FileToDownload(relFilePath, fileHash, sharedFolderUID, rs.getString(ROOTPATHFIELD),peerGroupId));
-
-
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return res;
-	}
-
-
-	public ArrayList<FileWithLocalSource> getFilesWithLocalSourceForAPeerGroup(String peerGroupId)
+	public ArrayList<FileWithLocalSource> getFilesWithLocalSource(String peerGroupId)
 	{
 		ArrayList<FileWithLocalSource> res = new ArrayList<FileWithLocalSource>();
 		try {
@@ -1106,48 +919,11 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException  e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;
 	}
 	
-	
-	public ArrayList<FileWithLocalSource> getFilesWithLocalSourceForASharedFolder(String sharedFolderUID)
-	{
-		ArrayList<FileWithLocalSource> res = new ArrayList<FileWithLocalSource>();
-		try {
-
-			String sqlQuery = "select e1."+FILEPATHFIELD+",e1."+NEWHASHFIELD+", e1."+SHAREDFOLDERFIELD+",sf1."+ROOTPATHFIELD+",(select sf."+ROOTPATHFIELD+"||e2."+FILEPATHFIELD+
-					" from "+DBEVENTSTABLE+" e2 left join "+DBSHAREDFOLDERSTABLE+" sf on (e2."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+") where e2."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e2."+STATUSFIELD+" = "+Event.STATUS_OK+" " +
-					" and e1."+ISFILEFIELD+"=1"+
-					" and e2."+NEWHASHFIELD+" = e1."+NEWHASHFIELD+
-					" and e1."+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\""+
-					" and e2."+DATEFIELD+" = " +
-					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+" and "+STATUSFIELD+" = "+Event.STATUS_OK+" )) as localSource "+
-					" from "+DBEVENTSTABLE+" e1 left join "+DBSHAREDFOLDERSTABLE+" sf1 on (e1."+SHAREDFOLDERFIELD+"=sf1."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
-					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
-					" and localSource NOT NULL";
-			
-
-
-			ResultSet rs = query(sqlQuery);
-
-			while(rs.next())
-			{
-
-				String relFilePath = rs.getString(FILEPATHFIELD);
-				String fileHash = rs.getString(NEWHASHFIELD);
-				String localSource = rs.getString("localsource");
-				res.add(new FileWithLocalSource(relFilePath, fileHash, sharedFolderUID,rs.getString(ROOTPATHFIELD),localSource));
-
-			}
-		} catch (SQLException  e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return res;
-	}
 	
 	
 	
@@ -1157,7 +933,6 @@ public class DataBaseManager extends DbliteConnection{
 		try {
 			update("Update "+DBEVENTSTABLE+" set "+STATUSFIELD+"="+status+" where "+FILEPATHFIELD+"=\""+relFilePath+"\" and "+SHAREDFOLDERFIELD+"=\""+sharedFolderUID+"\" and "+NEWHASHFIELD+"=\""+hash+"\"");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -1215,22 +990,19 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 	//retourne la disponibilit� d'un fichier � partir de son hash
-	public FileAvailability getFileAvailability(String hash) {
-		FileAvailability fa = getLocalFilesAvailabilityForAFile(hash);
+	public SharedFileAvailability getSharedFileAvailability(String hash) {
+		SharedFileAvailability fa = getLocalFilesAvailability(hash);
 		if(fa!=null)
 			return fa;
 		fa = getDownloadingFilesAvailibility(hash);
 		if(fa!=null)
 			return fa;
-		return new FileAvailability(hash);
+		return new SharedFileAvailability(new FileAvailability(hash),"",0,0);
 	}
 	
-	//Retourne le chemin absolue vers le premier fichier correspondant au hash 
-	public String getAvailableFilePath(String hash) {
-		// TODO Auto-generated method stub
-		return null;
-		
-	}
+	
+	
+	
 
 	public long getFileSize(String hash) {
 		
@@ -1249,7 +1021,6 @@ public class DataBaseManager extends DbliteConnection{
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return res;

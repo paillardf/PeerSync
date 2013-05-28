@@ -54,6 +54,7 @@ import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PipeAdvertisement;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.models.SharedFileAvailability;
 import com.peersync.network.content.listener.ClientEvent;
 import com.peersync.network.content.listener.SyncContentProviderListener;
 import com.peersync.network.content.message.AbstractSyncMessage;
@@ -352,7 +353,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
     	List<FileAvailability> fileAvailability = new ArrayList<FileAvailability>();
     	
     	for (String hash : req.getFilesHash()) {
-    		fileAvailability.add(dataBase.getFileAvailability(hash));
+    		fileAvailability.add(dataBase.getSharedFileAvailability(hash).getFileAvailability());
 		}
     	
     	AvailabilityResponseMessage resp = new AvailabilityResponseMessage(req,fileAvailability);
@@ -394,7 +395,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
         Logging.logCheckedFinest(LOG, "   PipeAdv: ", req.getResponsePipe());
 
         
-        FileAvailability fAv = dataBase.getFileAvailability(req.getHash());
+        FileAvailability fAv = dataBase.getSharedFileAvailability(req.getHash()).getFileAvailability();
 
        
         try {

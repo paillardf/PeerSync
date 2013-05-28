@@ -2,13 +2,10 @@ package com.peersync.network.content.transfer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import javax.xml.crypto.Data;
 
 import net.jxta.content.ContentID;
 import net.jxta.content.ContentTransferEvent;
@@ -21,7 +18,7 @@ import net.jxta.peergroup.PeerGroup;
 import net.jxta.protocol.ContentShareAdvertisement;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.models.FileToDownload;
+import com.peersync.models.ClassicFile;
 import com.peersync.network.content.SyncContentProvider;
 import com.peersync.network.content.model.FilesInfoManager;
 
@@ -229,7 +226,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 			}
 
 
-			if(DataBaseManager.getInstance().getFilesToDownloadForASharedFolder(sharedFolderUID).size()==0){
+			if(DataBaseManager.getInstance().getFilesToDownload(sharedFolderUID).size()==0){
 				// We should only get here on success
 				return ContentTransferState.COMPLETED;
 			}
@@ -442,9 +439,9 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	}
 
 	public List<String> getNeededFilesHash() {
-		ArrayList<FileToDownload> fTD = filesInfoManager.getFilesToDownload(sharedFolderUID);
+		ArrayList<ClassicFile> fTD = filesInfoManager.getFilesToDownload(sharedFolderUID);
 		List<String> filesHash = new ArrayList<String>();
-		for (FileToDownload fileToDownload : fTD) {
+		for (ClassicFile fileToDownload : fTD) {
 			filesHash.add(fileToDownload.getFileHash());
 		}
 		return filesHash;

@@ -63,7 +63,7 @@ public class SyncUtils {
 				}
 				
 				
-				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSourceForAPeerGroup(peerGroupID);
+				ArrayList<FileWithLocalSource> files = db.getFilesWithLocalSource(peerGroupID);
 				
 				for (FileWithLocalSource fileWithLocalSource : files) {
 					File f = new File(fileWithLocalSource.getLocalSourcePath());
