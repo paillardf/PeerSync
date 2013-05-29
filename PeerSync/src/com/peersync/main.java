@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.peersync.cli.ShellConsole;
 import com.peersync.network.PeerSync;
+import com.peersync.network.UpnpManager;
 import com.peersync.tools.Constants;
 
 public class main {
@@ -17,7 +18,10 @@ public class main {
 		System.setProperty("net.jxta.logging.Logging", "FINEST");
 		System.setProperty("net.jxta.level", "FINEST");
 		Constants.getInstance().PEERNAME = "client1";
-		Constants.getInstance().PORT = 9789;
+		UpnpManager upnp = UpnpManager.getInstance();
+		upnp.findGateway();
+		int port = upnp.openPort(9789, 9789, 9989, "TCP", "PeerSync");
+		Constants.getInstance().PORT = port!=-1?port:9789;
 		try {
 			PeerSync ps = PeerSync.getInstance();
 			ps.start();

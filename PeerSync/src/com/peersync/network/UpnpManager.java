@@ -1,6 +1,7 @@
 package com.peersync.network;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -34,7 +35,7 @@ public class UpnpManager {
 	{
 		GatewayDiscover discover = new GatewayDiscover();
     	try {
-			discover.discover();
+			Map<InetAddress, GatewayDevice> map = discover.discover();
 			setGateway(discover.getValidGateway());
 		} catch (IOException| SAXException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block
