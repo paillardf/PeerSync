@@ -60,7 +60,7 @@ public class RendezVous_Mya {
             MyNetworkConfigurator.setTcpOutgoing(true);
 
             // Setting the Peer ID
-            MyNetworkConfigurator.setPeerID(PID_RDV);
+           // MyNetworkConfigurator.setPeerID(PID_RDV);
 //            AdvertisementFactory.registerAdvertisementInstance(
 //	                Outils.createAllPurposePeerGroupWithPSEModuleImplAdv(net).getAdvType(),
 //	                new PeerGroupAdv.Instantiator());

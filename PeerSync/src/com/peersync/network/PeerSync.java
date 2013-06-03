@@ -28,7 +28,7 @@ import com.peersync.tools.Log;
 public class PeerSync {
 
 	//DEBUG VAL //TODO
-	private URI RendezVousSeedURI = URI.create("tcp://" + "127.0.0.1" + ":9711");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.50" + ":9711");
 	private int PORT = 9799;
 
 
@@ -63,8 +63,8 @@ public class PeerSync {
 		
 		File prefFolder = new File(Constants.getInstance().PREFERENCES_PATH()); 
 		if(Log.DEBUG){
-			//NetworkManager.RecursiveDelete(prefFolder); 
-			//NetworkManager.RecursiveDelete(confFile);
+			NetworkManager.RecursiveDelete(prefFolder); 
+			NetworkManager.RecursiveDelete(confFile);
 		}
 		prefFolder.mkdirs();
 		confFile.mkdirs();
@@ -82,9 +82,10 @@ public class PeerSync {
 				prefFolder.toURI());
 		//networkManager.setPeerID(PID_EDGE);
 		conf = networkManager.getConfigurator();
+		conf.setUseOnlyRendezvousSeeds(false);
 		conf.addSeedRendezvous(RendezVousSeedURI);
 		conf.setTcpPort(PORT);
-		conf.setUseMulticast(true);
+		conf.setUseMulticast(false);
 		conf.setTcpEnabled(true);
 		conf.setTcpIncoming(true);
 		conf.setTcpOutgoing(true);

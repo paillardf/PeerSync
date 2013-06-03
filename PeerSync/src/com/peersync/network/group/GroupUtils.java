@@ -1,14 +1,20 @@
 package com.peersync.network.group;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.cert.X509Certificate;
+
+import javax.crypto.EncryptedPrivateKeyInfo;
 
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
 import net.jxta.document.XMLDocument;
 import net.jxta.document.XMLElement;
 import net.jxta.id.ID;
+import net.jxta.id.IDFactory;
 import net.jxta.impl.access.pse.PSEAccessService;
 import net.jxta.impl.content.ContentServiceImpl;
+import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.impl.peergroup.CompatibilityUtils;
 import net.jxta.impl.peergroup.StdPeerGroup;
@@ -126,5 +132,26 @@ public class GroupUtils {
 
 		return newPGAdv;
 	}
+
+	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl, String peerGroupID,  X509Certificate[] invitationCertChain, EncryptedPrivateKeyInfo invitationPrivateKey) throws URISyntaxException {
+        PeerGroupAdvertisement newPGAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(
+                PeerGroupAdvertisement.getAdvertisementType());
+
+			newPGAdv.setPeerGroupID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)));
+        newPGAdv.setModuleSpecID(pseImpl.getModuleSpecID());
+        newPGAdv.setName("Group Name");
+        newPGAdv.setDescription("PSE Sync Group");
+
+        PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement(PSEConfigAdv.getAdvertisementType());
+
+        pseConf.setCertificateChain(invitationCertChain);
+        pseConf.setEncryptedPrivateKey(invitationPrivateKey, invitationCertChain[0].getPublicKey().getAlgorithm());
+
+        XMLDocument pseDoc = (XMLDocument) pseConf.getDocument(MimeMediaType.XMLUTF8);
+
+        newPGAdv.putServiceParam(PeerGroup.membershipClassID, pseDoc);
+
+        return newPGAdv;
+    }
 
 }

@@ -109,6 +109,8 @@ public class BasicPeerGroup  implements Observer{
 
 		pse_pga = GroupUtils.build_psegroup_adv(pseImpl, peerGroupName, peerGroupId);
 		disco.publish(pse_pga, PeerGroup.DEFAULT_LIFETIME, PeerGroup.DEFAULT_EXPIRATION);
+		getNetPeerGroup().getDiscoveryService().publish(pse_pga);
+		getNetPeerGroup().getDiscoveryService().remotePublish(pse_pga);
 		tempPeerGroup  = initPeerGroup(pse_pga);
 		return tempPeerGroup;
 	}
@@ -140,7 +142,8 @@ public class BasicPeerGroup  implements Observer{
 	}
 	
 	protected void initPeerGroupParameters(){
-		peerGroup.getRendezVousService().setAutoStart(true, 30000);
+		//peerGroup.getRendezVousService().startRendezVous();
+		peerGroup.getRendezVousService().setAutoStart(true, 35000);
 	}
 
 	@Override
