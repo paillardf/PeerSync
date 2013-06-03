@@ -28,7 +28,8 @@ import com.peersync.tools.Log;
 public class PeerSync {
 
 	//DEBUG VAL //TODO
-	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.50" + ":9711");
+
+	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
 	private int PORT = 9799;
 
 

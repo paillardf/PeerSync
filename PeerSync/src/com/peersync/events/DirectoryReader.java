@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -79,36 +80,34 @@ public class DirectoryReader {
 	 *  Calcule le Hash Sha-1 du ficher passé en paramètre.
 	 * 	@param f : fichier à hasher
 	 * 	@return hash 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws IOException 
 	 */
-	public static String calculateHash(File f)
+	public static String calculateHash(File f) throws NoSuchAlgorithmException, IOException
 	{
 		String res = new String();
 		if(f.isFile())
 		{
-			try
-			{
-				MessageDigest md = MessageDigest.getInstance("SHA1"); 
-				DigestInputStream dis = new DigestInputStream(new FileInputStream(f), md);  
-				byte[] dataBytes = new byte[1024];
+			MessageDigest md = MessageDigest.getInstance("SHA1"); 
+			DigestInputStream dis = new DigestInputStream(new FileInputStream(f), md);  
+			byte[] dataBytes = new byte[1024];
 
-				int nread = 0; 
+			int nread = 0; 
 
-				while ((nread = dis.read(dataBytes)) != -1) {
-					md.update(dataBytes, 0, nread);
-				};
+			while ((nread = dis.read(dataBytes)) != -1) {
+				md.update(dataBytes, 0, nread);
+			};
 
-				byte[] mdbytes = md.digest();
+			byte[] mdbytes = md.digest();
 
-				//convert the byte to hex format
-				StringBuffer sb = new StringBuffer("");
-				for (int i = 0; i < mdbytes.length; i++) {
-					sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-				}
-				res = sb.toString();
-				dis.close();
-			}catch (Exception ex) {  
-				ex.printStackTrace();  
+			//convert the byte to hex format
+			StringBuffer sb = new StringBuffer("");
+			for (int i = 0; i < mdbytes.length; i++) {
+				sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
 			}
+			res = sb.toString();
+			dis.close();
+
 		}
 		else
 			return null;
@@ -292,7 +291,14 @@ public class DirectoryReader {
 						{
 							files.add(file);
 							Log.d("SCAN", "No choice, we calculate the hash of "+file.getAbsolutePath());
-							String hash = DirectoryReader.calculateHash(file);
+							String hash = new String();
+							try {
+								hash = DirectoryReader.calculateHash(file);
+							} catch (NoSuchAlgorithmException | IOException e) {
+								m_filesOk.add(file.getAbsolutePath());
+								continue;
+							}
+				
 
 							//								if(file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).equals(hash))
 							//									m_filesOk.add(file.getAbsolutePath());
