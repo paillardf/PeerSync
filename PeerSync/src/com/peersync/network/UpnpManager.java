@@ -56,7 +56,12 @@ public class UpnpManager {
 				InetAddress localAddress = gd.getLocalAddress();
 				
 				try {
-					if (!gd.getSpecificPortMappingEntry(currentPort,protocol,portMapping)) 
+					boolean alreadyExist = gd.getSpecificPortMappingEntry(currentPort,protocol,portMapping);
+					if(alreadyExist && portMapping.getInternalClient().equals(localAddress.getHostAddress().toString()) &&  portMapping.getInternalPort()==localPort)
+					{
+						return currentPort;
+					}
+					else if (!alreadyExist) 
 					{
 
 					    if (gd.addPortMapping(currentPort,localPort,localAddress.getHostAddress(),protocol,description)) 
@@ -65,6 +70,7 @@ public class UpnpManager {
 					    	
 					    }
 					}
+						
 				} catch (IOException | SAXException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
