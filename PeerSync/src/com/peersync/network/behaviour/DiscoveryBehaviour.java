@@ -44,7 +44,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 		if(System.currentTimeMillis() - lastRDVPublishTime > UPDATE_RDV_DELAY&&myPeerGroup.getPeerGroup().isRendezvous()){
 			sendRDVAdvertisement();
 		}
-		
+
 
 
 		return 10000;
@@ -68,12 +68,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 				rdvAdv.setRouteAdv(ra);
 				peerRDVAdv = rdvAdv;
-				//				peerRDVAdv = (RendezVousAdvertisement) AdvertisementFactory.newAdvertisement(RendezVousAdvertisement.getAdvertisementType());
-				//				peerRDVAdv.setPeerID(myPeerGroup.getPeerGroup().getPeerID());
-				//				peerRDVAdv.setPeerGroupId(myPeerGroup.getPeerGroup().getPeerGroupID());
-				//				peerRDVAdv.setStartDate(System.currentTimeMillis());
 			}
-
 			myPeerGroup.getNetPeerGroup().getDiscoveryService().publish(peerRDVAdv,VALIDITY_RDV_ADV,VALIDITY_RDV_ADV);
 			myPeerGroup.getNetPeerGroup().getDiscoveryService().remotePublish(peerRDVAdv,VALIDITY_RDV_ADV);
 			Log.d(myPeerGroup.getPeerGroupName(), "--- SEND RDV ADVERTISEMENT ---");
@@ -91,11 +86,8 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 			e.printStackTrace();
 		}
 
-		// advs = discovery.getLocalAdvertisements(DiscoveryService.ADV, RdvAdvertisement.ServiceNameTag, serviceName);
 		myPeerGroup.getNetPeerGroup().getDiscoveryService().getRemoteAdvertisements( null,
 				DiscoveryService.ADV, RdvAdv.GroupIDTag, myPeerGroup.getPeerGroupID().toString(),
-				//RendezVousAdvertisement.PeerGroupIdTAG, 
-				//myPeerGroup.getPeerGroup().getPeerGroupID().toString(),
 				5, this );
 	}
 
@@ -108,109 +100,17 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 			while (advertisementsEnum.hasMoreElements()) {
 				Advertisement foundAdv = advertisementsEnum.nextElement();
-				//				if(foundAdv instanceof RdvAdvertisement){
-				//					RdvAdvertisement a =(RdvAdvertisement) foundAdv;
-				//					try {
-				//					NetworkConfigurator conf = PeerSync.getInstance().getConf();
-				//					String s = a.getRouteAdv().getDest().getEndpointAddresses().nextElement().toString();
-				//					
-				//					conf.addRdvSeedingURI(s);
-				//					} catch (IOException e) {
-				//						e.printStackTrace();
-				//					}
-				//				}
-
-
-				//				if(foundAdv.getAdvType().compareTo(RendezVousAdvertisement.getAdvertisementType())==0){
-				//
-				//
-				//					Log.d(myPeerGroup.getPeerGroupName(),"Found RDV Advertisement");
-				//					RendezVousAdvertisement rdvAdv = (RendezVousAdvertisement) foundAdv;
-				//					
-				//					if(!rdvAdv.getPeerID().equals(myPeerGroup.getPeerGroup().getPeerID())){
-				//
-				//						if(myPeerGroup.getPeerGroup().getRendezVousService().isRendezVous()){
-				//
-				//
-				//							List<PeerID> listRDV = myPeerGroup.getPeerGroup().getRendezVousService().getLocalRendezVousView();
-				//							for (PeerID peerID : listRDV) {
-				//								if(peerID.equals(rdvAdv.getPeerID())){
-				//
-				//								}
-				//							}
-				//						}else{
-				//							
-				//							//List<EndpointAddress> listAddress = ((RouteAdv)rdvAdv.getRouteAdv()).getDestEndpointAddresses();
-				//							//for (EndpointAddress endpointAddress : listAddress) {
-				//								myPeerGroup.getConf().addRdvSeedingURI(rdvAdv.getPeerID().toURI());
-				//								myPeerGroup.getConf().addRdvSeedingURI(rdvAdv.getRendezVousAddress().toURI());
-				//								//((RendezVousServiceImpl) myPeerGroup.getRendezVousService()).getPeerView().addSeed(endpointAddress.toURI());
-				//							//}
-				//							
-				//
-				//						}
-				//					}	
-
 
 				if(foundAdv.getAdvType().compareTo(RdvAdv.getAdvertisementType())==0){
 					RdvAdv rdvAdv = (RdvAdv) foundAdv;
 					if(!rdvAdv.getPeerID().equals(myPeerGroup.getPeerGroup().getPeerID())){
 						Log.d(myPeerGroup.getPeerGroupName(),"Found RDV Advertisement");
-						//if(myPeerGroup.getPeerGroup().getRendezVousService().isRendezVous()){
-
-
-						//							List<PeerID> listRDV = myPeerGroup.getPeerGroup().getRendezVousService().getLocalRendezVousView();
-						//							for (PeerID peerID : listRDV) {
-						//								if(peerID.equals(rdvAdv.getPeerID())){
-						//									if(peerRDVAdv==null||rdvAdv.getStartDate()<peerRDVAdv.getStartDate()){
-						//										myPeerGroup.getRendezVousService().stopRendezVous();
-						//										peerRDVAdv = null;
-						//										break;
-						//
-						//									}else{
-						//										//((RendezVousServiceImpl) myPeerGroup.getRendezVousService()).getPeerView(). probeAddress(rdvAdv.getRendezVousAddress(), null);
-						//										//URI t = rdvAdv.getRendezVousAddress().toURI();
-						//										//myPeerGroup.getConf().addRdvSeedingURI(t);
-						//										//myPeerGroup.getPeerGroup().getEndpointService().getEndpointRouter().suggestRoute(route);
-						//										//myPeerGroup.getRendezVousService().disconnectFromRendezVous(rdvAdv.getPeerId());
-						//									}
-						//								}
-						//							}
-						//						}else{
-//						PeerView peerView = ((RendezVousServiceImpl) myPeerGroup.getRendezVousService()).getPeerView();
-//						if(peerView !=null){
-//							List<EndpointAddress> listAddress = ((RouteAdv)rdvAdv.getRouteAdv()).getDestEndpointAddresses();
-//							for (EndpointAddress endpointAddress : listAddress) {
-//								peerView.addSeed(endpointAddress.toURI());
-//								//((RendezVousServiceImpl) myPeerGroup.getRendezVousService()).getPeerView().addSeed(endpointAddress.toURI());
-//							}
-//						}
 						try {
 							myPeerGroup.getDiscoveryService().publish(rdvAdv);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 
-
-
-						//							RouteAdvertisement r = (RouteAdvertisement) AdvertisementFactory.newAdvertisement(RouteAdvertisement.getAdvertisementType());
-						//							r.addDestEndpointAddress(rdvAdv.getRendezVousAddress());
-						//							URI r = rdvAdv.getRendezVousAddress().toURI();
-						//							((RendezVousServiceImpl) myPeerGroup.getRendezVousService()).getPeerView().addSeed(r);
-
-						//							String t = rdvAdv.getRouteAdv().getFirstHop().toString();//getRendezVousAddress().toURI();
-						//							myPeerGroup.getConf().addRdvSeedingURI(t);
-						//							
-						//							RouteAdvertisement r = (RouteAdvertisement) AdvertisementFactory.newAdvertisement(RouteAdvertisement.getAdvertisementType());
-						//							r.addDestEndpointAddress(rdvAdv.getRendezVousAddress());
-						//							myPeerGroup.getPeerGroup().getEndpointService().getEndpointRouter().suggestRoute(r);
-						//myPeerGroup.getPeerGroup().getMembershipService()..EndpointService().
-						//							try {
-						//								
-						//					myPeerGroup.getRendezVousService().getClass()connectToRendezVous(rdvAdv.getRendezVousAddress());
-						//							} catch (IOException e) {
-						//								e.printStackTrace();
-						//							}
 					}
 				}
 			}

@@ -1,6 +1,5 @@
 package com.peersync.network.behaviour;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,14 +17,11 @@ import net.jxta.content.ContentTransfer;
 import net.jxta.content.ContentTransferState;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
-import net.jxta.document.FileDocument;
 import net.jxta.document.MimeMediaType;
 import net.jxta.id.IDFactory;
-import net.jxta.impl.content.TransferAggregator;
 import net.jxta.protocol.ContentShareAdvertisement;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.models.FileAvailable;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.content.SyncContentProvider;
@@ -42,8 +38,10 @@ public class ContentBehaviour extends AbstractBehaviour{
 	private Map<String, SyncFolderTransfer> currentTransfer = new HashMap<String, SyncFolderTransfer>();
 	private ContentService service;
 	private DataBaseManager db;
-	private static final long PUBLISH_ADVERTISEMENT_DELAY = 60*1000;
 
+	private static final long UPDATE_CONTENT_DELAY = 8*60*1000;
+	private static final long VALIDITY_CONTENT_ADV = 9*60*1000;
+	
 
 	public ContentBehaviour(BasicPeerGroup peerGroup){
 		super(peerGroup);
@@ -84,8 +82,8 @@ public class ContentBehaviour extends AbstractBehaviour{
 
 					ContentShareAdvertisement adv = share.getContentShareAdvertisement();
 					try {
-						discoService.publish(adv);
-						discoService.remotePublish(adv);
+						discoService.publish(adv, VALIDITY_CONTENT_ADV, VALIDITY_CONTENT_ADV);
+						discoService.remotePublish(adv, VALIDITY_CONTENT_ADV);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -104,7 +102,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 	@Override
 	protected int action() {
 
-		if(System.currentTimeMillis()-lastShareContentAdvertisment>PUBLISH_ADVERTISEMENT_DELAY){
+		if(System.currentTimeMillis()-lastShareContentAdvertisment>UPDATE_CONTENT_DELAY){
 			publishShareContentAdvertisement();
 
 		}
@@ -127,7 +125,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 				}
 			}
 		}
-		return 4000;	
+		return 5000;	
 
 	}
 
@@ -165,7 +163,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 				lastShareContentAdvertisment = 0;
 				break;
 			case PeerGroupEvent.STACK_UPDATE:
-				lastShareContentAdvertisment = 0;
+				nextExecutionTime = 0;
 				break;
 			}
 

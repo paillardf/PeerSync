@@ -14,7 +14,7 @@ public class SharedFolder {
 	public SharedFolder(String UID) {
 		this.UID = UID;
 		asbolutePath = DataBaseManager.getInstance().getSharedFolderRootPath(UID);
-		
+
 		this.peerGroupUID = DataBaseManager.getInstance().getSharedFolderPeerGroup(UID);;
 	}
 
@@ -58,7 +58,10 @@ public class SharedFolder {
 	}
 
 
-
+	@Override
+	public boolean equals(Object obj) {
+		return UID.equals(((SharedFolder) obj).UID);
+	}
 
 
 

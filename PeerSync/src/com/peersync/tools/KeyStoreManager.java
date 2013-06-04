@@ -160,46 +160,7 @@ public class KeyStoreManager {
 
 
 
-	public void exportPeerGroup(String peerGroupID, String path, char[] encryptedKey, char[] keyStoreKey) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException, IOException {
-		PeerGroupAdvertisement pse_pga = null;
-
-		EncryptedPrivateKeyInfo encryptedInvitationKey = getEncryptedPrivateKey(peerGroupID, encryptedKey, keyStoreKey);
-		X509Certificate[] issuerChain = {getX509Certificate(peerGroupID)};
-		// Create the invitation.
-		pse_pga = GroupUtils.build_psegroup_adv(GroupUtils.createAllPurposePeerGroupWithPSEModuleImplAdv(),peerGroupID, issuerChain
-				,
-				encryptedInvitationKey);
-
-		XMLDocument asXML = (XMLDocument) pse_pga.getDocument(MimeMediaType.XMLUTF8);
-
-
-		FileWriter invitation_file = new FileWriter(path);
-
-		asXML.sendToWriter(invitation_file);
-
-		invitation_file.close();
-
-	}
-
-	public PeerGroupID importPeerGroup(String path, char[] encryptedKey , char[] keystoreKey) throws IOException{
-		FileReader csr_file = new FileReader(path);
-		XMLDocument csr_doc = (XMLDocument) StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, csr_file);
-		csr_file.close();
-
-		PeerGroupAdvertisement pseGroupAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(csr_doc);
-
-
-		PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement((XMLElement) pseGroupAdv.getServiceParam(PeerGroup.membershipClassID));
-		pseConf.getEncryptedPrivateKey();
-		PrivateKey private_key = PSEUtils.pkcs5_Decrypt_pbePrivateKey(encryptedKey, pseConf.getEncryptedPrivateKeyAlgo(),  pseConf.getEncryptedPrivateKey());//Encrypt_pbePrivateKey(encryptedKey, newPriv, 500);
-		addNewKeys(pseGroupAdv.getPeerGroupID().toString(),  pseConf.getCertificateChain()[0], private_key, keystoreKey);
-		pseGroupAdv.getName();
-		pseGroupAdv.getDescription();
-		//TODO SAVE GROUP IN BDD
-
-		return pseGroupAdv.getPeerGroupID();
-
-	}
+	
 
 
 }

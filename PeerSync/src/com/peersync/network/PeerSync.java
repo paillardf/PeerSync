@@ -1,17 +1,34 @@
 package com.peersync.network;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
+
+import javax.crypto.EncryptedPrivateKeyInfo;
 
 import net.jxta.content.Content;
 import net.jxta.content.ContentID;
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
+import net.jxta.document.StructuredDocumentFactory;
+import net.jxta.document.XMLDocument;
+import net.jxta.document.XMLElement;
 import net.jxta.id.IDFactory;
+import net.jxta.impl.membership.pse.PSEUtils;
+import net.jxta.impl.protocol.PSEConfigAdv;
 import net.jxta.peergroup.PeerGroup;
+import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
+import net.jxta.protocol.PeerGroupAdvertisement;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.ScanService;
@@ -19,6 +36,7 @@ import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.content.model.FolderDocument;
+import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
@@ -29,7 +47,13 @@ public class PeerSync {
 
 	//DEBUG VAL //TODO
 
-	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
+
+//	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
+
+//	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.50" + ":9711");
+
+
 	private int PORT = 9799;
 
 
@@ -85,11 +109,19 @@ public class PeerSync {
 		conf = networkManager.getConfigurator();
 		conf.setUseOnlyRendezvousSeeds(false);
 		conf.addSeedRendezvous(RendezVousSeedURI);
-		conf.setTcpPort(PORT);
-		conf.setUseMulticast(false);
+		
+		conf.setUseMulticast(true);
+		
 		conf.setTcpEnabled(true);
 		conf.setTcpIncoming(true);
 		conf.setTcpOutgoing(true);
+		conf.setTcpPort(PORT);
+		
+		conf.setHttp2Enabled(true);
+		conf.setHttp2Incoming(true);
+		conf.setHttp2Outgoing(true);
+		conf.setHttp2Port(80);
+		
 		conf.setKeyStoreLocation(ksm.getKeyStoreLocation());
 		conf.setPassword(KeyStoreManager.MyKeyStorePassword);
 		conf.setPrincipal(NAME+System.currentTimeMillis());
@@ -122,10 +154,6 @@ public class PeerSync {
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
-			
-			//TODO TEST
-			KeyStoreManager ks = KeyStoreManager.getInstance();
-			ks.createNewKeys(Constants.PsePeerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
 			SyncPeerGroup pg = new SyncPeerGroup(netPeerGroup,conf,  Constants.PsePeerGroupID, Constants.PsePeerGroupName);
 			peerGroupManager.addPeerGroupToManage(pg);
 			pg.initialize();
@@ -155,7 +183,58 @@ public class PeerSync {
 
 	}
 
+	
+	public SharedFolder addShareFolder(PeerGroupID peerGroupID, String path){
+		ContentID id = IDFactory.newContentID(peerGroupID, false, (path+System.currentTimeMillis()).getBytes());
+		SharedFolder sf = new SharedFolder(id.toString(), peerGroupID.toString(), path);
+		DataBaseManager.getInstance().saveSharedFolder(sf);
+		return sf;
+	}
+	
+	public PeerGroupID createPeerGroup(String name){
 
+		KeyStoreManager ks = KeyStoreManager.getInstance();
+		PeerGroupID peerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, name.getBytes());
+		ks.createNewKeys(peerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
+		//TODO SAVE GROUP IN BDD
+		return peerGroupID;
+		
+	}
+	
+	
+	public void exportPeerGroup(String peerGroupID, String outPath, char[] encryptedKey) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException, IOException {
+		PeerGroupAdvertisement pse_pga = null;
+		KeyStoreManager ks = KeyStoreManager.getInstance();
+		EncryptedPrivateKeyInfo encryptedInvitationKey = ks.getEncryptedPrivateKey(peerGroupID, encryptedKey, KeyStoreManager.MyKeyStorePassword.toCharArray());
+		X509Certificate[] issuerChain = {ks.getX509Certificate(peerGroupID)};
+		// Create the invitation.
+		pse_pga = GroupUtils.build_psegroup_adv(GroupUtils.createAllPurposePeerGroupWithPSEModuleImplAdv(),peerGroupID, issuerChain
+				,encryptedInvitationKey);
+
+		XMLDocument asXML = (XMLDocument) pse_pga.getDocument(MimeMediaType.XMLUTF8);
+		FileWriter invitation_file = new FileWriter(outPath);
+		asXML.sendToWriter(invitation_file);
+		invitation_file.close();
+	}
+
+	public PeerGroupID importPeerGroup(String path, char[] encryptedKey) throws IOException{
+		FileReader csr_file = new FileReader(path);
+		XMLDocument csr_doc = (XMLDocument) StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, csr_file);
+		csr_file.close();
+		KeyStoreManager ks = KeyStoreManager.getInstance();
+		PeerGroupAdvertisement pseGroupAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(csr_doc);
+
+
+		PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement((XMLElement) pseGroupAdv.getServiceParam(PeerGroup.membershipClassID));
+		pseConf.getEncryptedPrivateKey();
+		PrivateKey private_key = PSEUtils.pkcs5_Decrypt_pbePrivateKey(encryptedKey, pseConf.getEncryptedPrivateKeyAlgo(),  pseConf.getEncryptedPrivateKey());//Encrypt_pbePrivateKey(encryptedKey, newPriv, 500);
+		ks.addNewKeys(pseGroupAdv.getPeerGroupID().toString(),  pseConf.getCertificateChain()[0], private_key, KeyStoreManager.MyKeyStorePassword.toCharArray());
+		pseGroupAdv.getName();
+		pseGroupAdv.getDescription();
+		//TODO SAVE GROUP IN BDD
+
+		return pseGroupAdv.getPeerGroupID();
+	}
 
 
 	public PeerGroupManager getPeerGroupManager(){

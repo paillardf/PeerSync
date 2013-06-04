@@ -6,6 +6,7 @@ import net.jxta.id.IDFactory;
 
 import com.peersync.cli.ShellConsole;
 import com.peersync.network.PeerSync;
+import com.peersync.network.UpnpManager;
 import com.peersync.network.content.SyncContentProvider;
 import com.peersync.tools.Constants;
 
@@ -21,9 +22,14 @@ public class main1 {
 		
 		
 //		System.out.println(IDFactory.newModuleSpecID(IDFactory.newModuleClassID()).toString());
-//		System.exit(-1);
+
+//		UpnpManager upnp = UpnpManager.getInstance();
+//				upnp.findGateway();
+//				int port = upnp.openPort(9711, 9711, 9715, "TCP", "PeerSyncServ");
+//				System.exit(-1);
+				Constants.getInstance().PORT = 9788;
 		Constants.getInstance().PEERNAME = "client2";
-		Constants.getInstance().PORT = 9788;
+	//	Constants.getInstance().PORT = 9788;
 		try {
 			PeerSync ps = PeerSync.getInstance();
 			ps.start();
