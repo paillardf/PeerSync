@@ -38,10 +38,12 @@ public class BasicPeerGroup  implements Observer{
 	private GroupThread thread;
 	private Thread.State statue = Thread.State.BLOCKED;
 	private PeerGroup netPeerGroup;
+	private String description = "";
 
-	public BasicPeerGroup(PeerGroupID psepeergroupid, String peerGroupName) {
+	public BasicPeerGroup(PeerGroupID psepeergroupid, String peerGroupName,String description) {
 		this.peerGroupName = peerGroupName;
 		this.peerGroupId=psepeergroupid;
+		this.description=description;
 	}
 
 
@@ -190,11 +192,13 @@ public class BasicPeerGroup  implements Observer{
 	}
 
 
+	public String getDescription() {
+		return description;
+	}
+
 	public String getPeerGroupName() {
 		return peerGroupName;
 	}
-
-	
 
 	private class GroupThread extends Thread{
 

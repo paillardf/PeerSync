@@ -3,6 +3,8 @@ package com.peersync.data;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,6 +21,8 @@ import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.XMLElement;
+import net.jxta.id.IDFactory;
+import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
@@ -30,6 +34,7 @@ import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 import com.peersync.network.content.model.FileAvailability;
+import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
 
 public class DataBaseManager extends DbliteConnection{
@@ -139,7 +144,7 @@ public class DataBaseManager extends DbliteConnection{
 
 		update("create table "+PEERGROUP_TABLE+" "+
 				"("+PEERGROUP_ID+" text, "+
-				PEERGROUP_NAME+ " text, "+
+				PEERGROUP_NAME+ " text UNIQUE, "+
 				PEERGROUP_DESCRIPTION+ " text, "+
 				"PRIMARY KEY("+PEERGROUP_ID+"));");
 
@@ -168,9 +173,6 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		try
 		{
-
-
-
 			ResultSet rs = query("select e1."+FILEPATHFIELD+", sf."+ROOTPATHFIELD+",e1."+SHAREDFOLDERFIELD
 					+" from "+DBEVENTSTABLE+" e1 left join "+SHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")");
 			while(rs.next())
@@ -190,12 +192,6 @@ public class DataBaseManager extends DbliteConnection{
 					//					else // joue de la role du on delete cascade sur les sharedFolders
 					update("delete from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+"=\""+oldRelFilepath+"\" and "+SHAREDFOLDERFIELD+"=\""+oldFolderUID+"\"");
 				}
-				//
-
-
-
-
-
 			}
 
 		}
@@ -210,8 +206,98 @@ public class DataBaseManager extends DbliteConnection{
 	}
 
 
+	
+	
+	
+	public void savePeerGroup(SyncPeerGroup pg)
+	{
+		boolean update = false;
+		String name = pg.getPeerGroupName();
+		boolean found=false;
+		try {
+			int cpt=0;
+			while(!found)
+			{
+				cpt++;
+				ResultSet rs = query("select pg."+PEERGROUP_NAME+
+						" from "+PEERGROUP_TABLE+" pg where sf."+PEERGROUP_NAME+"=\""+name+"\" and pg."+PEERGROUP_ID+"<>\""+pg.getPeerGroupID().toString()+"\"");
+				found = true;
+				while(rs.next())
+				{
+					if(rs.getString(PEERGROUP_NAME)!=null)
+					{
+						name+=cpt;
+						found = false;
+					}
+				}
+					
+				
+			}
+			
+			
+			ResultSet rs = query("select pg."+PEERGROUP_ID+
+					" from "+PEERGROUP_TABLE+" pg where pg."+PEERGROUP_ID+"=\""+pg.getPeerGroupID().toString()+"\"");
 
-	//TODO : getPeerGroups
+			while(rs.next())
+			{
+				if(rs.getString(PEERGROUP_ID)!=null)
+					update = true;
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			if(update)
+				update("Update "+PEERGROUP_TABLE+" set "+PEERGROUP_NAME+"=\""+name+"\", "+PEERGROUP_DESCRIPTION+"=\""+pg.getDescription()+"\" where "+PEERGROUP_ID+"=\""+pg.getPeerGroupID().toString()+"\"");
+			else
+				update("insert into "+PEERGROUP_TABLE+ "("+PEERGROUP_ID+", "+PEERGROUP_NAME+", "+PEERGROUP_DESCRIPTION+") values (\""+pg.getPeerGroupID().toString() + "\", \""+name+"\", \""+pg.getDescription()+"\")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		
+	}
+	
+	
+	public SyncPeerGroup getPeerGroup(String name)
+	{
+		SyncPeerGroup res = null; 
+		try {
+			ResultSet rs = query("select * from "+PEERGROUP_TABLE+" where "+PEERGROUP_NAME+"=\""+name+"\"");
+			while(rs.next())
+			{
+				try {
+					res =new SyncPeerGroup((PeerGroupID)IDFactory.fromURI(new URI(rs.getString(PEERGROUP_ID))),rs.getString(PEERGROUP_NAME),rs.getString(PEERGROUP_DESCRIPTION));
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	public ArrayList<SyncPeerGroup> getPeerGroups()
+	{
+		ArrayList<SyncPeerGroup> res = new ArrayList<SyncPeerGroup>(); 
+		try {
+			ResultSet rs = query("select * from "+PEERGROUP_TABLE);
+			while(rs.next())
+			{
+				try {
+					res.add(new SyncPeerGroup((PeerGroupID)IDFactory.fromURI(new URI(rs.getString(PEERGROUP_ID))),rs.getString(PEERGROUP_NAME),rs.getString(PEERGROUP_DESCRIPTION)));
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
 
 	/** Raccourcis pour appeler {@link #getLastEventOfAFile(String, String)} avec uniquement un chemin absolu de fichier
 	 * @param absFilePath : Chemin absolu du fichier dont on veut r�cup�rer le dernier �v�nement
@@ -228,18 +314,12 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
 		try {
-
-
-
 			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+",sf."+SHAREDFOLDER_NAMEFIELD+
-
 					" from "+SHAREDFOLDERSTABLE+" sf where sf."+PEERGROUPFIELD+"=\""+peerGroupID+"\" AND sf."+ROOTPATHFIELD+" IS NOT NULL and sf."+ROOTPATHFIELD+" <>''");
-
 
 			while(rs.next())
 			{
 				res.add(new SharedFolder(rs.getString(UUIDFIELD),peerGroupID,rs.getString(ROOTPATHFIELD),rs.getString(SHAREDFOLDER_NAMEFIELD)));
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -274,16 +354,12 @@ public class DataBaseManager extends DbliteConnection{
 				int st = rs.getInt(STATUSFIELD);
 
 
-
 				res = new Event(sharedFolderUID , date, filepath,filesize,isFile,newHash,oldHash,action,owner,st);
 			}
 
 		}
 		catch(SQLException ex)
 		{
-			// if the error message is "out of memory", 
-			// it probably means no database file is found
-
 			System.err.println(ex.getMessage());
 		}
 		return res;
@@ -297,12 +373,7 @@ public class DataBaseManager extends DbliteConnection{
 	{
 		try
 		{
-
-
-
 			update("Insert into "+DBEVENTSTABLE+" ("+DATEFIELD+","+FILEPATHFIELD+","+NEWHASHFIELD+","+OLDHASHFIELD+","+ACTIONFIELD+","+PARAMETERSFIELD+","+OWNERFIELD+","+SHAREDFOLDERFIELD+","+ISFILEFIELD+","+EVENT_SIZEFIELD+","+STATUSFIELD+") VALUES(\""+e.getDate()+"\",\""+e.getFilepath()+"\",\""+e.getNewHash()+"\",\""+e.getOldHash()+"\","+e.getAction()+",\""+e.getParameters()+"\",\""+e.getOwner()+"\",\""+e.getShareFolderUID()+"\","+e.isFile()+","+e.getLenght()+","+e.getStatus()+")");
-
-
 		}
 		catch(SQLException ex)
 		{

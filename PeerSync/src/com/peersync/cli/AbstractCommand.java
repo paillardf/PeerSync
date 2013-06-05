@@ -11,7 +11,7 @@ public abstract class AbstractCommand {
 	// Groupes AND (list obj) pour des args interdépendants
 
 	protected ArgumentsList allArguments = new ArgumentsList();
-	protected OperatorNode rootParser;
+	protected OperatorNode rootParser=null;
 
 	private String description;
 	private String name;
@@ -36,7 +36,7 @@ public abstract class AbstractCommand {
 	}
 
 	public abstract void requestHandler(String queryString);
-	
+
 	public void setRootParser(OperatorNode r)
 	{
 		rootParser=r;
@@ -93,8 +93,11 @@ public abstract class AbstractCommand {
 
 	public boolean parse(String queryString)
 	{
-	StringRef sref = new StringRef(queryString);
-		return rootParser.parse(sref);
+		StringRef sref = new StringRef(queryString);
+		if(rootParser!=null)
+			return rootParser.parse(sref);
+		else
+			return true;
 
 
 	}
@@ -122,7 +125,7 @@ public abstract class AbstractCommand {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public static String formatString(String s,int size,boolean truncBegin)
 	{
 		String res;
@@ -151,7 +154,7 @@ public abstract class AbstractCommand {
 		return res;
 
 	}
-	
+
 	public String getArgumentValue(String argName,String queryString)
 	{
 		AbstractArgument arg = allArguments.getArgumentByName(argName);
