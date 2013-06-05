@@ -49,7 +49,7 @@ public class AddSharedFolder extends AbstractCommand {
 			if(f.exists() && f.isDirectory())
 			{
 				DataBaseManager db = DataBaseManager.getInstance();
-				db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced",absPath ));
+				db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced",absPath,"otototo" ));
 			}
 			else
 				println("Invalid rootPath");

@@ -56,7 +56,7 @@ public class DataBaseManager extends DbliteConnection{
 	private static final String ROOTPATHFIELD = "rootAbsolutePath";
 	private static final String PEERGROUPFIELD = "peerGroup";
 	private static final String EVENT_SIZEFIELD = "filesize";
-
+	private static final String SHAREDFOLDER_NAMEFIELD = "name";
 
 	private static final String FILESINFO_TABLE = "FilesInfo";
 	private static final String FILESINFO_ABSOLUTEPATHFIELD = "absolutePath";
@@ -120,6 +120,7 @@ public class DataBaseManager extends DbliteConnection{
 				"("+UUIDFIELD+" text, "+
 				PEERGROUPFIELD+ " text, "+
 				ROOTPATHFIELD+ " text, "+
+				SHAREDFOLDER_NAMEFIELD+ " text UNIQUE, "+
 				"PRIMARY KEY("+UUIDFIELD+"));");
 
 		update("create table "+FILESINFO_TABLE+" "+
@@ -225,14 +226,14 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
-			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+
+			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+",sf."+SHAREDFOLDER_NAMEFIELD+
 
 					" from "+SHAREDFOLDERSTABLE+" sf where sf."+PEERGROUPFIELD+"=\""+peerGroupID+"\" AND sf."+ROOTPATHFIELD+" IS NOT NULL and sf."+ROOTPATHFIELD+" <>''");
 
 
 			while(rs.next())
 			{
-				res.add(new SharedFolder(rs.getString(UUIDFIELD),peerGroupID,rs.getString(ROOTPATHFIELD)));
+				res.add(new SharedFolder(rs.getString(UUIDFIELD),peerGroupID,rs.getString(ROOTPATHFIELD),rs.getString(SHAREDFOLDER_NAMEFIELD)));
 
 			}
 		} catch (SQLException e) {
@@ -594,6 +595,37 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
+	
+	/** Obtient le chemin (absolu) d\"un dossier de partage 
+	 * 	@param UID : UID du Shared Folder dont on veut r�cup�rer le chemin absolu
+	 * 	@return chemin absolu du dossier de partage 
+	 */
+	public SharedFolder getSharedFolder(String UID)
+	{
+		SharedFolder res = null;
+		try
+		{
+			ResultSet rs = query("select *"+
+					" from "+SHAREDFOLDERSTABLE+" sf  where sf."+UUIDFIELD+" =\""+UID+"\"");
+
+			while(rs.next())
+			{
+				// read the result set
+				res = new SharedFolder(rs.getString(UUIDFIELD),rs.getString(PEERGROUPFIELD),rs.getString(ROOTPATHFIELD),rs.getString(SHAREDFOLDER_NAMEFIELD));
+				//		        System.out.println("name = " + rs.getString(FILEPATHFIELD));
+				//		        System.out.println("id = " + rs.getString(HASHFIELD));
+			}
+		}
+		catch(SQLException  e)
+		{
+			// if the error message is "out of memory", 
+			// it probably means no database file is found
+			System.err.println(e.getMessage());
+		}
+		return res;
+
+	}
+	
 	/** Obtient le chemin (absolu) d\"un dossier de partage 
 	 * 	@param UID : UID du Shared Folder dont on veut r�cup�rer le chemin absolu
 	 * 	@return chemin absolu du dossier de partage 
@@ -653,7 +685,24 @@ public class DataBaseManager extends DbliteConnection{
 	public void saveSharedFolder(SharedFolder sf){
 
 		boolean update = false;
+		String name = sf.getName();
+		boolean found=false;
 		try {
+			int cpt=0;
+			while(!found)
+			{
+				cpt++;
+				ResultSet rs = query("select sf."+SHAREDFOLDER_NAMEFIELD+
+						" from "+SHAREDFOLDERSTABLE+" sf where sf."+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"");
+				while(rs.next())
+				{
+					if(rs.getString(SHAREDFOLDER_NAMEFIELD)!=null)
+						name+=cpt;
+				}
+				
+			}
+			
+			
 			ResultSet rs = query("select sf."+UUIDFIELD+
 					" from "+SHAREDFOLDERSTABLE+" sf where sf."+UUIDFIELD+"=\""+sf.getUID()+"\"");
 
@@ -669,9 +718,9 @@ public class DataBaseManager extends DbliteConnection{
 
 		try {
 			if(update)
-				update("Update "+SHAREDFOLDERSTABLE+" set "+PEERGROUPFIELD+"=\""+sf.getPeerGroupUID()+"\", "+ROOTPATHFIELD+"=\""+sf.getAbsFolderRootPath()+"\"  where "+UUIDFIELD+"=\""+sf.getUID()+"\"");
+				update("Update "+SHAREDFOLDERSTABLE+" set "+PEERGROUPFIELD+"=\""+sf.getPeerGroupUID()+"\", "+ROOTPATHFIELD+"=\""+sf.getAbsFolderRootPath()+"\","+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"  where "+UUIDFIELD+"=\""+sf.getUID()+"\"");
 			else
-				update("insert into "+SHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+") values (\""+sf.getUID() + "\", \""+sf.getPeerGroupUID()+"\", \""+sf.getAbsFolderRootPath()+"\")");
+				update("insert into "+SHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+","+SHAREDFOLDER_NAMEFIELD+") values (\""+sf.getUID() + "\", \""+sf.getPeerGroupUID()+"\", \""+sf.getAbsFolderRootPath()+"\",\""+name+"\")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -689,14 +738,14 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
-			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+",sf."+PEERGROUPFIELD+
+			ResultSet rs = query("select sf."+UUIDFIELD+",sf."+ROOTPATHFIELD+",sf."+PEERGROUPFIELD+",sf."+SHAREDFOLDER_NAMEFIELD+
 
 					" from "+SHAREDFOLDERSTABLE+" sf where sf."+ROOTPATHFIELD+" IS NOT NULL and sf."+ROOTPATHFIELD+" <>''");
 
 
 			while(rs.next())
 			{
-				res.add(new SharedFolder(rs.getString(UUIDFIELD),rs.getString(PEERGROUPFIELD),rs.getString(ROOTPATHFIELD)));
+				res.add(new SharedFolder(rs.getString(UUIDFIELD),rs.getString(PEERGROUPFIELD),rs.getString(ROOTPATHFIELD),rs.getString(SHAREDFOLDER_NAMEFIELD)));
 
 			}
 		} catch (SQLException e) {
