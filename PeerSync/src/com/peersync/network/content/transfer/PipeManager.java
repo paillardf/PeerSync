@@ -387,6 +387,8 @@ class PipeManager implements PipeMsgListener{
 			
 			
 			processResponse(req, data);
+			data = null;
+			System.gc();
 			pipeQueries.remove(pipeQ);
 		} catch (IOException e) {
 			new IllegalArgumentException(getClass().getName() +

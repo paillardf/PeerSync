@@ -57,11 +57,13 @@ public class OperatorNode extends Node{
 			for(Node n : childs)
 			{
 				if(n instanceof OperatorNode)
+				{
 					if(((OperatorNode)n).parse(queryString,false))
 						nbOk++;
 					else if(operator==Operator.AND)
 						return false;
-				else if (n instanceof ArgumentNode)
+				}
+				else if (n instanceof ArgumentNode )
 				{
 					AbstractArgument arg = ((ArgumentNode) n).getArgument();
 					if(arg.checkPresence(queryString.getData()))
@@ -74,15 +76,21 @@ public class OperatorNode extends Node{
 						
 				}
 				if((operator==Operator.XOR || operator==Operator.XOR_ONE) && nbOk>1)
+				{
 					return false;
+				}
 
 			}
 			if((operator==Operator.OR_ONE_MIN || operator==Operator.XOR_ONE)&& nbOk==0)
+			{
 				return false;
+			}
 
 
 		if(master && queryString.getData().replace(" ", "").length()>0)
+		{
 			return false;
+		}
 		return true;
 	}
 

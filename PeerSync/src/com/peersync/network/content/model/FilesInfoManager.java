@@ -109,7 +109,7 @@ public class FilesInfoManager {
 							for (ClassicFile classicFile : files) {
 								
 								if(FileUtils.copy(myFile, new File(classicFile.getAbsFilePath())))
-									db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_OK);
+									db.updateEventStatus(classicFile.getRelFilePath(), hash, classicFile.getSharedFolderUID(), Event.STATUS_LOCAL_OK);
 							}
 							localFileAvailability.remove(hash);
 							dataBase.eraseFileAvailability(hash);

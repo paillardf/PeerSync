@@ -58,7 +58,7 @@ public class SyncUtils {
 				ArrayList<ClassicFile> folders = db.getUnsyncFolder(peerGroupID);
 				for (ClassicFile classicFile : folders) {
 					new File(classicFile.getAbsFilePath()).mkdirs();
-					db.updateEventStatus(classicFile.getRelFilePath(), classicFile.getFileHash(), classicFile.getSharedFolderUID(), Event.STATUS_OK);
+					db.updateEventStatus(classicFile.getRelFilePath(), classicFile.getFileHash(), classicFile.getSharedFolderUID(), Event.STATUS_LOCAL_OK);
 
 				}
 				
@@ -68,7 +68,7 @@ public class SyncUtils {
 				for (FileWithLocalSource fileWithLocalSource : files) {
 					File f = new File(fileWithLocalSource.getLocalSourcePath());
 					FileUtils.copy(f, new File(fileWithLocalSource.getAbsFilePath()));
-					db.updateEventStatus(fileWithLocalSource.getRelFilePath(), fileWithLocalSource.getFileHash(), fileWithLocalSource.getSharedFolderUID(), Event.STATUS_OK);
+					db.updateEventStatus(fileWithLocalSource.getRelFilePath(), fileWithLocalSource.getFileHash(), fileWithLocalSource.getSharedFolderUID(), Event.STATUS_LOCAL_OK);
 				}
 				
 				ArrayList<ClassicFile> filesToRemove = db.getFilesToRemove(peerGroupID);
@@ -77,7 +77,7 @@ public class SyncUtils {
 					File f = new File(fileToRemove.getAbsFilePath());
 					boolean res = FileUtils.deleteFile(f);
 					//Ici pb : le hash est nul ... Je pense pas que ça pose de vrais pb, mais on identifie mal l'event du coup
-					db.updateEventStatus(fileToRemove.getRelFilePath(), fileToRemove.getFileHash(), fileToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
+					db.updateEventStatus(fileToRemove.getRelFilePath(), fileToRemove.getFileHash(), fileToRemove.getSharedFolderUID(), res ? Event.STATUS_LOCAL_OK : Event.STATUS_LOCAL_CONFLICT);
 				}
 				
 				// TODO : vérifier, car en pratique ne fonctionne pas sur le dossier (conflit) --> temporiser ?
@@ -86,10 +86,10 @@ public class SyncUtils {
 					File f = new File(folderToRemove.getAbsFilePath());
 					boolean res = FileUtils.deleteFile(f);
 					//Ici pb : le hash est nul ... Je pense pas que ça pose de vrai pb, mais on identifie mal l'event du coup
-					db.updateEventStatus(folderToRemove.getRelFilePath(), folderToRemove.getFileHash(), folderToRemove.getSharedFolderUID(), res ? Event.STATUS_OK : Event.STATUS_CONFLICT);
+					db.updateEventStatus(folderToRemove.getRelFilePath(), folderToRemove.getFileHash(), folderToRemove.getSharedFolderUID(), res ? Event.STATUS_LOCAL_OK : Event.STATUS_LOCAL_CONFLICT);
 					if(!res)
 					{
-						Event e = new Event(folderToRemove.getSharedFolderUID(),System.currentTimeMillis(), folderToRemove.getFileHash(),-1,0,null,null,Event.ACTION_CREATE,  peerID ,Event.STATUS_OK);
+						Event e = new Event(folderToRemove.getSharedFolderUID(),System.currentTimeMillis(), folderToRemove.getFileHash(),-1,0,null,null,Event.ACTION_CREATE,  peerID ,Event.STATUS_LOCAL_OK);
 						e.save();
 					}
 				}

@@ -443,6 +443,8 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 				
 			 
             sendResponse(resp, session, data);
+            data = null;
+			System.gc();
 
         } catch (TooManyClientsException tmcx) {
 
