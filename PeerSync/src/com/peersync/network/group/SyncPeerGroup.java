@@ -43,10 +43,6 @@ public class SyncPeerGroup extends BasicPeerGroup {
 		
 	}
 
-	public void shareContent(Content content) {
-		peerGroup.getContentService().shareContent(content);
-		
-	}
 	
 	public SyncContentProvider getContentProvider(){
 		return syncContentProvider;

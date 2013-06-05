@@ -56,7 +56,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 
 	private void publishShareContentAdvertisement()  {
 
-		ArrayList<SharedFolder> folders = db.getSharedFoldersOfAPeerGroup(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
+		ArrayList<SharedFolder> folders = db.getSharedFolders(myPeerGroup.getPeerGroup().getPeerGroupID().toString());
 		ArrayList<SharedFolder>  unsharedFolder = (ArrayList<SharedFolder>) currentlySharedFiles.clone();
 		unsharedFolder.removeAll(folders);
 
@@ -110,7 +110,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 
 		SyncContentProvider contentProvider = ((SyncPeerGroup)myPeerGroup).getContentProvider();
 
-		for (SharedFolder sf : db.getSharedFoldersOfAPeerGroup(myPeerGroup.getPeerGroupID().toString())) {
+		for (SharedFolder sf : db.getSharedFolders(myPeerGroup.getPeerGroupID().toString())) {
 			if(db.getFilesToDownload(sf.getUID()).size()>0){
 				if(!currentTransfer.containsKey(sf.getUID())){
 					ContentTransfer transfer;

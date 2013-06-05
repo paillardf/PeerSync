@@ -45,7 +45,7 @@ public class GetSharedFolders extends AbstractCommand {
 		DataBaseManager db = DataBaseManager.getInstance();
 		if(pgid!=null)
 		{
-			ArrayList<SharedFolder> sfl = db.getSharedFoldersOfAPeerGroup(pgid);
+			ArrayList<SharedFolder> sfl = db.getSharedFolders(pgid);
 			if(sfl.size()>0)
 			{
 				println("    ID    \t    PeerGroupID    \t    Path");

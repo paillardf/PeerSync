@@ -219,7 +219,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
-	public ArrayList<SharedFolder> getSharedFoldersOfAPeerGroup(String peerGroupID)
+	public ArrayList<SharedFolder> getSharedFolders(String peerGroupID)
 	{
 		ArrayList<SharedFolder> res = new ArrayList<SharedFolder>();
 		try {

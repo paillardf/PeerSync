@@ -39,7 +39,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	public void publishStackVersionAdvertisement(){
 		DataBaseManager db = DataBaseManager.getInstance();
 
-		ArrayList<SharedFolder> shareFolderUIDs = db.getAllSharedDirectories();
+		ArrayList<SharedFolder> shareFolderUIDs = db.getSharedFolders(myPeerGroup.getPeerGroupID().toString());
 		ArrayList<SharedFolderVersion> shareFolders = new ArrayList<SharedFolderVersion>();
 		for (SharedFolder shareFolder : shareFolderUIDs) {
 			shareFolders.add(db.getSharedFolderVersion(shareFolder.getUID()));

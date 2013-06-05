@@ -161,19 +161,6 @@ public class PeerSync {
 			pg.start();
 			
 		
-			String shareFolderName = "shareFolderDeouf";
-			ContentID shareFolderID = IDFactory.newContentID( Constants.PsePeerGroupID, false, shareFolderName.getBytes("UTF-8"));
-			
-			DataBaseManager.getInstance().saveSharedFolder(new SharedFolder(shareFolderID.toString(), Constants.PsePeerGroupID.toString(), "C:\\PeerSyncTest\\"+getConf().getName()));
-		
-		
-
-			FolderDocument fileDoc = new FolderDocument( MimeMediaType.AOS);
-			Content content = new Content(shareFolderID, null, fileDoc);
-			
-			
-			pg.shareContent(content);
-		
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -185,9 +172,9 @@ public class PeerSync {
 	}
 
 	
-	public SharedFolder addShareFolder(PeerGroupID peerGroupID, String path){
+	public SharedFolder addShareFolder(PeerGroupID peerGroupID, String path, String name){
 		ContentID id = IDFactory.newContentID(peerGroupID, false, (path+System.currentTimeMillis()).getBytes());
-		SharedFolder sf = new SharedFolder(id.toString(), peerGroupID.toString(), path);
+		SharedFolder sf = new SharedFolder(id.toString(), peerGroupID.toString(), path, name);
 		DataBaseManager.getInstance().saveSharedFolder(sf);
 		return sf;
 	}
