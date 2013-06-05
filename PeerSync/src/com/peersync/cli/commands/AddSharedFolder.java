@@ -16,7 +16,7 @@ public class AddSharedFolder extends AbstractCommand {
 
 	public AddSharedFolder()
 	{
-		setDescription("Ajoute un dossier partage");
+		setDescription("Ajoute ou met a jour un dossier partage");
 		OperatorNode root = new OperatorNode(Operator.AND);
 		{
 			ValueArgument a;
@@ -30,6 +30,17 @@ public class AddSharedFolder extends AbstractCommand {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			try {
+				a = new ValueArgument("name","-n","Nom du dossier");
+				ArgumentNode n = new ArgumentNode(a);
+				if(allArguments.addArgument((AbstractArgument)a))
+					root.appendChild(n);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 		setRootParser(root);
 
@@ -39,9 +50,11 @@ public class AddSharedFolder extends AbstractCommand {
 
 	@Override
 	public void requestHandler(String queryString) {
-		AbstractArgument argPath = allArguments.getArgumentByName("path");
+		
 
-		String absPath = argPath.getValue(queryString);
+		String absPath = getArgumentValue("path",queryString);
+		
+		String name = getArgumentValue("name",queryString);
 		if(absPath!=null)
 		{
 
@@ -49,7 +62,7 @@ public class AddSharedFolder extends AbstractCommand {
 			if(f.exists() && f.isDirectory())
 			{
 				DataBaseManager db = DataBaseManager.getInstance();
-				db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced",absPath,"otototo" ));
+				db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced",absPath,name ));
 			}
 			else
 				println("Invalid rootPath");

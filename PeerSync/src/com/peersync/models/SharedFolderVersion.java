@@ -17,6 +17,12 @@ public class SharedFolderVersion {
 		return name;
 	}
 
+	
+	public String getUID() {
+		return UID;
+	}
+	
+	
 	public SharedFolderVersion(String UID,String name) {
 		this.UID = UID;
 		this.name=name;
@@ -31,9 +37,7 @@ public class SharedFolderVersion {
 		
 	}
 
-	public String getUID() {
-		return UID;
-	}
+
 
 	public StackVersion getStackVersion(String stackVersionUID){
 		for (StackVersion stackVersion : stackVersionList) {

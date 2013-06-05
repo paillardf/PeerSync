@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 public abstract class DbliteConnection {
 	private static final String DATABASE_INFO = "DATABASE_INFO";
@@ -47,8 +48,10 @@ public abstract class DbliteConnection {
 		if(!exist)
 			new File(f.getParent()).mkdirs();
 		
-
+//		Properties properties = new Properties();
+//		properties.setProperty("PRAGMA foreign_keys", "ON");
 		m_connection = DriverManager.getConnection("jdbc:sqlite:"+dbPath);
+		update("PRAGMA foreign_keys = ON;");
 		if(!exist){
 			
 			createBDD(version);

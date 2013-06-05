@@ -114,14 +114,18 @@ public class DataBaseManager extends DbliteConnection{
 				ISFILEFIELD +  " numeric, "+
 				SHAREDFOLDERFIELD +  " numeric, "+
 				STATUSFIELD + " numeric, "+
-				"PRIMARY KEY ("+DATEFIELD+","+FILEPATHFIELD+","+SHAREDFOLDERFIELD+","+NEWHASHFIELD+"))");
+				"PRIMARY KEY ("+DATEFIELD+","+FILEPATHFIELD+","+SHAREDFOLDERFIELD+","+NEWHASHFIELD+")," +
+				"FOREIGN KEY ("+SHAREDFOLDERFIELD+") REFERENCES "+SHAREDFOLDERSTABLE+"("+UUIDFIELD+")" +
+				");");
 
 		update("create table "+SHAREDFOLDERSTABLE+" "+
 				"("+UUIDFIELD+" text, "+
 				PEERGROUPFIELD+ " text, "+
 				ROOTPATHFIELD+ " text, "+
 				SHAREDFOLDER_NAMEFIELD+ " text UNIQUE, "+
-				"PRIMARY KEY("+UUIDFIELD+"));");
+				"PRIMARY KEY("+UUIDFIELD+")," +
+				"FOREIGN KEY ("+PEERGROUPFIELD+") REFERENCES "+PEERGROUP_TABLE+"("+PEERGROUP_ID+")" +
+				");");
 
 		update("create table "+FILESINFO_TABLE+" "+
 				"("+FILESINFO_ABSOLUTEPATHFIELD+" text, "+
@@ -207,6 +211,7 @@ public class DataBaseManager extends DbliteConnection{
 
 
 
+	//TODO : getPeerGroups
 
 	/** Raccourcis pour appeler {@link #getLastEventOfAFile(String, String)} avec uniquement un chemin absolu de fichier
 	 * @param absFilePath : Chemin absolu du fichier dont on veut r�cup�rer le dernier �v�nement
@@ -693,12 +698,17 @@ public class DataBaseManager extends DbliteConnection{
 			{
 				cpt++;
 				ResultSet rs = query("select sf."+SHAREDFOLDER_NAMEFIELD+
-						" from "+SHAREDFOLDERSTABLE+" sf where sf."+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"");
+						" from "+SHAREDFOLDERSTABLE+" sf where sf."+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\" and sf."+UUIDFIELD+"<>\""+sf.getUID()+"\"");
+				found = true;
 				while(rs.next())
 				{
 					if(rs.getString(SHAREDFOLDER_NAMEFIELD)!=null)
+					{
 						name+=cpt;
+						found = false;
+					}
 				}
+					
 				
 			}
 			
