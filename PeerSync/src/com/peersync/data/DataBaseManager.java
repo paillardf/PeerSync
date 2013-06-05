@@ -861,7 +861,7 @@ public class DataBaseManager extends DbliteConnection{
 
 	}
 
-
+	
 
 
 	/** R�cup�re la version de pile pour chaque owner pour un dossier donn�
@@ -869,19 +869,22 @@ public class DataBaseManager extends DbliteConnection{
 	 * 	@return SharedFolderVersion
 	 */
 	public SharedFolderVersion getSharedFolderVersion(String UID){
-		SharedFolderVersion res = new SharedFolderVersion(UID);
+		SharedFolderVersion res = null;
 		Statement statement;
 
 		try {
-			ResultSet rs = query("select max("+DATEFIELD+") as version,"+OWNERFIELD+" from "+DBEVENTSTABLE+" e1 left join "+SHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")"+
+			ResultSet rs = query("select max("+DATEFIELD+") as version,"+OWNERFIELD+" from "+DBEVENTSTABLE+" e1, sf."+SHAREDFOLDER_NAMEFIELD+" left join "+SHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")"+
 
 				" where sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" like (select "+ROOTPATHFIELD+"||\"%\" from "+SHAREDFOLDERSTABLE+" where "+UUIDFIELD+"=\""+UID+"\") group by "+OWNERFIELD);
 
 
 			while(rs.next())
 			{
+				if(res==null)
+					res=new SharedFolderVersion(UID, rs.getString(SHAREDFOLDER_NAMEFIELD));
 				StackVersion sv = new StackVersion(rs.getString(OWNERFIELD), rs.getLong("version"));
 				res.addStackVersion(sv);
+				
 
 			}
 		} catch (SQLException  e) {

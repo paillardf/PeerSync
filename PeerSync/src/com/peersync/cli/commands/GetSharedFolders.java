@@ -39,9 +39,9 @@ public class GetSharedFolders extends AbstractCommand {
 
 	@Override
 	public void requestHandler(String queryString) {
-		AbstractArgument argPGID = allArguments.getArgumentByName("peerGroupId");
+	
 
-		String pgid = argPGID.getValue(queryString);
+		String pgid = getArgumentValue("peerGroupId",queryString);
 		DataBaseManager db = DataBaseManager.getInstance();
 		if(pgid!=null)
 		{

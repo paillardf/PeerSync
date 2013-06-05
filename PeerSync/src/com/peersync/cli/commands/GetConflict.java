@@ -62,13 +62,11 @@ public class GetConflict extends AbstractCommand {
 	@Override
 	public void requestHandler(String queryString) {
 		boolean stop = false;
-		AbstractArgument argSF = allArguments.getArgumentByName("sharedFolderID");
-		AbstractArgument argNumero = allArguments.getArgumentByName("numero");
-		String sf = argSF.getValue(queryString);
+		String sf = getArgumentValue("sharedFolderID",queryString);
 		HashMap<String,ArrayList<Event>>  events = DataBaseManager.getInstance().getEventsInConflict();
 		try
 		{
-			int numberConflict = Integer.parseInt(argNumero.getValue(queryString));
+			int numberConflict = Integer.parseInt(getArgumentValue("numero",queryString));
 			if(numberConflict>0 && numberConflict<=events.size())
 			{
 				int cpt=0;
@@ -142,34 +140,7 @@ public class GetConflict extends AbstractCommand {
 	}
 
 
-	private String formatString(String s,int size,boolean truncBegin)
-	{
-		String res;
-		if(s.length()-size-3<0)
-		{
-			res= s;
-		}
-		else
-		{
-			if(truncBegin)
-				res = "..."+s.substring(s.length()-size-3);
-			else
-				res = s.substring(0,s.length()-size-3)+"...";
-
-		}
-
-		int cpt=res.length();
-		for(;cpt<size;cpt++)
-		{
-			if(cpt%2==0)
-				res=" "+res;
-			else
-				res+=" ";
-
-		}
-		return res;
-
-	}
+	
 
 
 

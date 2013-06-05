@@ -1,18 +1,25 @@
 package com.peersync.models;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class SharedFolderVersion {
 
 	private final String UID;
+	private String name;
 	private ArrayList<StackVersion> stackVersionList;
 
 
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
 
-
-	public SharedFolderVersion(String UID) {
+	public SharedFolderVersion(String UID,String name) {
 		this.UID = UID;
+		this.name=name;
 		stackVersionList = new ArrayList<StackVersion>();
 	}
 
