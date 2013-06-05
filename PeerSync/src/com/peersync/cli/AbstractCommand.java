@@ -122,5 +122,43 @@ public abstract class AbstractCommand {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public static String formatString(String s,int size,boolean truncBegin)
+	{
+		String res;
+		if(s.length()-size-3<0)
+		{
+			res= s;
+		}
+		else
+		{
+			if(truncBegin)
+				res = "..."+s.substring(s.length()-size-3);
+			else
+				res = s.substring(0,s.length()-size-3)+"...";
+
+		}
+
+		int cpt=res.length();
+		for(;cpt<size;cpt++)
+		{
+			if(cpt%2==0)
+				res=" "+res;
+			else
+				res+=" ";
+
+		}
+		return res;
+
+	}
+	
+	public String getArgumentValue(String argName,String queryString)
+	{
+		AbstractArgument arg = allArguments.getArgumentByName(argName);
+		if(arg!=null)
+			return arg.getValue(queryString);
+		else
+			return null;
+	}
 
 }

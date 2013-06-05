@@ -67,12 +67,8 @@ public class ScanService extends AbstractCommand {
 
 	@Override
 	public void requestHandler(String queryString) {
-		AbstractArgument argStart = allArguments.getArgumentByName("start");
-		AbstractArgument argStop = allArguments.getArgumentByName("stop");
-		AbstractArgument argRestart = allArguments.getArgumentByName("restart");
-
 		{
-			String argValue = argStart.getValue(queryString);
+			String argValue =  getArgumentValue("start",queryString);
 			if(argValue!=null)
 			{
 				try {
@@ -87,7 +83,7 @@ public class ScanService extends AbstractCommand {
 
 		}
 		{
-			String argValue = argStop.getValue(queryString);
+			String argValue =  getArgumentValue("stop",queryString);
 			if(argValue!=null)
 			{
 				com.peersync.events.ScanService.getInstance().stopService();
@@ -96,7 +92,7 @@ public class ScanService extends AbstractCommand {
 
 		}
 		{
-			String argValue = argRestart.getValue(queryString);
+			String argValue =  getArgumentValue("restart",queryString);
 			if(argValue!=null)
 			{
 				com.peersync.events.ScanService.getInstance().stopService();

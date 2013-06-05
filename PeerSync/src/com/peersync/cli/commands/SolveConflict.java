@@ -68,11 +68,7 @@ public class SolveConflict extends AbstractCommand {
 
 	@Override
 	public void requestHandler(String queryString) {
-		boolean stop = false;
-		AbstractArgument argF = allArguments.getArgumentByName("forceSolve");
-		AbstractArgument argNumeroConflit = allArguments.getArgumentByName("numeroConflit");
-		AbstractArgument argNumeroVersion = allArguments.getArgumentByName("version");
-		String force = argF.getValue(queryString);
+		String force = getArgumentValue("force",queryString);
 		HashMap<String,ArrayList<Event>>  events = DataBaseManager.getInstance().getEventsInConflict();
 		if(force!=null)
 		{
@@ -88,11 +84,11 @@ public class SolveConflict extends AbstractCommand {
 		{
 			try
 			{
-				int numberConflict = Integer.parseInt(argNumeroConflit.getValue(queryString));
+				int numberConflict = Integer.parseInt(getArgumentValue("numeroConflit",queryString));
 				if(numberConflict>0 && numberConflict<=events.size())
 				{
 					int cpt=0;
-					int numberVersion= Integer.parseInt(argNumeroVersion.getValue(queryString));
+					int numberVersion= Integer.parseInt(getArgumentValue("version",queryString));
 
 					for(Entry<String, ArrayList<Event>> entry : events.entrySet())
 					{
