@@ -27,16 +27,16 @@ public class SolveConflict extends AbstractCommand {
 		root.appendChild(and);
 		{
 			{
-			BooleanArgument a;
-			try {
-				a = new BooleanArgument("forceSolve","-f","Resouds tous les conflits en selectionnant a chaque fois la version de l'utilisateur, ou a defaut la version la plus recente");
-				ArgumentNode n = new ArgumentNode(a);
-				if(allArguments.addArgument((AbstractArgument)a))
-					root.appendChild(n);
+				BooleanArgument a;
+				try {
+					a = new BooleanArgument("forceSolve","-f","Resouds tous les conflits en selectionnant a chaque fois la version de l'utilisateur, ou a defaut la version la plus recente");
+					ArgumentNode n = new ArgumentNode(a);
+					if(allArguments.addArgument((AbstractArgument)a))
+						root.appendChild(n);
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			ValueArgument a;
@@ -78,7 +78,7 @@ public class SolveConflict extends AbstractCommand {
 				if(res!=null)
 					DataBaseManager.getInstance().saveEvent(res);
 			}
-			
+
 		}
 		else
 		{
@@ -112,8 +112,8 @@ public class SolveConflict extends AbstractCommand {
 	}
 
 
-	
-	
+
+
 	/**	
 	 * 
 	 * 
@@ -125,26 +125,24 @@ public class SolveConflict extends AbstractCommand {
 		res.setDate(System.currentTimeMillis());
 		res.setStatus(Event.STATUS_LOCAL_FORCEOK);
 		return res;
-		
-		
+
+
 	}
-	
-	
+
+
 	private Event ForceConflict(ArrayList<Event> list)
 	{
 		Event res=null;
 		long maxDate = Long.MIN_VALUE;
 		for(Event e : list)
 		{
-			try {
-				if(e.getOwner().equals(PeerSync.getInstance().getConf().getPeerID().toString()))
-				{
-					res = new Event(e);
-					break;
-				}
-			} catch (IOException e1) {
 
+			if(e.getOwner().equals(PeerSync.getInstance().getConf().getPeerID().toString()))
+			{
+				res = new Event(e);
+				break;
 			}
+
 			if(e.getDate()>maxDate)
 			{
 				maxDate=e.getDate();
@@ -152,8 +150,8 @@ public class SolveConflict extends AbstractCommand {
 			}
 		}
 		return SolveConflict(res);
-		
-		
+
+
 	}
 
 

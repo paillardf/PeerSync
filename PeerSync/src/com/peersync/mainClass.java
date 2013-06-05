@@ -23,6 +23,7 @@ public class mainClass {
 		Constants.getInstance().PEERNAME = "client1";
 		DataBaseManager db = DataBaseManager.getInstance();
 		db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced","toooot","un nom" ));
+		
 	
 	}
 }

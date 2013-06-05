@@ -82,15 +82,8 @@ public class AddSharedFolder extends AbstractCommand {
 				SyncPeerGroup peerGroup = db.getPeerGroup(pgName);
 				if(peerGroup!=null)
 				{
-					
-					try {
-						SharedFolder sf = PeerSync.getInstance().addShareFolder(peerGroup.getPeerGroupID(), absPath, name);
-					
-					
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					PeerSync.getInstance().addShareFolder(peerGroup.getPeerGroupID(), absPath, name);
+
 				}
 				else
 					println("Invalid peerGroup");

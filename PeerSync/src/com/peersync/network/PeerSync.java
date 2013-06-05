@@ -34,6 +34,7 @@ import com.peersync.events.ScanService;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
+import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
@@ -156,14 +157,18 @@ public class PeerSync {
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
-			PeerGroupID id = createPeerGroup("my peer group", "sync peer group");
+			PeerGroupID id = createPeerGroup("group", "SyncGroup");
 			peerGroupManager.startPeerGroup(id);
 			addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
+
+//			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "azeeee".toCharArray());
+//			peerGroupManager.startPeerGroup(peerID);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		} 
+		
 
 
 
@@ -192,13 +197,14 @@ public class PeerSync {
 	}
 	
 	
-	public void exportPeerGroup(String peerGroupID, String outPath, char[] encryptedKey) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException, IOException {
+	public void exportPeerGroup(PeerGroupID peerGroupID, String outPath, char[] encryptedKey) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException, IOException {
 		PeerGroupAdvertisement pse_pga = null;
 		KeyStoreManager ks = KeyStoreManager.getInstance();
-		EncryptedPrivateKeyInfo encryptedInvitationKey = ks.getEncryptedPrivateKey(peerGroupID, encryptedKey, KeyStoreManager.MyKeyStorePassword.toCharArray());
-		X509Certificate[] issuerChain = {ks.getX509Certificate(peerGroupID)};
+		BasicPeerGroup pg = peerGroupManager.getPeerGroup(peerGroupID);
+		EncryptedPrivateKeyInfo encryptedInvitationKey = ks.getEncryptedPrivateKey(peerGroupID.toString(), encryptedKey, KeyStoreManager.MyKeyStorePassword.toCharArray());
+		X509Certificate[] issuerChain = {ks.getX509Certificate(peerGroupID.toString())};
 		// Create the invitation.
-		pse_pga = GroupUtils.build_psegroup_adv(GroupUtils.createAllPurposePeerGroupWithPSEModuleImplAdv(),peerGroupID, issuerChain
+		pse_pga = GroupUtils.build_psegroup_adv(GroupUtils.createAllPurposePeerGroupWithPSEModuleImplAdv(),peerGroupID.toString(),pg.getPeerGroupName(),pg.getDescription(), issuerChain
 				,encryptedInvitationKey);
 
 		XMLDocument asXML = (XMLDocument) pse_pga.getDocument(MimeMediaType.XMLUTF8);
@@ -219,8 +225,6 @@ public class PeerSync {
 		pseConf.getEncryptedPrivateKey();
 		PrivateKey private_key = PSEUtils.pkcs5_Decrypt_pbePrivateKey(encryptedKey, pseConf.getEncryptedPrivateKeyAlgo(),  pseConf.getEncryptedPrivateKey());//Encrypt_pbePrivateKey(encryptedKey, newPriv, 500);
 		ks.addNewKeys(pseGroupAdv.getPeerGroupID().toString(),  pseConf.getCertificateChain()[0], private_key, KeyStoreManager.MyKeyStorePassword.toCharArray());
-		pseGroupAdv.getName();
-		pseGroupAdv.getDescription();
 		SyncPeerGroup peerGroup = new SyncPeerGroup(pseGroupAdv.getPeerGroupID(), pseGroupAdv.getName(), pseGroupAdv.getDescription());
 		
 		DataBaseManager db = DataBaseManager.getInstance();

@@ -108,7 +108,7 @@ public class BasicPeerGroup  implements Observer{
 
 		PeerGroupAdvertisement pse_pga = null;
 
-		pse_pga = GroupUtils.build_psegroup_adv(pseImpl, peerGroupName, peerGroupId);
+		pse_pga = GroupUtils.build_psegroup_adv(pseImpl, peerGroupName,description, peerGroupId);
 		disco.publish(pse_pga, PeerGroup.DEFAULT_LIFETIME, PeerGroup.DEFAULT_EXPIRATION);
 		getNetPeerGroup().getDiscoveryService().publish(pse_pga);
 		getNetPeerGroup().getDiscoveryService().remotePublish(pse_pga);

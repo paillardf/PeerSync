@@ -115,14 +115,14 @@ public class GroupUtils {
 
 	 
 	 
-	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl,String peerGroupName, PeerGroupID peerGroupID) {
+	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl,String peerGroupName,String description,PeerGroupID peerGroupID) {
 		PeerGroupAdvertisement newPGAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(
 				PeerGroupAdvertisement.getAdvertisementType());
 		//newPGAdv.getAdvType();
 		newPGAdv.setPeerGroupID(peerGroupID);
 		newPGAdv.setModuleSpecID(pseImpl.getModuleSpecID());
 		newPGAdv.setName(peerGroupName);
-		newPGAdv.setDescription("Created by PSE Sample!");
+		newPGAdv.setDescription(description);
 		PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement(PSEConfigAdv.getAdvertisementType());
 
 		
@@ -133,14 +133,14 @@ public class GroupUtils {
 		return newPGAdv;
 	}
 
-	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl, String peerGroupID,  X509Certificate[] invitationCertChain, EncryptedPrivateKeyInfo invitationPrivateKey) throws URISyntaxException {
+	public static PeerGroupAdvertisement build_psegroup_adv(ModuleImplAdvertisement pseImpl, String peerGroupID,String name,String description,  X509Certificate[] invitationCertChain, EncryptedPrivateKeyInfo invitationPrivateKey) throws URISyntaxException {
         PeerGroupAdvertisement newPGAdv = (PeerGroupAdvertisement) AdvertisementFactory.newAdvertisement(
                 PeerGroupAdvertisement.getAdvertisementType());
 
 			newPGAdv.setPeerGroupID((PeerGroupID) IDFactory.fromURI(new URI(peerGroupID)));
         newPGAdv.setModuleSpecID(pseImpl.getModuleSpecID());
-        newPGAdv.setName("Group Name");
-        newPGAdv.setDescription("PSE Sync Group");
+        newPGAdv.setName(name);
+        newPGAdv.setDescription(description);
 
         PSEConfigAdv pseConf = (PSEConfigAdv) AdvertisementFactory.newAdvertisement(PSEConfigAdv.getAdvertisementType());
 
