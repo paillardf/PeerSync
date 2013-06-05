@@ -10,6 +10,7 @@ import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
 import com.peersync.data.DataBaseManager;
 import com.peersync.models.SharedFolder;
+import com.peersync.network.group.SyncPeerGroup;
 
 public class GetPeerGroups extends AbstractCommand {
 
@@ -17,45 +18,29 @@ public class GetPeerGroups extends AbstractCommand {
 	public GetPeerGroups()
 	{
 		setDescription("Obtient la liste des peer groups ");
-		
+
 
 
 	}
 
 	@Override
 	public void requestHandler(String queryString) {
-	
 
-		String pgid = getArgumentValue("peerGroupName",queryString);
+
 		DataBaseManager db = DataBaseManager.getInstance();
-		if(pgid!=null)
+
+		ArrayList<SyncPeerGroup> pgs = db.getPeerGroups();
+		if(pgs.size()>0)
 		{
-			ArrayList<SharedFolder> sfl = db.getSharedFolders(pgid);
-			if(sfl.size()>0)
+			println("\t\tNom\t\t|\t\t\t\tDescription\t\t\t\t");
+			for( SyncPeerGroup pg : pgs)
 			{
-				println("\tNom\t    PeerGroupID    \t    Path");
-				for( SharedFolder sf : sfl)
-				{
-					println(sf.getUID()+"\t"+sf.getPeerGroupUID()+"\t"+sf.getAbsFolderRootPath());
-				}
+				println(formatString(pg.getPeerGroupName(),35,true)+" "+formatString(pg.getPeerGroupName(),68,true));
 			}
-			else
-				println("No shared folder in this peerGroup");
 		}
 		else
-		{
-			ArrayList<SharedFolder> sfl = db.getAllSharedDirectories();
-			if(sfl.size()>0)
-			{
-				println("    ID    \t    PeerGroupID    \t    Path");
-				for( SharedFolder sf : sfl)
-				{
-					println(sf.getUID()+"\t"+sf.getPeerGroupUID()+"\t"+sf.getAbsFolderRootPath());
-				}
-			}
-			else
-				println("No shared folders");
-		}
+			println("No PeerGroup");
+
 
 
 	}

@@ -17,25 +17,16 @@ import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerSync;
 import com.peersync.network.group.SyncPeerGroup;
 
-public class AddSharedFolder extends AbstractCommand {
+public class AddPeerGroup extends AbstractCommand {
 
 
-	public AddSharedFolder()
+	public AddPeerGroup()
 	{
-		setDescription("Ajoute ou met a jour un dossier partage");
+		setDescription("Ajoute ou met a jour un peerGroup");
 		OperatorNode root = new OperatorNode(Operator.AND);
 		{
 			ValueArgument a;
-			try {
-				a = new ValueArgument("path","-p","Chemin (absolu) du dossier");
-				ArgumentNode n = new ArgumentNode(a);
-				if(allArguments.addArgument((AbstractArgument)a))
-					root.appendChild(n);
 
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			try {
 				a = new ValueArgument("name","-n","Nom du dossier");
 				ArgumentNode n = new ArgumentNode(a);
@@ -43,12 +34,11 @@ public class AddSharedFolder extends AbstractCommand {
 					root.appendChild(n);
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 			try {
-				a = new ValueArgument("peerGroupName","-pg","PeerGroup du sharedFolder");
+				a = new ValueArgument("description","-d","Description");
 				ArgumentNode n = new ArgumentNode(a);
 				if(allArguments.addArgument((AbstractArgument)a))
 					root.appendChild(n);
@@ -69,35 +59,19 @@ public class AddSharedFolder extends AbstractCommand {
 	public void requestHandler(String queryString) {
 
 
-		String absPath = getArgumentValue("path",queryString);
-		String pgName = getArgumentValue("peerGroupName",queryString);
+		String description = getArgumentValue("description",queryString);
 		String name = getArgumentValue("name",queryString);
-		if(absPath!=null && pgName!=null && name!=null)
+		if(description!=null && name!=null)
 		{
 
-			File f = new File(absPath);
-			if(f.exists() && f.isDirectory())
-			{
-				DataBaseManager db = DataBaseManager.getInstance();
-				SyncPeerGroup peerGroup = db.getPeerGroup(pgName);
-				if(peerGroup!=null)
-				{
-					
-					try {
-						SharedFolder sf = PeerSync.getInstance().addShareFolder(peerGroup.getPeerGroupID(), absPath, name);
-					
-					
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				else
-					println("Invalid peerGroup");
-			}
-			else
-				println("Invalid Parameters");
-		}	
+			PeerSync.getInstance().createPeerGroup(name);
+
+
+
+		}
+		else
+			println("Invalid Parameters");
+
 	}
 
 
