@@ -44,9 +44,8 @@ public class PeerGroupManager {
 	}
 
 
-	void addPeerGroup(BasicPeerGroup peerGroup) {
+	public void addPeerGroup(BasicPeerGroup peerGroup) {
 			peerGroupList.add(peerGroup);
-
 	}
 
 	public void startPeerGroup(PeerGroupID peerGroupID) throws PeerGroupException, ProtocolNotSupportedException, IOException, BasicPeerGroupException {
@@ -54,6 +53,11 @@ public class PeerGroupManager {
 		peerGroup.initialize(netPeerGroup);
 		peer.getScanService().addObserver(peerGroup);
 		peerGroup.start();
+	}
+	
+	public void stopPeerGroup(PeerGroupID peerGroupID) throws BasicPeerGroupException{
+		BasicPeerGroup peerGroup = getPeerGroup(peerGroupID);
+		peerGroup.stop();
 	}
 
 	public DiscoveryService getNetDiscoveryService() {
@@ -64,8 +68,11 @@ public class PeerGroupManager {
 		return netPeerGroup;
 	}
 
-
-	private BasicPeerGroup getPeerGroup(PeerGroupID id){
+	public boolean isManage(PeerGroupID id){
+		return !(getPeerGroup(id)==null);
+	}
+	
+	public BasicPeerGroup getPeerGroup(PeerGroupID id){
 		for (BasicPeerGroup peerGroup : peerGroupList) {
 			if(peerGroup.getPeerGroupID().equals(id))
 				return peerGroup;

@@ -166,9 +166,9 @@ public class StackAdvertisement extends Advertisement {
 
 		for (SharedFolderVersion shareFolder : shareFolderList) {
 			XMLElement shareFolderElement  = (XMLElement) TheResult.createElement(ShareFolderTAG, shareFolder.getUID());
-			shareFolderElement.addAttribute(SHARE_FOLDER_NAME, shareFolder.getName());
-			TheResult.appendChild(shareFolderElement);
 
+			TheResult.appendChild(shareFolderElement);
+			shareFolderElement.addAttribute(SHARE_FOLDER_NAME, shareFolder.getName());
 			for (StackVersion stackVersion : shareFolder.getStackVersionList()) {
 
 				Element stackElement = TheResult.createElement(StackTAG, stackVersion.getUID());

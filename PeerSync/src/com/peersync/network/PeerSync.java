@@ -14,7 +14,6 @@ import java.security.cert.X509Certificate;
 
 import javax.crypto.EncryptedPrivateKeyInfo;
 
-import net.jxta.content.Content;
 import net.jxta.content.ContentID;
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
@@ -35,7 +34,6 @@ import com.peersync.events.ScanService;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
-import com.peersync.network.content.model.FolderDocument;
 import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
@@ -73,7 +71,7 @@ public class PeerSync {
 	private static PeerSync instance;
 
 
-	public synchronized static PeerSync getInstance() throws IOException{
+	public synchronized static PeerSync getInstance(){
 		if(instance==null){
 			instance = new PeerSync();
 		}
@@ -81,8 +79,15 @@ public class PeerSync {
 	}
 
 
-	private PeerSync() throws IOException {
+	private PeerSync(){
 
+		
+		
+	
+
+	}
+
+	public void initialize() throws IOException{
 		PORT =  Constants.getInstance().PORT;
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");
@@ -127,11 +132,7 @@ public class PeerSync {
 		conf.setPassword(KeyStoreManager.MyKeyStorePassword);
 		conf.setPrincipal(NAME+System.currentTimeMillis());
 		conf.setName(NAME);
-		
-	
-
 	}
-
 	public void start(){
 
 
@@ -155,8 +156,10 @@ public class PeerSync {
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
+			PeerGroupID id = createPeerGroup("my peer group", "sync peer group");
+			peerGroupManager.startPeerGroup(id);
+			addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
 			
-		
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -177,14 +180,15 @@ public class PeerSync {
 		return sf;
 	}
 	
-	public PeerGroupID createPeerGroup(String name){
-
+	public PeerGroupID createPeerGroup(String name, String description){
 		KeyStoreManager ks = KeyStoreManager.getInstance();
-		PeerGroupID peerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, name.getBytes());
+		PeerGroupID peerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, (name+System.currentTimeMillis()).getBytes());
 		ks.createNewKeys(peerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
-		//TODO SAVE GROUP IN BDD
+		DataBaseManager db = DataBaseManager.getInstance();
+		SyncPeerGroup peerGroup= new SyncPeerGroup(peerGroupID, name, description);
+		db.savePeerGroup(peerGroup);
+		peerGroupManager.addPeerGroup(peerGroup);
 		return peerGroupID;
-		
 	}
 	
 	
@@ -217,8 +221,12 @@ public class PeerSync {
 		ks.addNewKeys(pseGroupAdv.getPeerGroupID().toString(),  pseConf.getCertificateChain()[0], private_key, KeyStoreManager.MyKeyStorePassword.toCharArray());
 		pseGroupAdv.getName();
 		pseGroupAdv.getDescription();
-		//TODO SAVE GROUP IN BDD
-
+		SyncPeerGroup peerGroup = new SyncPeerGroup(pseGroupAdv.getPeerGroupID(), pseGroupAdv.getName(), pseGroupAdv.getDescription());
+		
+		DataBaseManager db = DataBaseManager.getInstance();
+		db.savePeerGroup(peerGroup);
+		peerGroupManager.addPeerGroup(peerGroup);
+		
 		return pseGroupAdv.getPeerGroupID();
 	}
 

@@ -220,7 +220,7 @@ public class DataBaseManager extends DbliteConnection{
 			{
 				cpt++;
 				ResultSet rs = query("select pg."+PEERGROUP_NAME+
-						" from "+PEERGROUP_TABLE+" pg where sf."+PEERGROUP_NAME+"=\""+name+"\" and pg."+PEERGROUP_ID+"<>\""+pg.getPeerGroupID().toString()+"\"");
+						" from "+PEERGROUP_TABLE+" pg where pg."+PEERGROUP_NAME+"=\""+name+"\" and pg."+PEERGROUP_ID+"<>\""+pg.getPeerGroupID().toString()+"\"");
 				found = true;
 				while(rs.next())
 				{
@@ -949,20 +949,21 @@ public class DataBaseManager extends DbliteConnection{
 	 * 	@param UID: UID du SharedFolder que l\"on veut analyser
 	 * 	@return SharedFolderVersion
 	 */
-	public SharedFolderVersion getSharedFolderVersion(String UID){
-		SharedFolderVersion res = null;
+	public SharedFolderVersion getSharedFolderVersion(String UID, String name){
+		if(getSharedFolder(UID)==null){
+			return null;
+		}
+		SharedFolderVersion res = new SharedFolderVersion(UID, name);
 		Statement statement;
 
 		try {
-			ResultSet rs = query("select max("+DATEFIELD+") as version,"+OWNERFIELD+" from "+DBEVENTSTABLE+" e1, sf."+SHAREDFOLDER_NAMEFIELD+" left join "+SHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")"+
+			ResultSet rs = query("select max("+DATEFIELD+") as version,"+OWNERFIELD+" from "+DBEVENTSTABLE+" e1 left join "+SHAREDFOLDERSTABLE+" sf on (e1."+SHAREDFOLDERFIELD+"=sf."+UUIDFIELD+")"+
 
 				" where sf."+ROOTPATHFIELD+"||e1."+FILEPATHFIELD+" like (select "+ROOTPATHFIELD+"||\"%\" from "+SHAREDFOLDERSTABLE+" where "+UUIDFIELD+"=\""+UID+"\") group by "+OWNERFIELD);
 
 
 			while(rs.next())
 			{
-				if(res==null)
-					res=new SharedFolderVersion(UID, rs.getString(SHAREDFOLDER_NAMEFIELD));
 				StackVersion sv = new StackVersion(rs.getString(OWNERFIELD), rs.getLong("version"));
 				res.addStackVersion(sv);
 				

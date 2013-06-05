@@ -12,6 +12,7 @@ import com.peersync.data.SyncUtils;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
+import com.peersync.network.PeerSync;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.query.StackVersionQuery;
@@ -42,7 +43,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		ArrayList<SharedFolder> shareFolderUIDs = db.getSharedFolders(myPeerGroup.getPeerGroupID().toString());
 		ArrayList<SharedFolderVersion> shareFolders = new ArrayList<SharedFolderVersion>();
 		for (SharedFolder shareFolder : shareFolderUIDs) {
-			shareFolders.add(db.getSharedFolderVersion(shareFolder.getUID()));
+			shareFolders.add(db.getSharedFolderVersion(shareFolder.getUID(), shareFolder.getName()));
 		}
 		StackAdvertisement adv = 
 				new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID(), myPeerGroup.getPeerGroup().getPeerID());
@@ -98,6 +99,16 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 					Log.d(NAME, "Adv recu" + stackVersionAdvertisement);
 
+					
+					
+					for (SharedFolderVersion sharedFolderVersion : stackVersionAdvertisement.getShareFolderList()) {
+						SharedFolderVersion myShareFolderVersion = DataBaseManager.getInstance().getSharedFolderVersion(sharedFolderVersion.getUID(), sharedFolderVersion.getName());
+						if(myShareFolderVersion==null){
+							PeerSync.getInstance().addShareFolder(myPeerGroup.getPeerGroupID(), "", sharedFolderVersion.getName());
+						}
+						
+					}
+					
 					ArrayList<SharedFolderVersion> shareFolderVersion = 
 							SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
 					if(shareFolderVersion.size()>0){

@@ -32,6 +32,7 @@ public class main1 {
 	//	Constants.getInstance().PORT = 9788;
 		try {
 			PeerSync ps = PeerSync.getInstance();
+			ps.initialize();
 			ps.start();
 			ShellConsole s = ShellConsole.getShellConsole();
 			s.start();

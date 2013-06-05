@@ -8,6 +8,7 @@ import com.peersync.models.Event;
 import com.peersync.models.FileWithLocalSource;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
+import com.peersync.network.PeerSync;
 import com.peersync.tools.FileUtils;
 
 public class SyncUtils {
@@ -19,8 +20,8 @@ public class SyncUtils {
 		ArrayList<SharedFolderVersion> shareFolderVList = new ArrayList<SharedFolderVersion>();
 		
 		for (SharedFolderVersion sharedFolderVersion : sharefolderVersionList) {
-			SharedFolderVersion myShareFolderVersion = db.getSharedFolderVersion(sharedFolderVersion.getUID());
-			
+			SharedFolderVersion myShareFolderVersion = db.getSharedFolderVersion(sharedFolderVersion.getUID(), sharedFolderVersion.getName());
+
 			SharedFolderVersion sfv = getNeededStackVersion(sharedFolderVersion, myShareFolderVersion);
 			
 			if(sfv.size()>0)

@@ -40,6 +40,7 @@ public class main {
 //		}
 		try {
 			PeerSync ps = PeerSync.getInstance();
+			ps.initialize();
 			ps.start();
 			ShellConsole s = ShellConsole.getShellConsole();
 			s.start();
