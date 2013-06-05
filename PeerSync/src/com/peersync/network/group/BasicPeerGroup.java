@@ -38,13 +38,10 @@ public class BasicPeerGroup  implements Observer{
 	private GroupThread thread;
 	private Thread.State statue = Thread.State.BLOCKED;
 	private PeerGroup netPeerGroup;
-	private NetworkConfigurator conf;
 
-	public BasicPeerGroup(PeerGroup netPeerGroup, NetworkConfigurator conf, PeerGroupID psepeergroupid, String peerGroupName) {
+	public BasicPeerGroup(PeerGroupID psepeergroupid, String peerGroupName) {
 		this.peerGroupName = peerGroupName;
 		this.peerGroupId=psepeergroupid;
-		this.netPeerGroup=netPeerGroup;
-		this.conf = conf;
 	}
 
 
@@ -72,7 +69,9 @@ public class BasicPeerGroup  implements Observer{
 		}
 	}
 
-	public  void initialize() throws PeerGroupException, IOException, ProtocolNotSupportedException, BasicPeerGroupException{
+	public  void initialize(PeerGroup netPeerGroup) throws PeerGroupException, IOException, ProtocolNotSupportedException, BasicPeerGroupException{
+		this.netPeerGroup = netPeerGroup;
+		
 		if(statue == Thread.State.BLOCKED){
 				PeerGroup myLocalGroup = createNewPeerGroup();
 				joinGroup(myLocalGroup);
@@ -169,9 +168,6 @@ public class BasicPeerGroup  implements Observer{
 
 	}
 
-	public NetworkConfigurator getConf() {
-		return conf;
-	}
 
 	public PeerGroupID getPeerGroupID(){
 		return peerGroupId;

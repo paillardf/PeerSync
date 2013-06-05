@@ -33,7 +33,7 @@ public class SyncUtils {
 
 	private static SharedFolderVersion getNeededStackVersion(SharedFolderVersion advSFV,SharedFolderVersion ownedSFV){
 		
-		SharedFolderVersion sfv  = new SharedFolderVersion(advSFV.getUID());
+		SharedFolderVersion sfv  = new SharedFolderVersion(advSFV.getUID(), advSFV.getName());
 		
 		for (StackVersion stackV : advSFV.getStackVersionList()) {
 			

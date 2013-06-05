@@ -1,14 +1,9 @@
 package com.peersync.network.group;
 
-import java.io.File;
 import java.util.List;
 
-import net.jxta.content.Content;
 import net.jxta.content.ContentProvider;
-import net.jxta.document.FileDocument;
-import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
-import net.jxta.platform.NetworkConfigurator;
 
 import com.peersync.network.behaviour.ContentBehaviour;
 import com.peersync.network.behaviour.DiscoveryBehaviour;
@@ -21,8 +16,8 @@ public class SyncPeerGroup extends BasicPeerGroup {
 	
 	private SyncContentProvider syncContentProvider;
 
-	public SyncPeerGroup(PeerGroup netPeerGroup, NetworkConfigurator conf, PeerGroupID psepeergroupid, String peerGroupName)  {
-		super(netPeerGroup, conf,  psepeergroupid,  peerGroupName);
+	public SyncPeerGroup(PeerGroupID psepeergroupid, String peerGroupName)  {
+		super( psepeergroupid,  peerGroupName);
 		behaviourList.add(new DiscoveryBehaviour(this));
 		behaviourList.add(new StackSyncBehaviour(this));
 		behaviourList.add(new ContentBehaviour(this));

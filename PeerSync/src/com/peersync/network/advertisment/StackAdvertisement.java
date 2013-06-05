@@ -64,7 +64,6 @@ import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
-import com.peersync.network.PeerSync;
 
 public class StackAdvertisement extends Advertisement {
 
@@ -76,7 +75,7 @@ public class StackAdvertisement extends Advertisement {
 	private ID AdvertisementID = ID.nullID;
 
 	public final static String ShareFolderTAG = "sharefolderID";
-	private final static String SHARE_FOLDER_NAME = "sharefolderName";
+	public final static String SHARE_FOLDER_NAME = "sharefolderName";
 	private final static String StackTAG = "stackID";
 	private final static String PeerIdTAG = "peerID";
 	private final static String PeerGroupIDTAG = "peerGroupID";
@@ -88,16 +87,14 @@ public class StackAdvertisement extends Advertisement {
 
 	private PeerGroupID peerGroupId;
 
-	private String shareFolderName;
 
 
 	private final static String[] IndexableFields = { ShareFolderTAG , StackTAG};
 
-	public StackAdvertisement(ArrayList<SharedFolderVersion> shareFolder,PeerGroupID peerGroupId,PeerID peerId, String shareFolderName) {
+	public StackAdvertisement(ArrayList<SharedFolderVersion> shareFolder,PeerGroupID peerGroupId,PeerID peerId) {
 		this.shareFolderList = shareFolder;
 		this.peerGroupId = peerGroupId;
 		this.peerId = peerId.toString();
-		this.shareFolderName = shareFolderName;
 		
 		
 	}
@@ -115,10 +112,9 @@ public class StackAdvertisement extends Advertisement {
 		while (folderList.hasMoreElements()) {
 
 			XMLElement folderElement = (XMLElement) folderList.nextElement();
-			shareFolderName = folderElement.getAttribute(SHARE_FOLDER_NAME).getValue();
 
 			if(folderElement.getName().compareTo(ShareFolderTAG)==0){
-				SharedFolderVersion shareFolder = new SharedFolderVersion(folderElement.getValue());
+				SharedFolderVersion shareFolder = new SharedFolderVersion(folderElement.getValue(),folderElement.getAttribute(SHARE_FOLDER_NAME).getValue());
 
 				Enumeration stackList = (Enumeration) folderElement.getChildren();
 
@@ -160,15 +156,17 @@ public class StackAdvertisement extends Advertisement {
 		StructuredDocument TheResult = StructuredDocumentFactory.newStructuredDocument(
 				TheMimeMediaType, AdvertisementType);
 
-		XMLElement peerIdElement = (XMLElement) TheResult.createElement(PeerIdTAG, getPeerId());
-		peerIdElement.addAttribute(SHARE_FOLDER_NAME, shareFolderName);
+		 Element peerIdElement = TheResult.createElement(PeerIdTAG, getPeerId());
+		
 		TheResult.appendChild(peerIdElement);
 
-		Element peerGroupIdElement = TheResult.createElement(PeerGroupIDTAG, peerGroupId.toString());
+		Element peerGroupIdElement =  TheResult.createElement(PeerGroupIDTAG, peerGroupId.toString());
+		
 		TheResult.appendChild(peerGroupIdElement);
 
 		for (SharedFolderVersion shareFolder : shareFolderList) {
-			Element shareFolderElement  = TheResult.createElement(ShareFolderTAG, shareFolder.getUID());
+			XMLElement shareFolderElement  = (XMLElement) TheResult.createElement(ShareFolderTAG, shareFolder.getUID());
+			shareFolderElement.addAttribute(SHARE_FOLDER_NAME, shareFolder.getName());
 			TheResult.appendChild(shareFolderElement);
 
 			for (StackVersion stackVersion : shareFolder.getStackVersionList()) {
@@ -247,12 +245,7 @@ public class StackAdvertisement extends Advertisement {
 		return peerId;
 
 	}
-	public void setShareFolderName(String shareFolderName) {
-		this.shareFolderName = shareFolderName;
-	}
-	public String getShareFolderName() {
-		return shareFolderName;
-	}
+
 
 	public static class Instantiator implements AdvertisementFactory.Instantiator {
 
@@ -261,7 +254,7 @@ public class StackAdvertisement extends Advertisement {
 		}
 
 		public Advertisement newInstance(ArrayList<SharedFolderVersion> shareFolderList, PeerGroupID peerG, PeerID peerID) {
-			return new StackAdvertisement(shareFolderList, peerG, peerID, SHARE_FOLDER_NAME);
+			return new StackAdvertisement(shareFolderList, peerG, peerID);
 		}
 
 		public Advertisement newInstance(net.jxta.document.Element root) {

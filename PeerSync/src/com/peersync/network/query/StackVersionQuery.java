@@ -15,6 +15,7 @@ import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
 import net.jxta.document.StructuredTextDocument;
 import net.jxta.document.TextElement;
+import net.jxta.document.XMLElement;
 import net.jxta.impl.protocol.ResolverQuery;
 import net.jxta.impl.protocol.ResolverResponse;
 import net.jxta.protocol.ResolverQueryMsg;
@@ -125,11 +126,13 @@ public class StackVersionQuery implements QueryHandler{
 
 			while (folderList.hasMoreElements()) {
 
-				TextElement folderElement = (TextElement) folderList.nextElement();
+				XMLElement folderElement = (XMLElement) folderList.nextElement();
 
 
 				if(folderElement.getName().compareTo(ShareFolderTAG)==0){
-					SharedFolderVersion shareFolder = new SharedFolderVersion(folderElement.getValue());
+					SharedFolderVersion shareFolder = 
+							new SharedFolderVersion(folderElement.getValue(), 
+									folderElement.getAttribute(StackAdvertisement.SHARE_FOLDER_NAME).getValue());
 
 					Enumeration stackList = (Enumeration) folderElement.getChildren();
 

@@ -155,12 +155,7 @@ public class PeerSync {
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
-			SyncPeerGroup pg = new SyncPeerGroup(netPeerGroup,conf,  Constants.PsePeerGroupID, Constants.PsePeerGroupName);
-			peerGroupManager.addPeerGroupToManage(pg);
-			pg.initialize();
-			pg.start();
 			
-		
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -171,6 +166,9 @@ public class PeerSync {
 
 	}
 
+	
+
+	
 	
 	public SharedFolder addShareFolder(PeerGroupID peerGroupID, String path, String name){
 		ContentID id = IDFactory.newContentID(peerGroupID, false, (path+System.currentTimeMillis()).getBytes());
