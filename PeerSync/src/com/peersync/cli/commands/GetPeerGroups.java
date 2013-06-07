@@ -1,6 +1,5 @@
 package com.peersync.cli.commands;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
@@ -16,7 +15,6 @@ import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
 import com.peersync.data.DataBaseManager;
-import com.peersync.models.SharedFolder;
 import com.peersync.network.PeerSync;
 import com.peersync.network.group.SyncPeerGroup;
 
@@ -87,6 +85,7 @@ public class GetPeerGroups extends AbstractCommand {
 		String export = getArgumentValue("export",queryString);
 		String name = getArgumentValue("name",queryString);
 		String filepath = getArgumentValue("filePath",queryString);
+		filepath = cleanFilePath(filepath);
 		String passwd = getArgumentValue("password",queryString);
 		
 		if(export!=null && name!=null && filepath!=null && passwd!=null)

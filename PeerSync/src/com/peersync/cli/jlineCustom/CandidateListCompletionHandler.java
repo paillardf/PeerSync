@@ -19,10 +19,8 @@ import java.util.Set;
 
 import jline.console.ConsoleReader;
 import jline.console.CursorBuffer;
+import jline.console.completer.Completer;
 import jline.console.completer.CompletionHandler;
-import jline.internal.Configuration;
-
-import com.peersync.tools.Log;
 
 /**
  * A {@link CompletionHandler} that deals with multiple distinct completions
@@ -41,7 +39,7 @@ public class CandidateListCompletionHandler
 	
 	// Modifs sur cette classe : Si UnambiguousCompletions contient des espaces, on ajoute une quote.
 
-    public boolean complete(final ConsoleReader reader, final List<CharSequence> candidates, final int pos) throws
+    public boolean complete(final ConsoleReader reader, final List<CharSequence> candidates,  int pos) throws
         IOException
     {
         CursorBuffer buf = reader.getCursorBuffer();
@@ -55,6 +53,7 @@ public class CandidateListCompletionHandler
             if (value.equals(buf.toString())) {
                 return false;
             }
+            
 
             setBuffer(reader, value, pos);
 
@@ -63,10 +62,31 @@ public class CandidateListCompletionHandler
         else if (candidates.size() > 1) {
    
     		String value = getUnambiguousCompletions(candidates);
+    		//Patch à la con
+    		if(reader.getCompleters().size()==1)
+    		{
+    			Completer c =reader.getCompleters().iterator().next();
+    			if(c instanceof ArgumentCompleter)
+    			{
+    				int begin = ((ArgumentCompleter)c).getCurrentArgBegin();
+    				int end = ((ArgumentCompleter)c).getCurrentArgEnd();
+    				
+    				String arg = buf.toString().substring(begin,end);
+    				if(arg.lastIndexOf("/")!=-1)
+    					arg = arg.substring(0,arg.lastIndexOf("/")+1);
+    				else if(arg.startsWith("'"))
+    					arg="'";
+    				else 
+    					arg="";
+    				if(!arg.startsWith("'") && value.contains(" "))
+    				{
+    					value = "'"+arg+value;
+    					pos = pos-arg.length();
+    				}
+    			}
+    		}
     		
-            value=value.replace("'", "\\'");
-            if(value.contains(" "))
-				value =  "'"+value;
+
             setBuffer(reader, value, pos);
         }
   

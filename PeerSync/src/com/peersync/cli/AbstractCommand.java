@@ -2,6 +2,8 @@ package com.peersync.cli;
 
 import java.util.Map.Entry;
 
+import jline.internal.Configuration;
+
 public abstract class AbstractCommand {
 
 	// Set Shortcut(vérifier que pas de doublons)
@@ -33,6 +35,16 @@ public abstract class AbstractCommand {
 			requestHandler(queryString);
 		else
 			help();
+	}
+
+	public static String cleanFilePath(String s)
+	{
+		String os = Configuration.getOsName();
+		boolean OS_IS_WINDOWS = os.contains("windows");
+		s=s.replace("\\'", "'");
+		if(OS_IS_WINDOWS)
+			s=s.replace("/", "\\");
+		return s;
 	}
 
 	public abstract void requestHandler(String queryString);

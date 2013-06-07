@@ -1,6 +1,5 @@
 package com.peersync.cli.commands;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -74,7 +73,7 @@ public class SolveConflict extends AbstractCommand {
 		{
 			for(Entry<String, ArrayList<Event>> entry : events.entrySet())
 			{
-				Event res = ForceConflict(entry.getValue());
+				Event res = forceSolveConflict(entry.getValue());
 				if(res!=null)
 					DataBaseManager.getInstance().saveEvent(res);
 			}
@@ -97,7 +96,7 @@ public class SolveConflict extends AbstractCommand {
 
 						if(cpt==numberConflict && numberVersion>0 && numberVersion<=entry.getValue().size())
 						{
-							Event res = SolveConflict(entry.getValue().get(numberConflict-1));
+							Event res = getSolveur(entry.getValue().get(numberConflict-1));
 							DataBaseManager.getInstance().saveEvent(res);
 						}
 					}
@@ -119,7 +118,7 @@ public class SolveConflict extends AbstractCommand {
 	 * 
 	 * @return L'event a insere en BDD pour resoudre le conflit (en se basant sur @param e)
 	 */
-	private Event SolveConflict(Event e)
+	private Event getSolveur(Event e)
 	{
 		Event res = new Event(e);
 		res.setDate(System.currentTimeMillis());
@@ -130,7 +129,7 @@ public class SolveConflict extends AbstractCommand {
 	}
 
 
-	private Event ForceConflict(ArrayList<Event> list)
+	private Event forceSolveConflict(ArrayList<Event> list)
 	{
 		Event res=null;
 		long maxDate = Long.MIN_VALUE;
@@ -149,7 +148,7 @@ public class SolveConflict extends AbstractCommand {
 				res = new Event(e);
 			}
 		}
-		return SolveConflict(res);
+		return getSolveur(res);
 
 
 	}

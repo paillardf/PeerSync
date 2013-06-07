@@ -14,7 +14,6 @@ public class ValueArgument extends AbstractArgument{
 
 	public String getValue(String queryString)
 	{
-
 		Pattern regexName = Pattern.compile(getRegexName());
 		Matcher mName = regexName.matcher(queryString);
 

@@ -3,19 +3,17 @@ import static jline.internal.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jline.console.completer.Completer;
 import jline.internal.Configuration;
-
-import com.peersync.tools.Log;
 
 public class FileCompleter 
 
 implements Completer
 {
-	// TODO: Handle files with spaces in them
-	//Meilleur gestion de Windows (winRegexp, changement des / en \ dans la completion)
-	// TODO : g�rer les noms de fichiers comportant des '
+	// TODO: Checker les arguments de 
 
 	private static final boolean OS_IS_WINDOWS;
 	private static final String winRegexp =  "^[a-zA-Z]:.*$";
@@ -50,7 +48,6 @@ implements Completer
 
 		File homeDir = getUserHome();
 
-		boolean test = translated.matches(winRegexp);
 
 
 		// Special character: ~ maps to the user's home directory
@@ -96,6 +93,15 @@ implements Completer
 
 	protected int matchFiles(String untouchedBuffer,final String buffer, final String translated, final File[] files, final List<CharSequence> candidates) {
 		int matches = 0;
+		
+		boolean startQuoted= false;
+		if(untouchedBuffer.startsWith("'"))
+			startQuoted=true;
+		Pattern regex = Pattern.compile(".*\\\\(?!').*");
+		Matcher mRegex = regex.matcher(untouchedBuffer);		
+
+		if(mRegex.find())
+			return 0;
 		if (files != null) {
 
 			
@@ -121,17 +127,27 @@ implements Completer
 							tmp = buffer.substring(0,buffer.lastIndexOf("/")+1);
 						String res = tmp+render(file, name).toString();
 						if(matches==1)
+						{
 							candidates.add(quoteIfWhitespaces(res));
+						}
 						else
+						{
 							candidates.add(render(file, name).toString());
+							
+						}
 					}	
 					else
 					{
 						String res =render(file, name).toString();
 						if(matches==1)
+						{
+							
 							candidates.add(quoteIfWhitespaces(res));
+						}
 						else
+						{
 							candidates.add(render(file, name).toString());
+						}
 					}
 				}
 			}
@@ -151,25 +167,30 @@ implements Completer
 				index  = buffer.lastIndexOf("\\");
 			else
 				index = buffer.lastIndexOf(separator());
-
-			return index + separator().length();
+			if(startQuoted)
+				return index + separator().length()+1;
+			else
+				return index + separator().length();
 		}
 		return 0;
 
-		//		final int index = buffer.lastIndexOf(separator());
-		//
-
-		//		return index + separator().length();
 	}
 
 	protected String quoteIfWhitespaces(String s)
 	{
-		s=s.replace("'", "\\'");
+		s=clean(s);
 		if(s.contains(" "))
 				return "'"+s+"' ";
 		else
 			return s;
 
+	}
+	
+	protected String clean(String s)
+	{
+		s=s.replace("\\", "/");
+		s=s.replace("'", "\\'");
+		return s;
 	}
 	
 	

@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jline.console.completer.Completer;
-import jline.internal.Configuration;
 import jline.internal.Log;
 
 /**
@@ -39,6 +38,9 @@ implements Completer
 	private final List<Completer> completers = new ArrayList<Completer>();
 
 	private boolean strict = true;
+	
+	private int currentArgBegin = 0;
+	private int currentArgEnd = 0;
 
 	/**
 	 * Create a new completer with the specified argument delimiter.
@@ -112,6 +114,14 @@ implements Completer
 	public List<Completer> getCompleters() {
 		return completers;
 	}
+	
+	public int getCurrentArgBegin()
+	{
+		return currentArgBegin;
+	}
+	public int getCurrentArgEnd() {
+		return currentArgEnd;
+	}
 
 	public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
 		// buffer can be null
@@ -121,6 +131,8 @@ implements Completer
 		ArgumentList list = delim.delimit(buffer, cursor);
 		int argpos = list.getArgumentPosition();
 		int argIndex = list.getCursorArgumentIndex();
+		
+		
 
 		if (argIndex < 0) {
 			return -1;
@@ -159,7 +171,11 @@ implements Completer
 
 		int ret = completer.complete(list.getCursorArgument(), argpos, candidates);
 
-
+		
+		currentArgEnd=list.getBufferPosition();
+		currentArgBegin= list.getBufferPosition()-argpos;
+		
+		
 		if (ret == -1) {
 			return -1;
 		}
@@ -188,6 +204,10 @@ implements Completer
 
 		return pos;
 	}
+
+	
+
+
 
 	/**
 	 * The {@link ArgumentCompleter.ArgumentDelimiter} allows custom breaking up of a {@link String} into individual
