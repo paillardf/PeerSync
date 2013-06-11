@@ -6,6 +6,10 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.jxta.id.IDFactory;
+import net.jxta.impl.endpoint.tls.TlsTransport;
+import net.jxta.peergroup.PeerGroup;
+
 import com.peersync.cli.ShellConsole;
 
 
@@ -29,7 +33,7 @@ public class mainClass {
 	}
 	
 	public static void main( String[] args ) {
-		
+		System.out.println(IDFactory.newModuleSpecID(PeerGroup.membershipClassID));
 //		UpnpManager u = UpnpManager.getInstance();
 //		u.findGateway();
 //		int port = u.openPort(9789, 9789, 9989, "TCP", "PeerSync");

@@ -47,11 +47,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.logging.Logger;
 
 import net.jxta.document.Advertisement;
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.Document;
 import net.jxta.document.Element;
+import net.jxta.document.ExtendableAdvertisement;
 import net.jxta.document.MimeMediaType;
 import net.jxta.document.StructuredDocument;
 import net.jxta.document.StructuredDocumentFactory;
@@ -59,14 +61,18 @@ import net.jxta.document.TextElement;
 import net.jxta.document.XMLElement;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
+import net.jxta.logging.Logging;
 import net.jxta.peer.PeerID;
 import net.jxta.peergroup.PeerGroupID;
 
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
 
-public class StackAdvertisement extends Advertisement {
+public class StackAdvertisement extends ExtendableAdvertisement {
 
+	
+	private static final Logger LOG = Logger.getLogger(StackAdvertisement.class.getName());
+	
 	public static final String Name = "FilesVersionAdvertisement";
 
 	// Advertisement elements, tags and indexables
@@ -105,42 +111,66 @@ public class StackAdvertisement extends Advertisement {
 
 	public StackAdvertisement(Element Root) {
 		this();
+		
+		
 		// Retrieving the elements
 		TextElement MyTextElement = (TextElement) Root;
-		Enumeration folderList = MyTextElement.getChildren();
+		Enumeration elements = MyTextElement.getChildren();
+		while (elements.hasMoreElements()) {
 
-		while (folderList.hasMoreElements()) {
+            XMLElement elem = (XMLElement) elements.nextElement();
 
-			XMLElement folderElement = (XMLElement) folderList.nextElement();
+            if (!handleElement(elem)) {
+                Logging.logCheckedFine(LOG, "Unhandled Element: ", elem);
+            }
 
-			if(folderElement.getName().compareTo(ShareFolderTAG)==0){
-				SharedFolderVersion shareFolder = new SharedFolderVersion(folderElement.getValue(),folderElement.getAttribute(SHARE_FOLDER_NAME).getValue());
+        }
+		
+	}
+	
+	
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean handleElement(Element raw) {
 
-				Enumeration stackList = (Enumeration) folderElement.getChildren();
+        if (super.handleElement(raw)) {
+            return true;
+        }
 
-				while (stackList.hasMoreElements()) {
+        XMLElement elem = (XMLElement) raw;
+        
+        if(elem.getName().compareTo(ShareFolderTAG)==0){
+			SharedFolderVersion shareFolder = new SharedFolderVersion(elem.getValue(),elem.getAttribute(SHARE_FOLDER_NAME).getValue());
 
-					TextElement stackElement = (TextElement) stackList.nextElement();
+			Enumeration stackList = (Enumeration) elem.getChildren();
 
-					if(stackElement.getName().compareTo(StackTAG)==0){
+			while (stackList.hasMoreElements()) {
 
-						long lastUpdate = Long.parseLong(((TextElement) stackElement.getChildren(StackLastUpdateTAG).nextElement()).getValue());
+				TextElement stackElement = (TextElement) stackList.nextElement();
 
-						shareFolder.addStackVersion(new StackVersion(stackElement.getValue(), lastUpdate));
-					}
-				}
-				this.shareFolderList.add(shareFolder);
-			}else if(folderElement.getName().compareTo(PeerIdTAG)==0){
-				peerId = folderElement.getValue();
-			}else if(folderElement.getName().compareTo(PeerGroupIDTAG)==0){
-				try {
-					peerGroupId = (PeerGroupID) IDFactory.fromURI(new URI(folderElement.getValue()));
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
+				if(stackElement.getName().compareTo(StackTAG)==0){
+
+					long lastUpdate = Long.parseLong(((TextElement) stackElement.getChildren(StackLastUpdateTAG).nextElement()).getValue());
+
+					shareFolder.addStackVersion(new StackVersion(stackElement.getValue(), lastUpdate));
 				}
 			}
+			this.shareFolderList.add(shareFolder);
+		}else if(elem.getName().compareTo(PeerIdTAG)==0){
+			peerId = elem.getValue();
+		}else if(elem.getName().compareTo(PeerGroupIDTAG)==0){
+			try {
+				peerGroupId = (PeerGroupID) IDFactory.fromURI(new URI(elem.getValue()));
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 		}
-	}
+        
+        return false;
+        
+    }
 
 	//	private void addShareFolder(SharedFolderVersion shareFolder){
 	//		this.shareFolderList.add(shareFolder);
@@ -190,6 +220,20 @@ public class StackAdvertisement extends Advertisement {
 
 	@Override
 	public synchronized ID getID() {
+		
+//		if (AdvertisementID == ID.nullID) {
+//            try {
+//                // We have not yet built it. Do it now
+//                byte[] seed = getAdvertisementType().getBytes("UTF-8");
+//                InputStream in = new ByteArrayInputStream(getPeerID().toString().getBytes("UTF-8"));
+//                AdvertisementID = IDFactory.newCodatID((PeerGroupID) peerGroupId, seed, in);
+//            } catch (Exception ez) {
+//                return ID.nullID;
+//            }
+//        }
+//        return AdvertisementID;
+        
+        
 		if (AdvertisementID == ID.nullID) {
 			byte[] seed;
 			try {
@@ -266,6 +310,12 @@ public class StackAdvertisement extends Advertisement {
 			return new StackAdvertisement();
 		}
 
+	}
+
+
+	@Override
+	public String getBaseAdvType() {
+		return getAdvertisementType();
 	}
 
 

@@ -34,7 +34,7 @@ public class SyncPeerGroup extends BasicPeerGroup {
 			peerGroup.getContentService().removeContentProvider(contentProvider);
 		}
 		syncContentProvider = new SyncContentProvider();
-		peerGroup.getContentService().addContentProvider(syncContentProvider);
+		peerGroup.getContentService().addContentProvider(syncContentProvider); //TODO Utile?
 		
 	}
 

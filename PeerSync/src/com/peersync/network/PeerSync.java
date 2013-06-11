@@ -124,10 +124,10 @@ public class PeerSync {
 		conf.setTcpOutgoing(true);
 		conf.setTcpPort(PORT);
 		
-		conf.setHttp2Enabled(true);
-		conf.setHttp2Incoming(true);
-		conf.setHttp2Outgoing(true);
-		conf.setHttp2Port(80);
+//		conf.setHttp2Enabled(true);
+//		conf.setHttp2Incoming(true);
+//		conf.setHttp2Outgoing(true);
+//		conf.setHttp2Port(80);
 		
 		conf.setKeyStoreLocation(ksm.getKeyStoreLocation());
 		conf.setPassword(KeyStoreManager.MyKeyStorePassword);
@@ -157,12 +157,16 @@ public class PeerSync {
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
 			
-			PeerGroupID id = createPeerGroup("group", "SyncGroup");
-			peerGroupManager.startPeerGroup(id);
-			addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
-
-//			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "azeeee".toCharArray());
-//			peerGroupManager.startPeerGroup(peerID);
+		//PeerGroupID peerID = createPeerGroup("group", "SyncGroup");
+			//peerGroupManager.startPeerGroup(id);
+			//addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
+			//exportPeerGroup(id, "C:\\PeerSyncTest\\export", "password".toCharArray());
+		
+		
+			
+			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "password".toCharArray());
+			peerGroupManager.startPeerGroup(peerID);
+			addShareFolder(peerID, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -187,7 +191,7 @@ public class PeerSync {
 	
 	public PeerGroupID createPeerGroup(String name, String description){
 		KeyStoreManager ks = KeyStoreManager.getInstance();
-		PeerGroupID peerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, (name+System.currentTimeMillis()).getBytes());
+		PeerGroupID peerGroupID = Constants.PsePeerGroupID;//TODO pour les tests IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, (name+System.currentTimeMillis()).getBytes());
 		ks.createNewKeys(peerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
 		DataBaseManager db = DataBaseManager.getInstance();
 		SyncPeerGroup peerGroup= new SyncPeerGroup(peerGroupID, name, description);

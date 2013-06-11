@@ -67,6 +67,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 				RouteAdvertisement ra = EndpointUtils.extractRouteAdv(padv);
 
 				rdvAdv.setRouteAdv(ra);
+				rdvAdv.sign(myPeerGroup.getPSECredential(), true, true);
 				peerRDVAdv = rdvAdv;
 			}
 			myPeerGroup.getNetPeerGroup().getDiscoveryService().publish(peerRDVAdv,VALIDITY_RDV_ADV,VALIDITY_RDV_ADV);
@@ -81,7 +82,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 	private void findRDVAdvertisement() {
 		Log.d(myPeerGroup.getPeerGroup().getPeerGroupName(),"Trying to find RDV advertisement...");
 		try {
-			parseAdvertisement(myPeerGroup.getNetPeerGroup().getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, RdvAdv.GroupIDTag, myPeerGroup.getPeerGroupID().toString()));
+			secureDiscovery(myPeerGroup.getNetPeerGroup().getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, RdvAdv.GroupIDTag, myPeerGroup.getPeerGroupID().toString()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -94,26 +95,22 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 
 
-	protected void parseAdvertisement(Enumeration<Advertisement> advertisementsEnum) {
 
-		if ((advertisementsEnum != null) && advertisementsEnum.hasMoreElements()) {
+	protected void parseAdvertisement(Advertisement foundAdv) {
 
-			while (advertisementsEnum.hasMoreElements()) {
-				Advertisement foundAdv = advertisementsEnum.nextElement();
-
-				if(foundAdv.getAdvType().compareTo(RdvAdv.getAdvertisementType())==0){
-					RdvAdv rdvAdv = (RdvAdv) foundAdv;
-					if(!rdvAdv.getPeerID().equals(myPeerGroup.getPeerGroup().getPeerID())){
-						Log.d(myPeerGroup.getPeerGroupName(),"Found RDV Advertisement");
-						try {
-							myPeerGroup.getDiscoveryService().publish(rdvAdv);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
-					}
+		if(foundAdv.getAdvType().compareTo(RdvAdv.getAdvertisementType())==0){
+			RdvAdv rdvAdv = (RdvAdv) foundAdv;
+			if(!rdvAdv.getPeerID().equals(myPeerGroup.getPeerGroup().getPeerID())){
+				Log.d(myPeerGroup.getPeerGroupName(),"Found RDV Advertisement");
+				try {
+					myPeerGroup.getDiscoveryService().publish(rdvAdv);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+
 			}
+
+
 
 		}
 

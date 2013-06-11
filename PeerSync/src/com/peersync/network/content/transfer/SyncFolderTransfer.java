@@ -12,7 +12,10 @@ import net.jxta.content.ContentTransferEvent;
 import net.jxta.content.ContentTransferListener;
 import net.jxta.content.ContentTransferState;
 import net.jxta.content.TransferException;
+import net.jxta.exception.PeerGroupException;
 import net.jxta.impl.content.defprovider.DefaultContentShareAdvertisementImpl;
+import net.jxta.impl.membership.pse.PSECredential;
+import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.protocol.ContentShareAdvertisement;
@@ -152,7 +155,20 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isAdvertisementOfUse(ContentShareAdvertisement adv) { //FIXME 
+	protected boolean isAdvertisementOfUse(ContentShareAdvertisement adv) { 
+		try {
+			adv.verify((PSECredential) peerGroup.getMembershipService().getDefaultCredential(), true);
+			if( !adv.isAuthenticated()||!adv.isCorrectMembershipKey()){
+				peerGroup.getDiscoveryService().remotePublish(adv);
+				return false;
+			}
+			
+		} catch (PeerGroupException e) {
+			e.printStackTrace();
+		}
+		
+		
+		//FIXME 
 		return (adv instanceof DefaultContentShareAdvertisementImpl);
 	}
 

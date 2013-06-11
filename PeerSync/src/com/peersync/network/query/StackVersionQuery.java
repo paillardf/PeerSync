@@ -112,6 +112,7 @@ public class StackVersionQuery implements QueryHandler{
 	@Override
 	public int processQuery(ResolverQueryMsg query) {
 		ResolverResponse responseMsg;
+		
 		Log.d(StackAdvertisement.Name, "reception d'une requete");
 		try {
 			Reader q = new StringReader(query.getQuery());
@@ -130,9 +131,11 @@ public class StackVersionQuery implements QueryHandler{
 
 
 				if(folderElement.getName().compareTo(ShareFolderTAG)==0){
+					String UID = folderElement.getValue();
+					//String name = folderElement.getAttribute(StackAdvertisement.SHARE_FOLDER_NAME).getValue();
+					
 					SharedFolderVersion shareFolder = 
-							new SharedFolderVersion(folderElement.getValue(), 
-									folderElement.getAttribute(StackAdvertisement.SHARE_FOLDER_NAME).getValue());
+							new SharedFolderVersion(UID, "");
 
 					Enumeration stackList = (Enumeration) folderElement.getChildren();
 

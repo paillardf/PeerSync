@@ -171,7 +171,7 @@ class PipeManager implements PipeMsgListener{
 			responsePipeAdv =
 					(PipeAdvertisement) AdvertisementFactory.newAdvertisement(
 							PipeAdvertisement.getAdvertisementType());
-			responsePipeAdv.setType(PipeService.UnicastType);
+			responsePipeAdv.setType(PipeService.UnicastSecureType); //TODO
 
 			pipeID = IDFactory.newPipeID(peerGroup.getPeerGroupID());
 			responsePipeAdv.setPipeID(pipeID);

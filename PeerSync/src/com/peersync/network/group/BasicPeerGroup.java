@@ -12,6 +12,8 @@ import net.jxta.credential.Credential;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.exception.ProtocolNotSupportedException;
+import net.jxta.impl.content.ContentServiceImpl;
+import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.impl.membership.pse.StringAuthenticator;
 import net.jxta.peergroup.PeerGroup;
@@ -39,6 +41,7 @@ public class BasicPeerGroup  implements Observer{
 	private Thread.State statue = Thread.State.BLOCKED;
 	private PeerGroup netPeerGroup;
 	private String description = "";
+	private PSECredential myCredential;
 
 	public BasicPeerGroup(PeerGroupID psepeergroupid, String peerGroupName,String description) {
 		this.peerGroupName = peerGroupName;
@@ -121,6 +124,11 @@ public class BasicPeerGroup  implements Observer{
 		peerGroup = getNetPeerGroup().newGroup(adv);
 		PSEMembershipService memberShip = (PSEMembershipService) peerGroup.getMembershipService();
 		memberShip.init(peerGroup, memberShip.getAssignedID(), memberShip.getImplAdvertisement());
+		/*
+		ContentServiceImpl contentService = (ContentServiceImpl) peerGroup.getContentService();
+		
+		contentService.init(peerGroup, ContentServiceImpl.MODULE_SPEC_ID, contentService.getImplAdvertisement());
+		*/
 		return peerGroup;
 	}
 
@@ -135,7 +143,7 @@ public class BasicPeerGroup  implements Observer{
 		if (!memberAuthenticator.isReadyForJoin()) {
 			Log.d(TAG,"Authenticator is not complete");
 		}
-		Credential MyCredential = membership.join(memberAuthenticator);
+		myCredential = (PSECredential) membership.join(memberAuthenticator);
 		Log.d(TAG,"Group has been joined");
 		peerGroup = myLocalGroup;
 		initPeerGroupParameters();
@@ -247,5 +255,14 @@ public class BasicPeerGroup  implements Observer{
 			peerGroup.stopApp();
 		}
 
+	}
+
+	public PSECredential getPSECredential() {
+		return myCredential;
+	}
+
+
+	public PSEMembershipService getPSEMembershipService() {
+		return (PSEMembershipService)peerGroup.getMembershipService();
 	}
 }

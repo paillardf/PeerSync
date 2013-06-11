@@ -96,6 +96,7 @@ public class FilesInfoManager {
 					accessor.seek(offset);
 					accessor.write(data, 0, length);
 					accessor.close(); 
+					accessor = null;
 					
 					fAv.realFileAvailability.addSegment(offset, length);
 					dataBase.saveFileAvailability(fAv.realFileAvailability);
@@ -118,7 +119,7 @@ public class FilesInfoManager {
 						}
 					}
 					
-					
+					myFile = null;
 					
 				}catch(IOException e){
 					//FIXME

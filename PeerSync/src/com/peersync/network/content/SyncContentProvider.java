@@ -161,7 +161,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 		pipeAdv =
 				(PipeAdvertisement) AdvertisementFactory.newAdvertisement(
 						PipeAdvertisement.getAdvertisementType());
-		pipeAdv.setType(PipeService.UnicastType);// TODO SECURE
+		pipeAdv.setType(PipeService.UnicastSecureType);// TODO SECURE
 
 		PipeID pipeID = IDFactory.newPipeID(peerGroup.getPeerGroupID());
 		pipeAdv.setPipeID(pipeID);
@@ -444,7 +444,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 			 
             sendResponse(resp, session, data);
             data = null;
-			System.gc();
+            accessor.close();
 
         } catch (TooManyClientsException tmcx) {
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
 import net.jxta.document.MimeMediaType;
 import net.jxta.id.IDFactory;
+import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.protocol.ContentShareAdvertisement;
 
 import com.peersync.data.DataBaseManager;
@@ -51,6 +51,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 	public void initialize() {
 		service = myPeerGroup.getPeerGroup().getContentService();
 		db = DataBaseManager.getInstance();
+		//myPeerGroup.getPSECredential().tlsKeyBridge(pseCredentialKeyRetriever)
 	};
 
 
@@ -75,12 +76,14 @@ public class ContentBehaviour extends AbstractBehaviour{
 			try{
 				FolderDocument fileDoc = new FolderDocument(MimeMediaType.AOS);
 				Content content = new Content((ContentID)IDFactory.fromURI(new URI(sharedFolder.getUID())), null, fileDoc);
-				List<ContentShare> shares = service.shareContent(content);
+				List<ContentShare> shares =((SyncPeerGroup)myPeerGroup).getContentProvider().shareContent(content);
+				
 				DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 				for (ContentShare share : shares) {
 
 
 					ContentShareAdvertisement adv = share.getContentShareAdvertisement();
+					adv.sign(myPeerGroup.getPSECredential(), false, true);
 					try {
 						discoService.publish(adv, VALIDITY_CONTENT_ADV, VALIDITY_CONTENT_ADV);
 						discoService.remotePublish(adv, VALIDITY_CONTENT_ADV);
@@ -147,8 +150,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 	}
 
 	@Override
-	protected void parseAdvertisement(
-			Enumeration<Advertisement> advertisementsEnum) {
+	protected void parseAdvertisement(Advertisement advertisement) {
 
 	}
 

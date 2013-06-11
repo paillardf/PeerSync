@@ -31,12 +31,13 @@ public class GroupUtils {
 	  private final static ModuleSpecID PSE_SAMPLE_MSID = (ModuleSpecID) ID.create(
 	            URI.create("urn:jxta:uuid-DEADBEEFDEAFBABAFEEDBABE0000000133BF5414AC624CC8AD3AF6AEC2C8264306"));
 	  
-	  
+	  private final static ModuleSpecID TEST = (ModuleSpecID) ID.create(
+	            URI.create("urn:jxta:uuid-DEADBEEFDEAFBABAFEEDBABE00000005A6E32D66C8214EEE8BE6B6659ACF3FE706"));
 	  
 	public static ModuleImplAdvertisement createAllPurposePeerGroupWithPSEModuleImplAdv() {
 
 		ModuleImplAdvertisement implAdv = CompatibilityUtils.createModuleImplAdvertisement(
-				PeerGroup.allPurposePeerGroupSpecID, StdPeerGroup.class.getName(),
+				PSE_SAMPLE_MSID, StdPeerGroup.class.getName(),
 				"Peer Group with PSE Implementation");
 
 		// Create the service list for the group.
@@ -44,6 +45,9 @@ public class GroupUtils {
 
 		// set the services
 		paramAdv.addService(PeerGroup.endpointClassID, PeerGroup.refEndpointSpecID);
+		paramAdv.addService(PeerGroup.tlsProtoClassID, PeerGroup.refTlsProtoSpecID);
+		//paramAdv.addService(PeerGroup.multicastProtoClassID, PeerGroup.);
+		paramAdv.addService(PeerGroup.tcpProtoClassID, PeerGroup.refTcpProtoSpecID);
 		paramAdv.addService(PeerGroup.resolverClassID, PeerGroup.refResolverSpecID);
 		paramAdv.addService(PeerGroup.membershipClassID, PSEMembershipService.pseMembershipSpecID);
 		paramAdv.addService(PeerGroup.accessClassID, PSEAccessService.PSE_ACCESS_SPEC_ID);
@@ -129,6 +133,7 @@ public class GroupUtils {
 		XMLDocument pseDoc = (XMLDocument) pseConf.getDocument(MimeMediaType.XMLUTF8);
 
 		newPGAdv.putServiceParam(PeerGroup.membershipClassID, pseDoc);
+		
 
 		return newPGAdv;
 	}

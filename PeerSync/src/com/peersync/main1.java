@@ -27,7 +27,7 @@ public class main1 {
 //				upnp.findGateway();
 //				int port = upnp.openPort(9711, 9711, 9715, "TCP", "PeerSyncServ");
 //				System.exit(-1);
-				Constants.getInstance().PORT = 9788;
+				Constants.getInstance().PORT = 9789;
 		Constants.getInstance().PEERNAME = "client2";
 	//	Constants.getInstance().PORT = 9788;
 		try {

@@ -14,7 +14,7 @@ public class main2 {
 		System.setProperty("net.jxta.logging.Logging", "FINEST");
 		System.setProperty("net.jxta.level", "FINEST");
 		Constants.getInstance().PEERNAME = "client3";
-		Constants.getInstance().PORT = 9787;
+		Constants.getInstance().PORT = 9790;
 		try {
 			PeerSync ps = PeerSync.getInstance();
 			ps.initialize();

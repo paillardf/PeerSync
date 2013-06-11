@@ -25,7 +25,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 	private long lastStackVersionAdvertismentEvent=0;
 	private StackVersionQuery queryHandler;
 	private static final long VALIDITY_STACKVERSION_ADV = 2*60*1000;
-	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-10*1000;
+	private static final long PUBLISH_ADVERTISEMENT_DELAY = VALIDITY_STACKVERSION_ADV-3*1000;
 
 
 	public StackSyncBehaviour(BasicPeerGroup peerGroup){
@@ -47,15 +47,14 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		}
 		StackAdvertisement adv = 
 				new StackAdvertisement(shareFolders, myPeerGroup.getPeerGroup().getPeerGroupID(), myPeerGroup.getPeerGroup().getPeerID());
-
-		//peer.myPeerGroup.getPipeService().
+		adv.sign(myPeerGroup.getPSECredential() , true, true);
 		try {
 			myPeerGroup.getDiscoveryService().publish(adv, VALIDITY_STACKVERSION_ADV, VALIDITY_STACKVERSION_ADV);
 			myPeerGroup.getDiscoveryService().remotePublish(adv, VALIDITY_STACKVERSION_ADV);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Log.d(NAME, "Advertisement Send" +adv);
+		Log.d(NAME, "--- Advertisement Send ---");
 		lastStackVersionAdvertismentEvent = System.currentTimeMillis();
 	}
 
@@ -70,13 +69,13 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		try {
 			TheAdvEnum = myPeerGroup.getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, StackAdvertisement.ShareFolderTAG, null);
 
-			parseAdvertisement(TheAdvEnum);
+			secureDiscovery(TheAdvEnum);
 			myPeerGroup.getDiscoveryService().getRemoteAdvertisements(null, DiscoveryService.ADV,
 					StackAdvertisement.ShareFolderTAG, null,  100, this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return 20000;
+		return 15000;
 	}
 
 
@@ -86,43 +85,41 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 
 
 
-	protected void parseAdvertisement(Enumeration<Advertisement> TheAdvEnum) {
-		while (TheAdvEnum.hasMoreElements()) { 
+	protected void parseAdvertisement(Advertisement TheAdv) {
 
-			Advertisement TheAdv = TheAdvEnum.nextElement();
 
-			if (TheAdv.getAdvType().compareTo(StackAdvertisement.AdvertisementType)==0) {
+		if (TheAdv.getAdvType().compareTo(StackAdvertisement.AdvertisementType)==0) {
 
-				// We found StackVersion Advertisement
-				StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
-				if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
+			// We found StackVersion Advertisement
+			StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
+			if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 
-					Log.d(NAME, "Adv recu" + stackVersionAdvertisement);
+				Log.d(NAME, "---  Advertisement Receive ---" );
 
-					
-					
-					for (SharedFolderVersion sharedFolderVersion : stackVersionAdvertisement.getShareFolderList()) {
-						SharedFolderVersion myShareFolderVersion = DataBaseManager.getInstance().getSharedFolderVersion(sharedFolderVersion.getUID(), sharedFolderVersion.getName());
-						if(myShareFolderVersion==null){
-							PeerSync.getInstance().addShareFolder(myPeerGroup.getPeerGroupID(), "", sharedFolderVersion.getName());
-						}
-						
+
+
+				for (SharedFolderVersion sharedFolderVersion : stackVersionAdvertisement.getShareFolderList()) {
+					SharedFolderVersion myShareFolderVersion = DataBaseManager.getInstance().getSharedFolderVersion(sharedFolderVersion.getUID(), sharedFolderVersion.getName());
+					if(myShareFolderVersion==null){
+						PeerSync.getInstance().addShareFolder(myPeerGroup.getPeerGroupID(), "", sharedFolderVersion.getName());
 					}
-					
-					ArrayList<SharedFolderVersion> shareFolderVersion = 
-							SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
-					if(shareFolderVersion.size()>0){
-						//ENVOYER UNE REQUETE
-						queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
-					}
+
 				}
-				//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
-				//queryHandler.sendQuery(stackVersionAdvertisement.getShareFolderList(), stackVersionAdvertisement.getPeerId());
-				//System.out.println(stackVersionAdvertisement.toString());
-				// Flushing advertisement
-				//TheDiscoveryService.flushAdvertisement(TheAdv);
-				//}
-			} 
+
+				ArrayList<SharedFolderVersion> shareFolderVersion = 
+						SyncUtils.compareShareFolderVersion(stackVersionAdvertisement.getShareFolderList());
+				if(shareFolderVersion.size()>0){
+					//ENVOYER UNE REQUETE
+					queryHandler.sendQuery(shareFolderVersion, stackVersionAdvertisement.getPeerId());
+				}
+			}
+			//if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
+			//queryHandler.sendQuery(stackVersionAdvertisement.getShareFolderList(), stackVersionAdvertisement.getPeerId());
+			//System.out.println(stackVersionAdvertisement.toString());
+			// Flushing advertisement
+			//TheDiscoveryService.flushAdvertisement(TheAdv);
+			//}
+
 
 
 		}
@@ -141,7 +138,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 			switch (event.getID()) {
 			case PeerGroupEvent.RDV_CONNECTION:
 				lastStackVersionAdvertismentEvent = 0;
-				
+
 				break;
 			case PeerGroupEvent.STACK_UPDATE:
 				lastStackVersionAdvertismentEvent = 0;
