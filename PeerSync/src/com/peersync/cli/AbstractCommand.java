@@ -12,6 +12,26 @@ public abstract class AbstractCommand {
 	// Groupes OR (list obj) --> ex start, stop et restart ou exclusif
 	// Groupes AND (list obj) pour des args interdépendants
 
+	
+	protected final static String PASSWORD = "password";
+	protected final static String DESCRIPTION = "description";
+	protected final static String NAME = "name";
+	protected final static String PATH = "path";
+	protected final static String CREATE = "create";
+	protected final static String IMPORT = "import";
+	protected final static String EXPORT = "import";
+	protected final static String LIST = "list";
+	protected final static String PEERGROUP = "peergroup";
+	protected final static String DETAIL = "detail";
+	protected final static String NUMBER = "number";
+	protected final static String SOLVE = "solve";
+	protected final static String CHOICE = "choice";
+	protected final static String FORCE = "force";
+	
+	protected final static String START = "start";
+	protected final static String STOP = "stop";
+	protected final static String RESTART = "restart";
+	
 	protected ArgumentsList allArguments = new ArgumentsList();
 	protected OperatorNode rootParser=null;
 
@@ -23,11 +43,15 @@ public abstract class AbstractCommand {
 		String name = getClass().getSimpleName();
 		name = name.substring(0,1).toLowerCase() + name.substring(1);
 		setName(name);
-
+		try {
+			iniCommand();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
-
+	protected abstract void iniCommand() throws Exception;
 
 	public final void exec(String queryString)
 	{

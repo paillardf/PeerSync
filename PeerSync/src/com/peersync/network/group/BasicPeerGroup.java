@@ -1,11 +1,11 @@
 package com.peersync.network.group;
 
 import java.io.IOException;
+import java.lang.Thread.State;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -13,19 +13,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import net.jxta.credential.AuthenticationCredential;
-import net.jxta.credential.Credential;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.exception.ProtocolNotSupportedException;
-import net.jxta.impl.content.ContentServiceImpl;
-import net.jxta.impl.endpoint.tls.JTlsDefs;
-import net.jxta.impl.endpoint.tls.TlsTransport;
 import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.impl.membership.pse.StringAuthenticator;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
-import net.jxta.platform.NetworkConfigurator;
 import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PeerGroupAdvertisement;
 import net.jxta.rendezvous.RendezVousService;
@@ -45,7 +40,7 @@ public class BasicPeerGroup  implements Observer{
 	protected PeerGroup peerGroup;
 	protected ArrayList<AbstractBehaviour> behaviourList = new ArrayList<AbstractBehaviour>();
 	private GroupThread thread;
-	private Thread.State statue = Thread.State.BLOCKED;
+	private Thread.State status = Thread.State.BLOCKED;
 	private PeerGroup netPeerGroup;
 	private String description = "";
 	private PSECredential myCredential;
@@ -58,12 +53,12 @@ public class BasicPeerGroup  implements Observer{
 
 
 	public void start() throws BasicPeerGroupException {
-		if(statue == Thread.State.BLOCKED){
+		if(status == Thread.State.BLOCKED){
 			throw new BasicPeerGroupException("Group has to be initialized first");
-		}else if(statue == Thread.State.NEW){
+		}else if(status == Thread.State.NEW){
 			thread.start();	
-			statue = Thread.State.RUNNABLE;
-		}else if(statue == Thread.State.RUNNABLE){
+			status = Thread.State.RUNNABLE;
+		}else if(status == Thread.State.RUNNABLE){
 			throw new BasicPeerGroupException("Group thread is already running");
 		}else{
 
@@ -71,10 +66,10 @@ public class BasicPeerGroup  implements Observer{
 	}
 
 	public void stop() throws BasicPeerGroupException{
-		if(statue == Thread.State.RUNNABLE){
-			statue= Thread.State.TERMINATED;
+		if(status == Thread.State.RUNNABLE){
+			status= Thread.State.TERMINATED;
 			thread.interrupt();
-		}else if(statue == Thread.State.BLOCKED){
+		}else if(status == Thread.State.BLOCKED){
 			throw new BasicPeerGroupException("Group thread is already stopped");
 		}else{
 			throw new BasicPeerGroupException("Group thread hasn't been started");
@@ -84,17 +79,17 @@ public class BasicPeerGroup  implements Observer{
 	public  void initialize(PeerGroup netPeerGroup) throws PeerGroupException, IOException, ProtocolNotSupportedException, BasicPeerGroupException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException{
 		this.netPeerGroup = netPeerGroup;
 		
-		if(statue == Thread.State.BLOCKED){
+		if(status == Thread.State.BLOCKED){
 				PeerGroup myLocalGroup = createNewPeerGroup();
 				joinGroup(myLocalGroup);
 				thread = new GroupThread();
 				initializeBehaviour();
-				statue = Thread.State.NEW;
-		}else if(statue == Thread.State.RUNNABLE){
+				status = Thread.State.NEW;
+		}else if(status == Thread.State.RUNNABLE){
 			throw new BasicPeerGroupException("Group thread is running");
-		}else if(statue == Thread.State.TERMINATED){
+		}else if(status == Thread.State.TERMINATED){
 			throw new BasicPeerGroupException("Group is already initialized");
-		}else if(statue == Thread.State.TERMINATED){
+		}else if(status == Thread.State.TERMINATED){
 			throw new BasicPeerGroupException("Group thread is currently stopping");
 		}
 	}
@@ -240,7 +235,7 @@ public class BasicPeerGroup  implements Observer{
 		@Override
 		public void run() {
 			try {
-				while (statue == Thread.State.RUNNABLE) {
+				while (status == Thread.State.RUNNABLE) {
 
 					for (AbstractBehaviour behaviour : behaviourList) {
 						if(behaviour.hasToRun()){
@@ -274,7 +269,7 @@ public class BasicPeerGroup  implements Observer{
 
 			}
 			Log.d(TAG, "Group "+peerGroupName+" Stop");
-			statue = Thread.State.BLOCKED;
+			status = Thread.State.BLOCKED;
 			thread=null;
 			peerGroup.stopApp();
 		}
@@ -288,5 +283,10 @@ public class BasicPeerGroup  implements Observer{
 
 	public PSEMembershipService getPSEMembershipService() {
 		return (PSEMembershipService)peerGroup.getMembershipService();
+	}
+
+
+	public State getStatus() {
+		return status;
 	}
 }

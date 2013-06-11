@@ -63,6 +63,10 @@ public class PeerGroupManager {
 		BasicPeerGroup peerGroup = getPeerGroup(peerGroupID);
 		peerGroup.stop();
 	}
+	
+	public ArrayList<BasicPeerGroup> getPeerGroupList() {
+		return peerGroupList;
+	}
 
 	public DiscoveryService getNetDiscoveryService() {
 		return netPeerGroup.getDiscoveryService();
