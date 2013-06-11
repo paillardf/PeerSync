@@ -14,6 +14,7 @@ import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
 import com.peersync.data.DataBaseManager;
+import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.network.PeerSync;
 import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.group.SyncPeerGroup;
@@ -105,7 +106,36 @@ public class PeerGroupCommand extends AbstractCommand {
 			if(allArguments.addArgument((AbstractArgument)a))
 				andExport.appendChild(n);
 		}
+		
+		// START
 
+
+		OperatorNode start = new OperatorNode(Operator.AND);
+		root.appendChild(start);
+		a = new ValueArgument(START,null,"start a peergroup");
+		n = new ArgumentNode(a);
+		if(allArguments.addArgument((AbstractArgument)a))
+			start.appendChild(n);
+		
+		a = new ValueArgument(NAME,"-n","name of the peergroup");
+		n = new ArgumentNode(a);
+		if(allArguments.addArgument((AbstractArgument)a))
+			start.appendChild(n);
+		
+		// START
+		OperatorNode stop = new OperatorNode(Operator.AND);
+		root.appendChild(start);
+		a = new ValueArgument(STOP,null,"stop a peergroup");
+		n = new ArgumentNode(a);
+		if(allArguments.addArgument((AbstractArgument)a))
+			stop.appendChild(n);
+		
+		a = new ValueArgument(NAME,"-n","name of the peergroup");
+		n = new ArgumentNode(a);
+		if(allArguments.addArgument((AbstractArgument)a))
+			stop.appendChild(n);
+		
+		
 		setRootParser(root);
 	}
 
@@ -140,6 +170,28 @@ public class PeerGroupCommand extends AbstractCommand {
 			for (int i = 0; i < list.size(); i++) {
 				println(formatString(list.get(i).getPeerGroupName(),35,true)+" "+formatString(list.get(i).getStatus().toString(), 20, true)+" "+formatString(list.get(i).getDescription(),68,true));
 			}
+		}else if(getArgumentValue(START,queryString)!=null){
+			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(PEERGROUP,queryString));
+			if(pg==null){
+				println("Peergroup Name invalid");
+			}
+			try {
+				PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).start();
+			} catch (BasicPeerGroupException e) {
+				e.printStackTrace();
+			}
+			
+		}else if(getArgumentValue(STOP,queryString)!=null){
+			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(PEERGROUP,queryString));
+			if(pg==null){
+				println("Peergroup Name invalid");
+			}
+			try {
+				PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).stop();
+			} catch (BasicPeerGroupException e) {
+				e.printStackTrace();
+			}
+			
 		}
 		else
 			println("Invalid Parameters");

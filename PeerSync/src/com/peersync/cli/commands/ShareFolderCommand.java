@@ -28,7 +28,7 @@ public class ShareFolderCommand extends AbstractCommand {
 
 		ValueArgument a;
 		ArgumentNode n ;
-		a = new ValueArgument(CREATE,null,"create a new sharefolder");
+		a = new ValueArgument(CREATE,null,"create or update a new sharefolder");
 		n = new ArgumentNode(a);
 		if(allArguments.addArgument((AbstractArgument)a))
 			andNew.appendChild(n);
