@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
@@ -89,6 +90,7 @@ public class PeerSync {
 	}
 
 	public void initialize() throws IOException{
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		PORT =  Constants.getInstance().PORT;
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");

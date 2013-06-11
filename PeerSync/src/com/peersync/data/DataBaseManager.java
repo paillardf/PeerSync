@@ -1164,15 +1164,11 @@ public class DataBaseManager extends DbliteConnection{
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e2."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e2."+SHAREDFOLDERFIELD+" and "+STATUSFIELD+" BETWEEN "+Event.MIN_STATUS_LOCAL+" AND "+Event.MAX_STATUS_LOCAL+" )) as localSource "+
 					" from "+DBEVENTSTABLE+" e1 left join "+SHAREDFOLDERSTABLE+" sf1 on (e1."+SHAREDFOLDERFIELD+"=sf1."+UUIDFIELD+") where e1."+ACTIONFIELD+" <> "+Event.ACTION_DELETE+" and e1."+STATUSFIELD+" = "+Event.STATUS_UNSYNC+" and  e1."+DATEFIELD+" = " +
 					" (select max(date) from "+DBEVENTSTABLE+" where "+FILEPATHFIELD+" = e1."+FILEPATHFIELD+" and "+SHAREDFOLDERFIELD+"=e1."+SHAREDFOLDERFIELD+")" +
-					" and localSource NOT NULL";
-
-
-
+					" and localSource NOT NULL OR e1."+EVENT_SIZEFIELD+"=0";
+			
 			ResultSet rs = query(sqlQuery);
-
 			while(rs.next())
 			{
-
 				String relFilePath = rs.getString(FILEPATHFIELD);
 				String fileHash = rs.getString(NEWHASHFIELD);
 				String sharedFolderUID = rs.getString(SHAREDFOLDERFIELD);

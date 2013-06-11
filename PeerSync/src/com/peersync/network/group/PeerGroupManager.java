@@ -1,6 +1,10 @@
 package com.peersync.network.group;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 
 import net.jxta.discovery.DiscoveryService;
@@ -48,7 +52,7 @@ public class PeerGroupManager {
 			peerGroupList.add(peerGroup);
 	}
 
-	public void startPeerGroup(PeerGroupID peerGroupID) throws PeerGroupException, ProtocolNotSupportedException, IOException, BasicPeerGroupException {
+	public void startPeerGroup(PeerGroupID peerGroupID) throws PeerGroupException, ProtocolNotSupportedException, IOException, BasicPeerGroupException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException {
 		BasicPeerGroup peerGroup = getPeerGroup(peerGroupID);
 		peerGroup.initialize(netPeerGroup);
 		peer.getScanService().addObserver(peerGroup);

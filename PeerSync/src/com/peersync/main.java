@@ -13,7 +13,7 @@ public class main {
 	
 	public static void main(String[] args) {
 
-		
+		System.setProperty("net.jxta.endpoint.WireFormatMessageFactory.CBJX_DISABLE", "true");
 		
 //		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client1\\log.properties");
 //		System.setProperty("net.jxta.logging.Logging", "FINEST");
@@ -23,7 +23,6 @@ public class main {
 		//upnp.findGateway();
 		//int port = upnp.openPort(9789, 9789, 9989, "TCP", "PeerSync");
 		Constants.getInstance().PORT = 9788;
-		
 //		
 //		try {
 //			KeyStoreManager.getInstance().exportPeerGroup(Constants.PsePeerGroupID.toString(), "./key", "florian".toCharArray(), KeyStoreManager.MyKeyStorePassword.toCharArray());

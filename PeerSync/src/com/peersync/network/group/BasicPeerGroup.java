@@ -1,6 +1,11 @@
 package com.peersync.network.group;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -13,6 +18,8 @@ import net.jxta.discovery.DiscoveryService;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.exception.ProtocolNotSupportedException;
 import net.jxta.impl.content.ContentServiceImpl;
+import net.jxta.impl.endpoint.tls.JTlsDefs;
+import net.jxta.impl.endpoint.tls.TlsTransport;
 import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.impl.membership.pse.StringAuthenticator;
@@ -74,7 +81,7 @@ public class BasicPeerGroup  implements Observer{
 		}
 	}
 
-	public  void initialize(PeerGroup netPeerGroup) throws PeerGroupException, IOException, ProtocolNotSupportedException, BasicPeerGroupException{
+	public  void initialize(PeerGroup netPeerGroup) throws PeerGroupException, IOException, ProtocolNotSupportedException, BasicPeerGroupException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException{
 		this.netPeerGroup = netPeerGroup;
 		
 		if(statue == Thread.State.BLOCKED){
@@ -100,7 +107,7 @@ public class BasicPeerGroup  implements Observer{
 	}
 
 
-	private PeerGroup createNewPeerGroup() throws IOException, PeerGroupException {
+	private PeerGroup createNewPeerGroup() throws IOException, PeerGroupException, URISyntaxException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
 		PeerGroup tempPeerGroup = null;
 
 		// Build the Module Impl Advertisemet we will use for our group.
@@ -111,7 +118,14 @@ public class BasicPeerGroup  implements Observer{
 
 		PeerGroupAdvertisement pse_pga = null;
 
-		pse_pga = GroupUtils.build_psegroup_adv(pseImpl, peerGroupName,description, peerGroupId);
+		
+//		KeyStoreManager ks = KeyStoreManager.getInstance();
+//		X509Certificate[] cert = {ks.getX509Certificate(peerGroupId.toString())};
+//		pse_pga = GroupUtils.build_psegroup_adv( pseImpl,peerGroupId.toString(), peerGroupName,description,cert ,
+//				ks.getEncryptedPrivateKey(peerGroupId.toString(), ks.MyKeyStorePassword.toCharArray(), ks.MyKeyStorePassword.toCharArray()) );
+		
+		pse_pga = GroupUtils.build_psegroup_adv( pseImpl, peerGroupName,description, peerGroupId);
+//				
 		disco.publish(pse_pga, PeerGroup.DEFAULT_LIFETIME, PeerGroup.DEFAULT_EXPIRATION);
 		getNetPeerGroup().getDiscoveryService().publish(pse_pga);
 		getNetPeerGroup().getDiscoveryService().remotePublish(pse_pga);
@@ -122,9 +136,12 @@ public class BasicPeerGroup  implements Observer{
 
 		PeerGroup peerGroup = null;
 		peerGroup = getNetPeerGroup().newGroup(adv);
-		PSEMembershipService memberShip = (PSEMembershipService) peerGroup.getMembershipService();
+		/*	PSEMembershipService memberShip = (PSEMembershipService) peerGroup.getMembershipService();
 		memberShip.init(peerGroup, memberShip.getAssignedID(), memberShip.getImplAdvertisement());
-		/*
+		
+		
+		memberShip.getCurrentCredentials().notify();
+		
 		ContentServiceImpl contentService = (ContentServiceImpl) peerGroup.getContentService();
 		
 		contentService.init(peerGroup, ContentServiceImpl.MODULE_SPEC_ID, contentService.getImplAdvertisement());
@@ -136,6 +153,8 @@ public class BasicPeerGroup  implements Observer{
 		PSEMembershipService membership =	(PSEMembershipService)myLocalGroup.getMembershipService();
 		StringAuthenticator memberAuthenticator;
 		AuthenticationCredential application = new AuthenticationCredential(myLocalGroup, "StringAuthentication", null);
+		membership.resign();
+		membership.getPSEConfig().setKeyStorePassword(KeyStoreManager.MyKeyStorePassword.toCharArray());
 		memberAuthenticator = (StringAuthenticator) membership.apply(application);
 		memberAuthenticator.setAuth1_KeyStorePassword(KeyStoreManager.MyKeyStorePassword);
 		memberAuthenticator.setAuth2Identity(myLocalGroup.getPeerGroupID());
@@ -150,9 +169,14 @@ public class BasicPeerGroup  implements Observer{
 		
 	}
 	
-	protected void initPeerGroupParameters(){
+	protected void initPeerGroupParameters() throws PeerGroupException{
 		//peerGroup.getRendezVousService().startRendezVous();
 		peerGroup.getRendezVousService().setAutoStart(true, 35000);
+		//TlsTransport t = new TlsTransport();
+		//(TlsTransport)peerGroup.getEndpointService().getMessageTransport("jxtatls");
+		//t.init(peerGroup, PeerGroup.tlsProtoClassID, null);
+		//t.startApp(null);
+		
 	}
 
 	@Override

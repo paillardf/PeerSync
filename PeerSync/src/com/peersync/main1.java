@@ -14,7 +14,7 @@ public class main1 {
 
 	
 	public static void main(String[] args) {
-		
+		System.setProperty("net.jxta.endpoint.WireFormatMessageFactory.CBJX_DISABLE", "true");
 
 //		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client2\\log.properties");
 //		System.setProperty("net.jxta.logging.Logging", "FINEST");

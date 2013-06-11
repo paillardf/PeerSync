@@ -1,59 +1,59 @@
 package com.peersync;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.FileReader;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
 
-import net.jxta.id.IDFactory;
-import net.jxta.impl.endpoint.tls.TlsTransport;
-import net.jxta.peergroup.PeerGroup;
+import javax.crypto.Cipher;
 
-import com.peersync.cli.ShellConsole;
+import net.jxta.document.AdvertisementFactory;
+import net.jxta.document.MimeMediaType;
+import net.jxta.document.StructuredDocumentFactory;
+import net.jxta.document.XMLDocument;
+import net.jxta.impl.membership.pse.PSEUtils;
+import net.jxta.protocol.PeerGroupAdvertisement;
+
+import com.peersync.network.content.ContentSecurity;
+import com.peersync.tools.Constants;
+import com.peersync.tools.KeyStoreManager;
+
 
 
 
 
 
 public class mainClass {
-	public static String getValue(String queryString)
-	{
-
-		Pattern regexName = Pattern.compile(ShellConsole.SPACES+"-f"+ShellConsole.SPACES+ShellConsole.ARG+ShellConsole.SPACES);
-		Matcher mName = regexName.matcher(queryString);
 
 
-		if(mName.find())
-			return mName.group(1);
-		
-		else
-			return null;
+	
+
+		  public static void main(String[] unused) throws Exception {
+			  
+		    
+		    // Generate a key-pair
+		   // KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+		    //kpg.initialize(512); // 512 is the keysize.
+		    //KeyPair kp = kpg.generateKeyPair();
+		    KeyStoreManager ks =  KeyStoreManager.getInstance();
+		    ks.createNewKeys("test", KeyStoreManager.MyKeyStorePassword.toCharArray());
+		    PublicKey pubk = ks.getX509Certificate("test").getPublicKey();
+		    PrivateKey prvk = ks.getPrivateKey("test",KeyStoreManager.MyKeyStorePassword.toCharArray()) ;
+
+		    byte[] dataBytes =
+		        "J2EE Security for Servlets, EJBs and Web Services".getBytes();
+
+		    byte[] encBytes = ContentSecurity.encrypt(dataBytes, pubk);
+		    byte[] decBytes = ContentSecurity.decrypt(encBytes, prvk);
+
+		    boolean expected = java.util.Arrays.equals(dataBytes, decBytes);
+		    System.out.println("Test " + (expected ? "SUCCEEDED!" : "FAILED!"));
+		  }
+
 
 	}
-	
-	public static void main( String[] args ) {
-		System.out.println(IDFactory.newModuleSpecID(PeerGroup.membershipClassID));
-//		UpnpManager u = UpnpManager.getInstance();
-//		u.findGateway();
-//		int port = u.openPort(9789, 9789, 9989, "TCP", "PeerSync");
-//		System.out.println(port);
-//		Constants.getInstance().PEERNAME = "client1";
-//		DataBaseManager db = DataBaseManager.getInstance();
-//		db.saveSharedFolder(new SharedFolder("5000", "toBeReplaced","toooot","un nom" ));
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-	 
-		try {
-			String lineRead = reader.readLine();
-			System.out.println(getValue(lineRead));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	
-	}
-}
+
 
 

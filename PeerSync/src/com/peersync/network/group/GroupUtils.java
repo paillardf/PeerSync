@@ -17,6 +17,7 @@ import net.jxta.impl.content.ContentServiceImpl;
 import net.jxta.impl.membership.pse.PSECredential;
 import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.impl.peergroup.CompatibilityUtils;
+import net.jxta.impl.peergroup.ShadowPeerGroup;
 import net.jxta.impl.peergroup.StdPeerGroup;
 import net.jxta.impl.peergroup.StdPeerGroupParamAdv;
 import net.jxta.impl.protocol.PSEConfigAdv;
@@ -37,33 +38,41 @@ public class GroupUtils {
 	public static ModuleImplAdvertisement createAllPurposePeerGroupWithPSEModuleImplAdv() {
 
 		ModuleImplAdvertisement implAdv = CompatibilityUtils.createModuleImplAdvertisement(
-				PSE_SAMPLE_MSID, StdPeerGroup.class.getName(),
+				PeerGroup.allPurposePeerGroupSpecID, StdPeerGroup.class.getName(),
 				"Peer Group with PSE Implementation");
 
 		// Create the service list for the group.
 		StdPeerGroupParamAdv paramAdv = new StdPeerGroupParamAdv();
 
 		// set the services
-		paramAdv.addService(PeerGroup.endpointClassID, PeerGroup.refEndpointSpecID);
-		paramAdv.addService(PeerGroup.tlsProtoClassID, PeerGroup.refTlsProtoSpecID);
+		
+		
 		//paramAdv.addService(PeerGroup.multicastProtoClassID, PeerGroup.);
-		paramAdv.addService(PeerGroup.tcpProtoClassID, PeerGroup.refTcpProtoSpecID);
-		paramAdv.addService(PeerGroup.resolverClassID, PeerGroup.refResolverSpecID);
-		paramAdv.addService(PeerGroup.membershipClassID, PSEMembershipService.pseMembershipSpecID);
-		paramAdv.addService(PeerGroup.accessClassID, PSEAccessService.PSE_ACCESS_SPEC_ID);
+
+
+
 		
 		// standard services
-		paramAdv.addService(PeerGroup.discoveryClassID, PeerGroup.refDiscoverySpecID);
-		paramAdv.addService(PeerGroup.rendezvousClassID, PeerGroup.refRendezvousSpecID);
-		paramAdv.addService(PeerGroup.pipeClassID, PeerGroup.refPipeSpecID);
-		paramAdv.addService(PeerGroup.peerinfoClassID, PeerGroup.refPeerinfoSpecID);
-
-		paramAdv.addService(PeerGroup.contentClassID, ContentServiceImpl.MODULE_SPEC_ID);
+	
+		paramAdv.addService(PeerGroup.accessClassID, PSEAccessService.PSE_ACCESS_SPEC_ID); //1
+		
+		paramAdv.addService(PeerGroup.rendezvousClassID, PeerGroup.refRendezvousSpecID);//2
+		paramAdv.addService(PeerGroup.peerinfoClassID, PeerGroup.refPeerinfoSpecID); //3
+		paramAdv.addService(PeerGroup.endpointClassID, PeerGroup.refEndpointSpecID); //4
+		
+		paramAdv.addService(PeerGroup.membershipClassID, PSEMembershipService.pseMembershipSpecID); //5
+		paramAdv.addService(PeerGroup.resolverClassID, PeerGroup.refResolverSpecID); //6
+		paramAdv.addService(PeerGroup.discoveryClassID, PeerGroup.refDiscoverySpecID); //7
+		paramAdv.addService(PeerGroup.contentClassID, ContentServiceImpl.MODULE_SPEC_ID); //8
+		paramAdv.addService(PeerGroup.pipeClassID, PeerGroup.refPipeSpecID); // 9
+		paramAdv.addService(PeerGroup.relayProtoClassID, PeerGroup.refRelayProtoSpecID); //10
+		paramAdv.addService(PeerGroup.tlsProtoClassID, PeerGroup.refTlsProtoSpecID); //11
+		paramAdv.addService(PeerGroup.routerProtoClassID, PeerGroup.refRouterProtoSpecID); //11
+		
 
 		// Insert the newParamAdv in implAdv
 		XMLElement paramElement = (XMLElement) paramAdv.getDocument(MimeMediaType.XMLUTF8);
 		implAdv.setParam(paramElement);
-
 		return implAdv;
 
 	}

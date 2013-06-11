@@ -1,6 +1,9 @@
 package com.peersync.network.content.transfer;
 
 import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -8,6 +11,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.KeyManager;
 
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
@@ -31,6 +36,7 @@ import net.jxta.pipe.PipeMsgListener;
 import net.jxta.pipe.PipeService;
 import net.jxta.protocol.PipeAdvertisement;
 
+import com.peersync.network.content.ContentSecurity;
 import com.peersync.network.content.SyncContentProvider;
 import com.peersync.network.content.message.AbstractSyncMessage;
 import com.peersync.network.content.message.AvailabilityRequestMessage;
@@ -39,6 +45,7 @@ import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.content.model.SegmentToDownload;
+import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 
 class PipeManager implements PipeMsgListener{
@@ -48,17 +55,17 @@ class PipeManager implements PipeMsgListener{
 	 */
 	private final Logger LOG =
 			Logger.getLogger(PipeManager.class.getName());
-	
-	
+
+
 	class PipeQuery{
 		private long lastAccess = System.currentTimeMillis();
 
-		
+
 		private AbstractSyncMessage message;
 
 		public PipeQuery(AbstractSyncMessage message) {
 			this.message = message;
-			
+
 		}
 
 		public synchronized boolean isIdle() {
@@ -73,7 +80,7 @@ class PipeManager implements PipeMsgListener{
 			if(getType().equals(DataRequestMessage.tagRoot)){
 				syncFolderTranfert.filesInfoManager.cancelBookFileSegment((DataRequestMessage)message);
 			}
-			
+
 		}
 	}
 
@@ -108,7 +115,7 @@ class PipeManager implements PipeMsgListener{
 			Integer.getInteger(SyncFolderTransfer.class.getName()
 					+ ".maxQueue", SyncFolderTransfer.MAX_OUTSTANDING_PIPE * MAX_OUTSTANDING * 2).intValue();
 
-	
+
 
 	private long lastActivity = System.currentTimeMillis();
 	private long lastFileAvailabilityUpdate = 0;
@@ -136,7 +143,7 @@ class PipeManager implements PipeMsgListener{
 	public void init() throws Exception{
 		if(!setupOutputPipe()||!setupResponsePipe())
 			throw new Exception("Pipe Manager can't create needed Pipe");
-		
+
 		running = true;
 	}
 
@@ -171,7 +178,7 @@ class PipeManager implements PipeMsgListener{
 			responsePipeAdv =
 					(PipeAdvertisement) AdvertisementFactory.newAdvertisement(
 							PipeAdvertisement.getAdvertisementType());
-			responsePipeAdv.setType(PipeService.UnicastSecureType); //TODO
+			responsePipeAdv.setType(PipeService.UnicastType); //TODO
 
 			pipeID = IDFactory.newPipeID(peerGroup.getPeerGroupID());
 			responsePipeAdv.setPipeID(pipeID);
@@ -210,11 +217,11 @@ class PipeManager implements PipeMsgListener{
 	synchronized boolean needsFileAvailabilityUpdate() {
 		return (System.currentTimeMillis() - lastFileAvailabilityUpdate) > FILE_AVAILABILITY_TIMEOUT;
 	}
-	
+
 	private boolean canQuery() {
 		return pipeQueries.size()<MAX_OUTSTANDING;
 	}
-	
+
 	private boolean queryFileAvailabilityRunning() {
 		for (PipeQuery query : pipeQueries) {
 			if(query.getType().equals(AvailabilityRequestMessage.tagRoot))
@@ -234,7 +241,7 @@ class PipeManager implements PipeMsgListener{
 				}
 			}
 		}
-		
+
 	}
 
 	private AbstractSyncMessage getRequest(){
@@ -248,7 +255,7 @@ class PipeManager implements PipeMsgListener{
 				if(bs!=null){
 					message = createDataRequestMessage(bs);
 				}
-				
+
 			}
 		}
 		if(message!=null){
@@ -303,12 +310,12 @@ class PipeManager implements PipeMsgListener{
 		for (PipeMsgEvent pme : workQueue) {
 
 			msg = pme.getMessage();
-			
-			
+
+
 			try {
-				
+
 				processMessage(msg);
-				
+
 			} catch (Exception x) {
 				x.printStackTrace();
 			}
@@ -367,14 +374,14 @@ class PipeManager implements PipeMsgListener{
 			if (doc.getName().equals(DataResponseMessage.tagRoot)) {
 				req = new DataResponseMessage(doc);
 				ByteArrayMessageElement bmsge = (ByteArrayMessageElement) it.next();
-		        data = bmsge.getBytes();
+				data = bmsge.getBytes();
 			}else if(doc.getName().equals(AvailabilityResponseMessage.tagRoot)){
 				req = new AvailabilityResponseMessage(doc);
 			}else{
 				throw new IllegalArgumentException(getClass().getName() +
 						" doesn't support this request");
 			}
-		
+
 			PipeQuery pipeQ = null;
 			for (int i = 0; i < pipeQueries.size(); i++) {
 				if(pipeQueries.get(i).message.getQueryID()==req.getQueryID()){
@@ -384,8 +391,8 @@ class PipeManager implements PipeMsgListener{
 			}
 			if(pipeQ==null)
 				return;
-			
-			
+
+
 			processResponse(req, data);
 			data = null;
 			System.gc();
@@ -413,15 +420,21 @@ class PipeManager implements PipeMsgListener{
 	}
 
 	private void processDataResponse(DataResponseMessage req, byte[] data) {
-		
-		
 
-		
-		FileAvailability fAvUpdate = req.getFileAvailability();
-		syncFolderTranfert.filesInfoManager.addFileAvailability(fAvUpdate, getID());
-		if(req.getQueryID()%10==0)
-			Log.d(getClass().getSimpleName(), "from " + req.getOffset() +" to "+ (int) req.getLength());
-		syncFolderTranfert.filesInfoManager.writeDownloadedSegment(fAvUpdate.getHash(), req.getOffset(), (int) req.getLength(), data);
+
+
+		try {
+			byte[] decBytes = ContentSecurity.decrypt(data, KeyStoreManager.getInstance().getPrivateKey(peerGroup.getPeerGroupID().toString(),KeyStoreManager.MyKeyStorePassword.toCharArray()));
+
+
+			FileAvailability fAvUpdate = req.getFileAvailability();
+			syncFolderTranfert.filesInfoManager.addFileAvailability(fAvUpdate, getID());
+			if(req.getQueryID()%10==0)
+				Log.d(getClass().getSimpleName(), "from " + req.getOffset() +" to "+ (int) req.getLength());
+			syncFolderTranfert.filesInfoManager.writeDownloadedSegment(fAvUpdate.getHash(), req.getOffset(), (int) decBytes.length, decBytes);
+		} catch ( Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void sendRequest(AbstractSyncMessage req) {
@@ -445,10 +458,10 @@ class PipeManager implements PipeMsgListener{
 
 		} catch (IOException iox) {
 
-		//	Logging.logCheckedWarning(LOG, "IOException during message send\n", iox);
+			//	Logging.logCheckedWarning(LOG, "IOException during message send\n", iox);
 
 		}
-		
+
 
 	}
 
@@ -464,7 +477,7 @@ class PipeManager implements PipeMsgListener{
 			synchronized (syncFolderTranfert) {
 				syncFolderTranfert.notifyAll();
 			}
-			
+
 		}
 	}
 
@@ -494,7 +507,7 @@ class PipeManager implements PipeMsgListener{
 				return;
 			}
 			queryGC();
-			
+
 		}
 
 	}
