@@ -254,4 +254,11 @@ public class PeerSync {
 		return scanService;
 
 	}
+
+
+	public void exit() {
+		//TODO : necessité de parcourir tous les peer groups pour arreter un à un ?
+		networkManager.stopNetwork();
+		System.exit(0);
+	}
 }

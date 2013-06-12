@@ -2,10 +2,7 @@ package com.peersync.cli.commands;
 
 import java.io.IOException;
 
-import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
-import com.peersync.cli.ArgumentNode;
-import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
@@ -22,7 +19,6 @@ public class ScanServiceCommand extends AbstractCommand {
 	
 
 		ValueArgument a;
-		BooleanArgument b;
 		
 		a = new ValueArgument(START,"-st","start the scan service");
 		createArgumentNode(a,root);

@@ -88,7 +88,6 @@ public class ShellConsole {
 
 	private void commandRoute(String command)
 	{
-		System.out.println("Commande "+command);
 		String pattern = BEGIN+FACSPACES+ARG+FACSPACES+JOKER+END;
 		Pattern p = Pattern.compile(pattern);
 		java.util.regex.Matcher m = p.matcher(command);
@@ -152,7 +151,6 @@ public class ShellConsole {
 				out.flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

@@ -87,10 +87,10 @@ public class ShareFolderCommand extends AbstractCommand {
 				ArrayList<SharedFolder> sfl = db.getSharedFolders(pgid);
 				if(sfl.size()>0)
 				{
-					println("\t\tPeerGroupName\t\t|\t\t\tPath\t\t\t");
+					println(EIGHTSPACES+"Name"+EIGHTSPACES+"|"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES+"Path"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES);
 					for( SharedFolder sf : sfl)
 					{
-						println(formatString(sf.getName(), 45, true)+formatString(sf.getAbsFolderRootPath(), 80, true));
+						println(formatString(sf.getName(), 20, true,0)+formatString(sf.getAbsFolderRootPath(), 80, true,0));
 					}
 				}
 				else
@@ -101,10 +101,11 @@ public class ShareFolderCommand extends AbstractCommand {
 				ArrayList<SharedFolder> sfl = db.getAllSharedDirectories();
 				if(sfl.size()>0)
 				{
-					println("\tPeerGroupName\t|\t\t\tPath\t\t\t");
+					println(EIGHTSPACES+"Name"+EIGHTSPACES+"|"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES+"Path"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES+"|PeerGroupName");
 					for( SharedFolder sf : sfl)
 					{
-						println(formatString(sf.getName(), 29, true)+sf.getAbsFolderRootPath());
+						SyncPeerGroup spg = DataBaseManager.getInstance().getPeerGroupName(sf.getPeerGroupUID());
+						println(formatString(sf.getName(), 20, true,0)+"|"+formatString(sf.getAbsFolderRootPath(), 52, true,0)+"|"+formatString(spg.getPeerGroupName(), 20, true,0));
 					}
 				}
 				else

@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
-import com.peersync.cli.ArgumentNode;
 import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
@@ -85,12 +83,12 @@ public class ConflictCommand extends AbstractCommand {
 
 			HashMap<String,ArrayList<Event>>  events = DataBaseManager.getInstance().getEventsInConflict();
 			int cpt=0;
-			println("Numero conflit\t|\t\t\tChemin du fichier\t\t\t");
+			println("Numero conflit|"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES+"Chemin du fichier"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES);
 			for(Entry<String, ArrayList<Event>> entry : events.entrySet())
 			{
 				cpt++;
 
-				println("\t"+cpt+"\t "+formatString(entry.getKey(),65,true));
+				println(formatString(((Integer)cpt).toString(),65,true,0)+"|"+formatString(entry.getKey(),65,true,0));
 			}
 
 
@@ -112,7 +110,7 @@ public class ConflictCommand extends AbstractCommand {
 						{
 
 							println("File in conflict : "+entry.getKey());
-							println("Version number\t|\t\t\tEvent creator\t\t\t| Conflict type");
+							println("Version number|\t\t\tEvent creator\t\t\t| Conflict type");
 							for(Event e : entry.getValue())
 							{
 								i++;
@@ -129,7 +127,7 @@ public class ConflictCommand extends AbstractCommand {
 									action = 'U';
 									break;
 								}
-								println("\t"+i+"\t "+formatString(e.getOwner(),70,true)+" "+action);
+								println(formatString(((Integer)i).toString(),14,true,0)+"|"+formatString(e.getOwner(),70,true,0)+" "+action);
 							}
 
 							break;

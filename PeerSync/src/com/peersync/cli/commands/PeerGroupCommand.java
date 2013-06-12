@@ -7,12 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 
-import net.jxta.exception.PeerGroupException;
-import net.jxta.exception.ProtocolNotSupportedException;
-
-import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
-import com.peersync.cli.ArgumentNode;
 import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
@@ -22,7 +17,6 @@ import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.network.PeerSync;
 import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.group.SyncPeerGroup;
-import com.peersync.tools.Constants;
 
 public class PeerGroupCommand extends AbstractCommand {
 
@@ -75,7 +69,7 @@ public class PeerGroupCommand extends AbstractCommand {
 		a = new ValueArgument(PASSWORD,"-p","key encryption password");
 		createArgumentNode(a,andExport);
 
-	
+
 		a = new ValueArgument(PATH,"-f","save file path");
 		createArgumentNode(a,andExport);
 
@@ -84,21 +78,18 @@ public class PeerGroupCommand extends AbstractCommand {
 		OperatorNode xorStartStop = createOperatorNode(Operator.XOR_ONE,true,"To start or stop a shared folder",root);
 		a = new ValueArgument(START,null,"start a peergroup");
 		createArgumentNode(a,xorStartStop);
-		
+
 		a = new ValueArgument(STOP,null,"stop a peergroup");
 		createArgumentNode(a,xorStartStop);
-		
-		
+
+
 		b = new BooleanArgument(LIST,"-l","list peergroups");
-		OperatorNode orList = createOperatorNode(Operator.OR,b,root);
+		createArgumentNode(b,root);
 
 
 
-		a = new ValueArgument(PEERGROUP,"-pg","filter by peergroup");
-		createArgumentNode(a,orList);
-		
-		
-		
+
+
 		setRootParser(root);
 	}
 
@@ -129,9 +120,9 @@ public class PeerGroupCommand extends AbstractCommand {
 			PeerSync.getInstance().createPeerGroup( getArgumentValue(NAME,queryString), getArgumentValue(DESCRIPTION,queryString));
 		}else if(getArgumentValue(LIST,queryString)!=null){
 			ArrayList<BasicPeerGroup> list = PeerSync.getInstance().getPeerGroupManager().getPeerGroupList();
-			println("\t\tNom\t\t|\t\t\t\tDescription\t\t\t\t");
+			println(EIGHTSPACES+"Nom"+EIGHTSPACES+"|"+FOURSPACES+"Status"+FOURSPACES+"|"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES+"Description"+EIGHTSPACES+EIGHTSPACES+EIGHTSPACES);
 			for (int i = 0; i < list.size(); i++) {
-				println(formatString(list.get(i).getPeerGroupName(),35,true)+" "+formatString(list.get(i).getStatus().toString(), 20, true)+" "+formatString(list.get(i).getDescription(),68,true));
+				println(formatString(list.get(i).getPeerGroupName(),19,true,0)+"|"+formatString(list.get(i).getStatus().toString(), 14, true,0)+"|"+formatString(list.get(i).getDescription(),52,true,0));
 			}
 		}else if(getArgumentValue(START,queryString)!=null){
 			BasicPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(START,queryString));
@@ -141,19 +132,19 @@ public class PeerGroupCommand extends AbstractCommand {
 			try {
 				if(pg.getStatus()==Thread.State.BLOCKED)
 				{
-				try {
-					pg.initialize(PeerSync.getInstance().getPeerGroupManager().getNetPeerGroup());
-				} catch (Exception e) {
-					println(e.getMessage());
-				}
-				PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).start();
+					try {
+						pg.initialize(PeerSync.getInstance().getPeerGroupManager().getNetPeerGroup());
+					} catch (Exception e) {
+						println(e.getMessage());
+					}
+					PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).start();
 				}
 				else
 					println("Peergroup already started");
 			} catch (BasicPeerGroupException e) {
 				println(e.getMessage());
 			}
-			
+
 		}else if(getArgumentValue(STOP,queryString)!=null){
 			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(STOP,queryString));
 			if(pg==null){
@@ -164,7 +155,7 @@ public class PeerGroupCommand extends AbstractCommand {
 			} catch (BasicPeerGroupException e) {
 				println(e.getMessage());
 			}
-			
+
 		}
 		else
 			println("Invalid Parameters");

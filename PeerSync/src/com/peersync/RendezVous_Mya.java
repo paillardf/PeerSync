@@ -81,7 +81,7 @@ public class RendezVous_Mya {
 					);
             // Starting the JXTA network
             PeerGroup NetPeerGroup = MyNetworkManager.startNetwork();
-
+          
             // Starting the connectivity monitor
             new ConnectivityMonitor(NetPeerGroup);
 

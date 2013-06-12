@@ -1294,6 +1294,25 @@ public class DataBaseManager extends DbliteConnection{
 		return res;
 	}
 
+	public SyncPeerGroup getPeerGroupName(String peerGroupUID) {
+		SyncPeerGroup res = null; 
+		try {
+			ResultSet rs = query("select * from "+PEERGROUP_TABLE+" where "+PEERGROUP_ID+"=\""+peerGroupUID+"\"");
+			while(rs.next())
+			{
+				try {
+					res =new SyncPeerGroup((PeerGroupID)IDFactory.fromURI(new URI(rs.getString(PEERGROUP_ID))),rs.getString(PEERGROUP_NAME),rs.getString(PEERGROUP_DESCRIPTION));
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return res;
+		
+	}
+
 
 
 

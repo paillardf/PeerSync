@@ -12,7 +12,7 @@ public abstract class AbstractCommand {
 	// Groupes OR (list obj) --> ex start, stop et restart ou exclusif
 	// Groupes AND (list obj) pour des args interdépendants
 
-	
+
 	protected final static String PASSWORD = "password";
 	protected final static String DESCRIPTION = "description";
 	protected final static String NAME = "name";
@@ -27,10 +27,14 @@ public abstract class AbstractCommand {
 	protected final static String SOLVE = "solve";
 	protected final static String CHOICE = "choice";
 	protected final static String FORCE = "force";
-	
+
 	protected final static String START = "start";
 	protected final static String STOP = "stop";
 	protected final static String RESTART = "restart";
+	
+	
+	public static final String FOURSPACES = "    ";
+	public static final String EIGHTSPACES = "        ";
 	
 	protected ArgumentsList allArguments = new ArgumentsList();
 	protected OperatorNode rootParser=null;
@@ -60,7 +64,7 @@ public abstract class AbstractCommand {
 		else
 			help();
 	}
-	
+
 	public OperatorNode createOperatorNode(Operator op,OperatorNode parent)
 	{
 		OperatorNode res = new OperatorNode(op);
@@ -68,7 +72,7 @@ public abstract class AbstractCommand {
 			parent.appendChild(res);
 		return res;
 	}
-	
+
 	//Pour construire un node "group leader"
 	public OperatorNode createOperatorNode(Operator op,BooleanArgument groupName,OperatorNode parent)
 	{
@@ -78,17 +82,17 @@ public abstract class AbstractCommand {
 			parent.appendChild(res);
 		return res;
 	}
-	
+
 	public OperatorNode createOperatorNode(Operator op,boolean groupLeader,String description,OperatorNode parent)
 	{
-		
+
 		OperatorNode res = new OperatorNode(op,true,description);
 		if(parent!=null)
 			parent.appendChild(res);
 		return res;
 	}
-	
-	
+
+
 	public ArgumentNode createArgumentNode(AbstractArgument arg,OperatorNode parent)
 	{
 		allArguments.addArgument((AbstractArgument)arg);
@@ -138,7 +142,7 @@ public abstract class AbstractCommand {
 
 
 
-		
+
 
 		println(" ");
 
@@ -156,7 +160,7 @@ public abstract class AbstractCommand {
 			print(" <value>");
 		println(" : "+arg.getDescription());
 	}
-	
+
 	public void printArgs(OperatorNode op, int level)
 	{
 
@@ -164,7 +168,7 @@ public abstract class AbstractCommand {
 		{
 			for(Node n : op.getChilds())
 			{
-				
+
 				if(n instanceof OperatorNode)
 				{
 					if(((OperatorNode) n).getGroupName()!=null)
@@ -196,7 +200,7 @@ public abstract class AbstractCommand {
 
 
 	}
-	
+
 	public void println(String disp)
 	{
 		System.out.println(disp);
@@ -248,7 +252,16 @@ public abstract class AbstractCommand {
 		this.name = name;
 	}
 
-	public static String formatString(String s,int size,boolean truncBegin)
+
+	/**
+	 *  ormatString
+	 * @param s
+	 * @param size
+	 * @param truncBegin
+	 * @param align : 0 = alignement à gauche, 1= centré, 2 = aligné à droite
+	 * @return
+	 */
+	public static String formatString(String s,int size,boolean truncBegin,int align)
 	{
 		String res;
 		if(s.length()-size-3<0)
@@ -267,10 +280,27 @@ public abstract class AbstractCommand {
 		int cpt=res.length();
 		for(;cpt<size;cpt++)
 		{
-			if(cpt%2==0)
+			switch (align) {
+			case 1:
+			{
+				if(cpt%2==0)
+					res=" "+res;
+				else
+					res+=" ";
+				break;
+			}
+			case 2:
+			{
 				res=" "+res;
-			else
+				break;
+			}
+
+
+			default:
 				res+=" ";
+				break;
+			}
+			
 
 		}
 		return res;
