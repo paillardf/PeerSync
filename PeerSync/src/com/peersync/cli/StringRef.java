@@ -7,6 +7,11 @@ public class StringRef
 		setData(s);
 	}
 	
+	public StringRef(StringRef s)
+	{
+		setData(s.data);
+	}
+	
 	private String data;
 
 	public String getData() {

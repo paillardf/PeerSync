@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
 import com.peersync.cli.ArgumentNode;
+import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
@@ -16,30 +17,27 @@ public class ScanServiceCommand extends AbstractCommand {
 	@Override
 	protected void iniCommand() throws Exception {
 		setDescription("manage scanservice");
-		OperatorNode root = new OperatorNode(Operator.XOR_ONE);
+		OperatorNode root = createOperatorNode(Operator.XOR_ONE,null);
 
 	
 
 		ValueArgument a;
-		ArgumentNode n ;
+		BooleanArgument b;
+		
 		a = new ValueArgument(START,"-st","start the scan service");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			root.appendChild(n);
+		createArgumentNode(a,root);
 
 
 		a = new ValueArgument(STOP,"-sp","stop the scan service");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			root.appendChild(n);
+		createArgumentNode(a,root);
 
 
 
 
 		a = new ValueArgument(RESTART,"-r","restart the scan service");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			root.appendChild(n);
+		createArgumentNode(a,root);
+		
+		setRootParser(root);
 
 
 	}

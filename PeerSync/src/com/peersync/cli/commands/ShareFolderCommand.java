@@ -3,9 +3,8 @@ package com.peersync.cli.commands;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
-import com.peersync.cli.ArgumentNode;
+import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
@@ -20,55 +19,40 @@ public class ShareFolderCommand extends AbstractCommand {
 	@Override
 	protected void iniCommand() throws Exception {
 		setDescription("manage sharefolder");
-		OperatorNode root = new OperatorNode(Operator.XOR_ONE);
-
-		// NEW Share Folder
-		OperatorNode andNew = new OperatorNode(Operator.AND);
-		root.appendChild(andNew);
+		OperatorNode root = createOperatorNode(Operator.XOR_ONE,null);
 
 		ValueArgument a;
-		ArgumentNode n ;
-		a = new ValueArgument(CREATE,null,"create or update a new sharefolder");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNew.appendChild(n);
+		BooleanArgument b;
+
+		// NEW Share Folder
+		b = new BooleanArgument(CREATE,null,"create or update a new sharefolder");
+		OperatorNode andNew = createOperatorNode(Operator.AND,b,root);
+		
+		
 
 
 		a = new ValueArgument(PATH,"-f","path of the folder");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNew.appendChild(n);
+		createArgumentNode(a,andNew);
 
 
-
+		a = new ValueArgument(PEERGROUP,"-pg","peergroup's name");
+		createArgumentNode(a,andNew);
 
 		a = new ValueArgument(NAME,"-n","name of the share folder");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNew.appendChild(n);
+		createArgumentNode(a,andNew);
 
 
 
 		// List share folder
 
-		OperatorNode andList = new OperatorNode(Operator.AND);
-		root.appendChild(andList);
+
+		b = new BooleanArgument(LIST,"-l","list the sharefolder");
+		OperatorNode orList = createOperatorNode(Operator.OR,b,root);
 
 
-		a = new ValueArgument(LIST,"-l","list the sharefolder");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andList.appendChild(n);
-
-
-		OperatorNode orOption = new OperatorNode(Operator.OR);
 
 		a = new ValueArgument(PEERGROUP,"-pg","filter by peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			orOption.appendChild(n);
-
-		andList.appendChild(orOption);
+		createArgumentNode(a,orList);
 
 		
 		setRootParser(root);
@@ -80,14 +64,14 @@ public class ShareFolderCommand extends AbstractCommand {
 	public void requestHandler(String queryString) {
 
 		if(getArgumentValue(CREATE,queryString)!=null){
-			File f = new File(getArgumentValue(PATH,queryString));
+			File f = new File(cleanFilePath(getArgumentValue(PATH,queryString)));
 			if(f.exists() && f.isDirectory())
 			{
 				DataBaseManager db = DataBaseManager.getInstance();
-				SyncPeerGroup peerGroup = db.getPeerGroup(getArgumentValue(NAME,queryString));
+				SyncPeerGroup peerGroup = db.getPeerGroup(getArgumentValue(PEERGROUP,queryString));
 				if(peerGroup!=null)
 				{
-					PeerSync.getInstance().addShareFolder(peerGroup.getPeerGroupID(), getArgumentValue(PATH,queryString), getArgumentValue(NAME,queryString));
+					PeerSync.getInstance().addShareFolder(peerGroup.getPeerGroupID(), f.getAbsolutePath(), getArgumentValue(NAME,queryString));
 
 				}
 				else
@@ -103,10 +87,10 @@ public class ShareFolderCommand extends AbstractCommand {
 				ArrayList<SharedFolder> sfl = db.getSharedFolders(pgid);
 				if(sfl.size()>0)
 				{
-					println("    ID    \t    PeerGroupID    \t    Path");
+					println("\t\tPeerGroupName\t\t|\t\t\tPath\t\t\t");
 					for( SharedFolder sf : sfl)
 					{
-						println(sf.getUID()+"\t"+sf.getPeerGroupUID()+"\t"+sf.getAbsFolderRootPath());
+						println(formatString(sf.getName(), 45, true)+formatString(sf.getAbsFolderRootPath(), 80, true));
 					}
 				}
 				else
@@ -117,10 +101,10 @@ public class ShareFolderCommand extends AbstractCommand {
 				ArrayList<SharedFolder> sfl = db.getAllSharedDirectories();
 				if(sfl.size()>0)
 				{
-					println("    ID    \t    PeerGroupID    \t    Path");
+					println("\tPeerGroupName\t|\t\t\tPath\t\t\t");
 					for( SharedFolder sf : sfl)
 					{
-						println(sf.getUID()+"\t"+sf.getPeerGroupUID()+"\t"+sf.getAbsFolderRootPath());
+						println(formatString(sf.getName(), 29, true)+sf.getAbsFolderRootPath());
 					}
 				}
 				else

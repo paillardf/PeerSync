@@ -1,8 +1,8 @@
 package com.peersync.cli;
 
-import java.util.Map.Entry;
-
 import jline.internal.Configuration;
+
+import com.peersync.cli.Node.Operator;
 
 public abstract class AbstractCommand {
 
@@ -19,7 +19,7 @@ public abstract class AbstractCommand {
 	protected final static String PATH = "path";
 	protected final static String CREATE = "create";
 	protected final static String IMPORT = "import";
-	protected final static String EXPORT = "import";
+	protected final static String EXPORT = "export";
 	protected final static String LIST = "list";
 	protected final static String PEERGROUP = "peergroup";
 	protected final static String DETAIL = "detail";
@@ -60,9 +60,48 @@ public abstract class AbstractCommand {
 		else
 			help();
 	}
+	
+	public OperatorNode createOperatorNode(Operator op,OperatorNode parent)
+	{
+		OperatorNode res = new OperatorNode(op);
+		if(parent!=null)
+			parent.appendChild(res);
+		return res;
+	}
+	
+	//Pour construire un node "group leader"
+	public OperatorNode createOperatorNode(Operator op,BooleanArgument groupName,OperatorNode parent)
+	{
+		allArguments.addArgument((AbstractArgument)groupName);
+		OperatorNode res = new OperatorNode(op,groupName);
+		if(parent!=null)
+			parent.appendChild(res);
+		return res;
+	}
+	
+	public OperatorNode createOperatorNode(Operator op,boolean groupLeader,String description,OperatorNode parent)
+	{
+		
+		OperatorNode res = new OperatorNode(op,true,description);
+		if(parent!=null)
+			parent.appendChild(res);
+		return res;
+	}
+	
+	
+	public ArgumentNode createArgumentNode(AbstractArgument arg,OperatorNode parent)
+	{
+		allArguments.addArgument((AbstractArgument)arg);
+		ArgumentNode res = new ArgumentNode(arg);
+		if(parent!=null)
+			parent.appendChild(res);
+		return res;
+	}
 
 	public static String cleanFilePath(String s)
 	{
+		if(s==null)
+			return s;
 		String os = Configuration.getOsName();
 		boolean OS_IS_WINDOWS = os.contains("windows");
 		s=s.replace("\\'", "'");
@@ -95,22 +134,69 @@ public abstract class AbstractCommand {
 		println("OPTIONS");
 		println(" ");
 		//les arguments
-		for(Entry<String, AbstractArgument> entry : allArguments.getArguments().entrySet())
-		{
-			print("\t");
-			AbstractArgument arg = entry.getValue();
-			if(arg.getShortcut()!=null)
-				print(arg.getShortcut()+", ");
-			print(entry.getKey());
-			if(arg instanceof ValueArgument)
-				print(" <value>");
-			println(" : "+arg.getDescription());
+		printArgs(rootParser, 0);
 
-		}
+
+
+		
+
 		println(" ");
 
 	}
 
+	public void printArg(AbstractArgument arg,int level)
+	{
+		for(int i=0;i<level;i++)
+			print("\t");
+		print("\t");
+		if(arg.getShortcut()!=null)
+			print(arg.getShortcut()+", ");
+		print(arg.getName());
+		if(arg instanceof ValueArgument)
+			print(" <value>");
+		println(" : "+arg.getDescription());
+	}
+	
+	public void printArgs(OperatorNode op, int level)
+	{
+
+		if(op.getChilds().size()>0)
+		{
+			for(Node n : op.getChilds())
+			{
+				
+				if(n instanceof OperatorNode)
+				{
+					if(((OperatorNode) n).getGroupName()!=null)
+					{
+						println("");
+						printArg((AbstractArgument)((OperatorNode) n).getGroupName(),level);
+						printArgs((OperatorNode)n, level+1);
+						println("");
+					}
+					else if(((OperatorNode) n).getGroupLeader())
+					{
+						println("");
+						for(int i=0;i<level;i++)
+							print("\t");
+						print("\t");
+						println(((OperatorNode) n).getDescription());
+						printArgs((OperatorNode)n, level+1);
+						println("");
+					}
+					else
+						printArgs((OperatorNode)n, level);
+				}
+				else if (n instanceof ArgumentNode)
+				{
+					printArg(((ArgumentNode)n).getArgument(),level);
+				}
+			}
+		}
+
+
+	}
+	
 	public void println(String disp)
 	{
 		System.out.println(disp);

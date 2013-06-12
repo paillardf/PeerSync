@@ -7,9 +7,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 
+import net.jxta.exception.PeerGroupException;
+import net.jxta.exception.ProtocolNotSupportedException;
+
 import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
 import com.peersync.cli.ArgumentNode;
+import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
@@ -18,6 +22,7 @@ import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.network.PeerSync;
 import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.group.SyncPeerGroup;
+import com.peersync.tools.Constants;
 
 public class PeerGroupCommand extends AbstractCommand {
 
@@ -25,115 +30,73 @@ public class PeerGroupCommand extends AbstractCommand {
 	@Override
 	protected void iniCommand() throws Exception {
 		setDescription("manage peergroup");
-		OperatorNode root = new OperatorNode(Operator.XOR_ONE);
+		ValueArgument a;
+		BooleanArgument b;
+		OperatorNode root = createOperatorNode(Operator.XOR_ONE,null);
 
 		// NEW GROUP
-		OperatorNode andNewPeerGroup = new OperatorNode(Operator.AND);
-		root.appendChild(andNewPeerGroup);
-
-		ValueArgument a;
-		ArgumentNode n ;
-		a = new ValueArgument(CREATE,null,"create a new peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNewPeerGroup.appendChild(n);
+		b = new BooleanArgument(CREATE,null,"create a new peergroup");
+		OperatorNode andNewPeerGroup = createOperatorNode(Operator.AND,b,root);
 
 
 		a = new ValueArgument(NAME,"-n","peergroup name");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNewPeerGroup.appendChild(n);
+		createArgumentNode(a,andNewPeerGroup);
 
 
 
 
 		a = new ValueArgument(DESCRIPTION,"-d","peergroup description");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andNewPeerGroup.appendChild(n);
+		createArgumentNode(a,andNewPeerGroup);
 
 
 
 		// IMPORT GROUP
-
-		OperatorNode andImportPeerGroup = new OperatorNode(Operator.AND);
-		root.appendChild(andImportPeerGroup);
-
-
-		a = new ValueArgument(IMPORT,null,"import a peergroup from a invitation file");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andImportPeerGroup.appendChild(n);
-
+		b = new BooleanArgument(IMPORT,null,"import a peergroup from a invitation file");
+		OperatorNode andImportPeerGroup = createOperatorNode(Operator.AND,b,root);
 
 		a = new ValueArgument(PATH,"-f","path to the invitation file");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andImportPeerGroup.appendChild(n);
+		createArgumentNode(a,andImportPeerGroup);
 
 		a = new ValueArgument(PASSWORD,"-p","invitation file encryption password");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andImportPeerGroup.appendChild(n);
+		createArgumentNode(a,andImportPeerGroup);
 
 
 		// EXPORT
-		{
-
-			OperatorNode andExport = new OperatorNode(Operator.AND);
-			root.appendChild(andExport);
+		b = new BooleanArgument(EXPORT,null,"export a peergroup invitation file");
+		OperatorNode andExport = createOperatorNode(Operator.AND,b,root);
 
 
-			a = new ValueArgument(EXPORT,null,"export a peergroup invitation file");
-			n = new ArgumentNode(a);
-			if(allArguments.addArgument((AbstractArgument)a))
-				andExport.appendChild(n);
-
-			
-			a = new ValueArgument(PEERGROUP,"-pg","name of the peergroup to export");
-			n = new ArgumentNode(a);
-			if(allArguments.addArgument((AbstractArgument)a))
-				andExport.appendChild(n);
-			
-
-			a = new ValueArgument(PATH,"-f","save file path");
-			n = new ArgumentNode(a);
-			if(allArguments.addArgument((AbstractArgument)a))
-				andExport.appendChild(n);
-
-			a = new ValueArgument(PASSWORD,"-p","key encryption password");
-			n = new ArgumentNode(a);
-			if(allArguments.addArgument((AbstractArgument)a))
-				andExport.appendChild(n);
-		}
-		
-		// START
 
 
-		OperatorNode start = new OperatorNode(Operator.AND);
-		root.appendChild(start);
+		a = new ValueArgument(PEERGROUP,"-pg","name of the peergroup to export");
+		createArgumentNode(a,andExport);
+
+
+		a = new ValueArgument(PASSWORD,"-p","key encryption password");
+		createArgumentNode(a,andExport);
+
+	
+		a = new ValueArgument(PATH,"-f","save file path");
+		createArgumentNode(a,andExport);
+
+
+		//Start stop 
+		OperatorNode xorStartStop = createOperatorNode(Operator.XOR_ONE,true,"To start or stop a shared folder",root);
 		a = new ValueArgument(START,null,"start a peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			start.appendChild(n);
+		createArgumentNode(a,xorStartStop);
 		
-		a = new ValueArgument(NAME,"-n","name of the peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			start.appendChild(n);
-		
-		// START
-		OperatorNode stop = new OperatorNode(Operator.AND);
-		root.appendChild(start);
 		a = new ValueArgument(STOP,null,"stop a peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			stop.appendChild(n);
+		createArgumentNode(a,xorStartStop);
 		
-		a = new ValueArgument(NAME,"-n","name of the peergroup");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			stop.appendChild(n);
+		
+		b = new BooleanArgument(LIST,"-l","list peergroups");
+		OperatorNode orList = createOperatorNode(Operator.OR,b,root);
+
+
+
+		a = new ValueArgument(PEERGROUP,"-pg","filter by peergroup");
+		createArgumentNode(a,orList);
+		
 		
 		
 		setRootParser(root);
@@ -146,9 +109,9 @@ public class PeerGroupCommand extends AbstractCommand {
 
 		if(getArgumentValue(IMPORT,queryString)!=null){
 			try {
-				PeerSync.getInstance().importPeerGroup(getArgumentValue(PATH,queryString), getArgumentValue(PASSWORD,queryString).toCharArray());
+				PeerSync.getInstance().importPeerGroup(cleanFilePath(getArgumentValue(PATH,queryString)), getArgumentValue(PASSWORD,queryString).toCharArray());
 			} catch (IOException e) {
-				e.printStackTrace();
+				println(e.getMessage());
 			}
 		}else if(getArgumentValue(EXPORT,queryString)!=null){
 			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(PEERGROUP,queryString));
@@ -156,11 +119,11 @@ public class PeerGroupCommand extends AbstractCommand {
 				println("Peergroup Name invalid");
 			}
 			try {
-				PeerSync.getInstance().exportPeerGroup(pg.getPeerGroupID(), getArgumentValue(PATH,queryString), getArgumentValue(PASSWORD,queryString).toCharArray());
+				PeerSync.getInstance().exportPeerGroup(pg.getPeerGroupID(), cleanFilePath(getArgumentValue(PATH,queryString)), getArgumentValue(PASSWORD,queryString).toCharArray());
 			} catch (UnrecoverableKeyException | KeyStoreException
 					| NoSuchAlgorithmException | URISyntaxException
 					| IOException e) {
-				e.printStackTrace();
+				println(e.getMessage());
 			}
 		}else if(getArgumentValue(CREATE,queryString)!=null){
 			PeerSync.getInstance().createPeerGroup( getArgumentValue(NAME,queryString), getArgumentValue(DESCRIPTION,queryString));
@@ -171,25 +134,35 @@ public class PeerGroupCommand extends AbstractCommand {
 				println(formatString(list.get(i).getPeerGroupName(),35,true)+" "+formatString(list.get(i).getStatus().toString(), 20, true)+" "+formatString(list.get(i).getDescription(),68,true));
 			}
 		}else if(getArgumentValue(START,queryString)!=null){
-			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(PEERGROUP,queryString));
+			BasicPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(START,queryString));
 			if(pg==null){
 				println("Peergroup Name invalid");
 			}
 			try {
+				if(pg.getStatus()==Thread.State.BLOCKED)
+				{
+				try {
+					pg.initialize(PeerSync.getInstance().getPeerGroupManager().getNetPeerGroup());
+				} catch (Exception e) {
+					println(e.getMessage());
+				}
 				PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).start();
+				}
+				else
+					println("Peergroup already started");
 			} catch (BasicPeerGroupException e) {
-				e.printStackTrace();
+				println(e.getMessage());
 			}
 			
 		}else if(getArgumentValue(STOP,queryString)!=null){
-			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(PEERGROUP,queryString));
+			SyncPeerGroup pg = DataBaseManager.getInstance().getPeerGroup(getArgumentValue(STOP,queryString));
 			if(pg==null){
 				println("Peergroup Name invalid");
 			}
 			try {
 				PeerSync.getInstance().getPeerGroupManager().getPeerGroup(pg.getPeerGroupID()).stop();
 			} catch (BasicPeerGroupException e) {
-				e.printStackTrace();
+				println(e.getMessage());
 			}
 			
 		}

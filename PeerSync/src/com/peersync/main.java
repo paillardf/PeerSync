@@ -4,6 +4,7 @@ package com.peersync;
 import java.io.IOException;
 
 import com.peersync.cli.ShellConsole;
+import com.peersync.data.DataBaseManager;
 import com.peersync.network.PeerSync;
 import com.peersync.tools.Constants;
 
@@ -15,7 +16,7 @@ public class main {
 
 		System.setProperty("net.jxta.endpoint.WireFormatMessageFactory.CBJX_DISABLE", "true");
 		
-//		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client1\\log.properties");
+		System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client1\\log.properties");
 //		System.setProperty("net.jxta.logging.Logging", "FINEST");
 //		System.setProperty("net.jxta.level", "FINEST");
 		Constants.getInstance().PEERNAME = "client1";

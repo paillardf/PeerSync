@@ -28,6 +28,8 @@ public class ShellConsole {
 	public final static String END = "$";
 	public final static String JOKER = "(.*)";
 
+	private final String COMMAND_SUFFIX = "Command";
+
 	private Set<String> availableCommands = new HashSet<String>();
 
 	private String packageName=null;
@@ -41,7 +43,9 @@ public class ShellConsole {
 		for(Class c : ac)
 		{
 			String cmd = c.getSimpleName();
-			cmd=cmd.substring(0,1).toLowerCase() + cmd.substring(1); 
+			cmd=cmd.substring(0,1).toLowerCase() + cmd.substring(1);
+			if(cmd.lastIndexOf("Command")>-1)
+				cmd = cmd.substring(0, cmd.lastIndexOf("Command"));
 			availableCommands.add(cmd);
 		}
 
@@ -94,7 +98,7 @@ public class ShellConsole {
 			{
 				commandName=commandName.substring(0,1).toUpperCase() + commandName.substring(1);
 				try {
-					AbstractCommand c = (AbstractCommand)Class.forName(getPackageName()+"."+commandName).newInstance();
+					AbstractCommand c = (AbstractCommand)Class.forName(getPackageName()+"."+commandName+COMMAND_SUFFIX).newInstance();
 					c.exec(" "+m.group(2)+" "); // Ajout d' " " pour faciliter le parsing
 				} catch (InstantiationException | IllegalAccessException
 						| ClassNotFoundException e) {
@@ -111,32 +115,32 @@ public class ShellConsole {
 	{
 
 		//FileCompleter fc = new FileCompleter();
-//		List<CharSequence> candidates = new LinkedList<CharSequence>();
-//		fc.complete("C:\\Program Files\\", 2, candidates);
-//		
-//		for(CharSequence s : candidates)
-//		{
-//			System.out.println(s);
-//		}
-		
+		//		List<CharSequence> candidates = new LinkedList<CharSequence>();
+		//		fc.complete("C:\\Program Files\\", 2, candidates);
+		//		
+		//		for(CharSequence s : candidates)
+		//		{
+		//			System.out.println(s);
+		//		}
+
 		ConsoleReader reader;
 		try {
-			
-			
-			
+
+
+
 			reader = new ConsoleReader();
 
 
 			reader.setPrompt("PeerSyncShell> ");
 			reader.setCompletionHandler(new com.peersync.cli.jlineCustom.CandidateListCompletionHandler());
-			
-			
+
+
 			final List<Completer> completors = Arrays.asList(
-				    new StringsCompleter(availableCommands),
-				    new FileCompleter());
+					new StringsCompleter(availableCommands),
+					new FileCompleter());
 
 			reader.addCompleter(new com.peersync.cli.jlineCustom.ArgumentCompleter(completors));
-			
+
 			//reader.addCompleter(new ArgumentCompleter(new StringsCompleter("foo", "bar", "baz")));
 			//reader.addCompleter(new ArgumentCompleter(new FileNameCompleter()));
 

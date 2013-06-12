@@ -25,9 +25,9 @@ public abstract class Node {
 			case XOR :
 				return "X";
 			case OR_ONE_MIN :
-				return "|+";
+				return "|";
 			case XOR_ONE :
-				return "X1";
+				return "X";
 			default :
 				return null;
 			}

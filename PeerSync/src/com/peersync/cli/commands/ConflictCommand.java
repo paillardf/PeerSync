@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import com.peersync.cli.AbstractArgument;
 import com.peersync.cli.AbstractCommand;
 import com.peersync.cli.ArgumentNode;
+import com.peersync.cli.BooleanArgument;
 import com.peersync.cli.Node.Operator;
 import com.peersync.cli.OperatorNode;
 import com.peersync.cli.ValueArgument;
@@ -20,73 +21,55 @@ public class ConflictCommand extends AbstractCommand {
 	@Override
 	protected void iniCommand() throws Exception {
 		setDescription("manage conflict");
-		OperatorNode root = new OperatorNode(Operator.XOR_ONE);
-
-		// List conflict
-		OperatorNode andList = new OperatorNode(Operator.AND);
-		root.appendChild(andList);
+		OperatorNode root = createOperatorNode(Operator.XOR_ONE,null);
 
 		ValueArgument a;
-		ArgumentNode n ;
-		a = new ValueArgument(LIST,null,"list conflicts");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andList.appendChild(n);
+		BooleanArgument b;
+
+		
+		
+		//LIST
+		b = new BooleanArgument(LIST,null,"list conflicts");
+		createArgumentNode(b,root);
 
 
-		// detail conflict
-		OperatorNode andDetail = new OperatorNode(Operator.AND);
-		root.appendChild(andDetail);
+		// GROUP "DETAIL CONFLICT"
+		b = new BooleanArgument(DETAIL,"-d","details on a conflict");
+		OperatorNode andDetail = createOperatorNode(Operator.AND,b,root);
 
-		a = new ValueArgument(DETAIL,"-d","details on a conflict");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andDetail.appendChild(n);
+
+		
 
 		a = new ValueArgument(NUMBER,"-n","number of a conflict");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andDetail.appendChild(n);
+		createArgumentNode(a,andDetail);
+	
 
 
 
-		// detail conflict
 
 
-		OperatorNode resolv = new OperatorNode(Operator.AND);
-		root.appendChild(resolv);
-
-		a = new ValueArgument(SOLVE,"-s","solve a conflict");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			resolv.appendChild(n);
-
-
-		OperatorNode xorResolve = new OperatorNode(Operator.XOR_ONE);
-		resolv.appendChild(xorResolve);
+		// GROUP "SOLVE CONFLICT"
+		b = new BooleanArgument(SOLVE,"-s","solve a conflict");
+		OperatorNode resolv = createOperatorNode(Operator.XOR_ONE,b,root);
 
 
 
-		OperatorNode andResolve = new OperatorNode(Operator.AND);
-		xorResolve.appendChild(andResolve);
 
+
+		//Bloc resolution unitaire
+		OperatorNode andResolve = createOperatorNode(Operator.AND,resolv);
+		
 		a = new ValueArgument(NUMBER,"-n","conflict number");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andResolve.appendChild(n);
+		createArgumentNode(a,andResolve);
+
 
 		a = new ValueArgument(CHOICE,"-c","resolve choice number");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andResolve.appendChild(n);
+		createArgumentNode(a,andResolve);
 
-		OperatorNode andResolveForce = new OperatorNode(Operator.AND);
-		xorResolve.appendChild(andResolveForce);
+
 
 		a = new ValueArgument(FORCE,"-f","resole all conflict by choising your own file");
-		n = new ArgumentNode(a);
-		if(allArguments.addArgument((AbstractArgument)a))
-			andResolveForce.appendChild(n);
+		createArgumentNode(a,resolv);
 
 
 		setRootParser(root);

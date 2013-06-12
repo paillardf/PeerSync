@@ -760,11 +760,21 @@ public class DataBaseManager extends DbliteConnection{
 
 	public void saveSharedFolder(SharedFolder sf){
 
+		
 		boolean update = false;
 		String name = sf.getName();
 		boolean found=false;
 		try {
 			int cpt=0;
+			ResultSet rs1 = query("select sf."+SHAREDFOLDER_NAMEFIELD+
+					" from "+SHAREDFOLDERSTABLE+" sf where sf."+ROOTPATHFIELD+" LIKE \""+sf.getAbsFolderRootPath()+"%\" and sf."+UUIDFIELD+"<>\""+sf.getUID()+"\" and sf."+SHAREDFOLDER_NAMEFIELD+"<>\""+name+"\"");
+			while(rs1.next())
+			{
+				if(rs1.getString(SHAREDFOLDER_NAMEFIELD)!=null)
+				{
+					return; // throw ?
+				}
+			}
 			while(!found)
 			{
 				cpt++;
@@ -785,7 +795,7 @@ public class DataBaseManager extends DbliteConnection{
 			
 			
 			ResultSet rs = query("select sf."+UUIDFIELD+
-					" from "+SHAREDFOLDERSTABLE+" sf where sf."+UUIDFIELD+"=\""+sf.getUID()+"\"");
+					" from "+SHAREDFOLDERSTABLE+" sf where sf."+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"");
 
 			while(rs.next())
 			{
@@ -799,7 +809,7 @@ public class DataBaseManager extends DbliteConnection{
 
 		try {
 			if(update)
-				update("Update "+SHAREDFOLDERSTABLE+" set "+PEERGROUPFIELD+"=\""+sf.getPeerGroupUID()+"\", "+ROOTPATHFIELD+"=\""+sf.getAbsFolderRootPath()+"\","+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"  where "+UUIDFIELD+"=\""+sf.getUID()+"\"");
+				update("Update "+SHAREDFOLDERSTABLE+" set "+PEERGROUPFIELD+"=\""+sf.getPeerGroupUID()+"\", "+ROOTPATHFIELD+"=\""+sf.getAbsFolderRootPath()+"\","+UUIDFIELD+"=\""+sf.getUID()+"\"  where "+SHAREDFOLDER_NAMEFIELD+"=\""+name+"\"");
 			else
 				update("insert into "+SHAREDFOLDERSTABLE+ "("+UUIDFIELD+", "+PEERGROUPFIELD+", "+ROOTPATHFIELD+","+SHAREDFOLDER_NAMEFIELD+") values (\""+sf.getUID() + "\", \""+sf.getPeerGroupUID()+"\", \""+sf.getAbsFolderRootPath()+"\",\""+name+"\")");
 		} catch (SQLException e) {
