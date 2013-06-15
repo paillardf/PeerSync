@@ -22,7 +22,6 @@ import com.peersync.models.Event;
 import com.peersync.models.EventsStack;
 import com.peersync.models.FileInfo;
 import com.peersync.models.SharedFolder;
-import com.peersync.network.PeerSync;
 import com.peersync.tools.Log;
 
 public class DirectoryReader {
@@ -119,7 +118,7 @@ public class DirectoryReader {
 	{
 		Set<String> peerGroupWithNewEvents = new HashSet<String>();
 		if(peerID==null)
-			Log.d("Can't scan : peerID unavalaible");
+			Log.s("Can't scan : peerID unavalaible");
 		else
 		{
 
@@ -174,7 +173,7 @@ public class DirectoryReader {
 				if(!found)
 				{
 					m_deletedFiles.add(entry.getKey());
-					Log.d("SCAN", "A SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
+					Log.d("SUPPR : name = " + entry.getKey()+"   hash : "+entry.getValue());
 					String relFilePath = SharedFolder.RelativeFromAbsolutePath(entry.getKey(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 					m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(), relFilePath ,-1,entry.getValue().getHash().equals("null")? 0 : 1,null,entry.getValue().getHash(),Event.ACTION_DELETE,peerID, Event.STATUS_LOCAL_OK));
 				}
@@ -185,10 +184,10 @@ public class DirectoryReader {
 			//Log.d("SCAN", "FileOk : name = " + t);
 		}
 		for(Entry<String, String> entry : m_newFiles.entrySet()) {
-			Log.d("SCAN", "FileACREER: name = " + entry.getKey());
+			Log.d("CREATE: name = " + entry.getKey());
 		}
 		for(Entry<String, String> entry : m_updatedFiles.entrySet()) {
-			Log.d("SCAN", "FileAMAJ: name = " + entry.getKey());
+			Log.d("UPDATE: name = " + entry.getKey());
 		}
 
 
@@ -290,7 +289,7 @@ public class DirectoryReader {
 						else
 						{
 							files.add(file);
-							Log.d("SCAN", "No choice, we calculate the hash of "+file.getAbsolutePath());
+							Log.d("CALCULATE HASH: "+file.getAbsolutePath());
 							String hash = new String();
 							try {
 								hash = DirectoryReader.calculateHash(file);

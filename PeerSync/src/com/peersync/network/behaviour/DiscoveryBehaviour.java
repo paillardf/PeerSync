@@ -1,7 +1,6 @@
 package com.peersync.network.behaviour;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
@@ -39,8 +38,8 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 		//			peerView.seed();
 		//		}
 
-		Log.d(myPeerGroup.getPeerGroupName(), "IS RENDEZ VOUS "+ myPeerGroup.getPeerGroup().isRendezvous());
-		Log.d(myPeerGroup.getPeerGroupName(), "IS CONNECT TO RENDEZ VOUS "+ myPeerGroup.getPeerGroup().getRendezVousService().isConnectedToRendezVous());
+		Log.d("IS RENDEZ VOUS "+ myPeerGroup.getPeerGroup().isRendezvous(), myPeerGroup.getPeerGroupID().toString());
+		Log.d( "IS CONNECT TO RENDEZ VOUS "+ myPeerGroup.getPeerGroup().getRendezVousService().isConnectedToRendezVous(), myPeerGroup.getPeerGroupID().toString());
 		if(System.currentTimeMillis() - lastRDVPublishTime > UPDATE_RDV_DELAY&&myPeerGroup.getPeerGroup().isRendezvous()){
 			sendRDVAdvertisement();
 		}
@@ -80,7 +79,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 	}
 
 	private void findRDVAdvertisement() {
-		Log.d(myPeerGroup.getPeerGroup().getPeerGroupName(),"Trying to find RDV advertisement...");
+		Log.d("Trying to find RDV advertisement...", myPeerGroup.getPeerGroup().getPeerGroupName());
 		try {
 			secureDiscovery(myPeerGroup.getNetPeerGroup().getDiscoveryService().getLocalAdvertisements(DiscoveryService.ADV, RdvAdv.GroupIDTag, myPeerGroup.getPeerGroupID().toString()));
 		} catch (IOException e) {
@@ -101,7 +100,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 		if(foundAdv.getAdvType().compareTo(RdvAdv.getAdvertisementType())==0){
 			RdvAdv rdvAdv = (RdvAdv) foundAdv;
 			if(!rdvAdv.getPeerID().equals(myPeerGroup.getPeerGroup().getPeerID())){
-				Log.d(myPeerGroup.getPeerGroupName(),"Found RDV Advertisement");
+				Log.d("Found RDV Advertisement", myPeerGroup.getPeerGroupID().toString());
 				try {
 					myPeerGroup.getDiscoveryService().publish(rdvAdv);
 				} catch (IOException e) {

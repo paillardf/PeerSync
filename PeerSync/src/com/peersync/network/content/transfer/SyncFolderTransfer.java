@@ -15,7 +15,6 @@ import net.jxta.content.TransferException;
 import net.jxta.exception.PeerGroupException;
 import net.jxta.impl.content.defprovider.DefaultContentShareAdvertisementImpl;
 import net.jxta.impl.membership.pse.PSECredential;
-import net.jxta.impl.membership.pse.PSEMembershipService;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.protocol.ContentShareAdvertisement;
@@ -271,7 +270,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 			if (candidate instanceof DefaultContentShareAdvertisementImpl) {
 				sourcesRemaining.add(
 						(DefaultContentShareAdvertisementImpl) candidate);
-				Log.d("SyncFolderTransfer", "nouveau candidat "+((DefaultContentShareAdvertisementImpl) candidate).getPipeAdvertisement().getPipeID());
+				Log.i("nouveau candidat "+((DefaultContentShareAdvertisementImpl) candidate).getPipeAdvertisement().getPipeID());
 			}
 		}
 
@@ -330,7 +329,7 @@ public class SyncFolderTransfer extends AbstractFolderTransfer {
 
 			PipeManager pipeM ;
 			try {
-				Log.d("SyncFolderTransfer", "nouveau Pipe" +adv.getPipeAdvertisement().getPipeID());
+				Log.d("nouveau Pipe" +adv.getPipeAdvertisement().getPipeID());
 				pipeM = new PipeManager(this, adv.getPipeAdvertisement(), peerGroup);
 				pipeM.init();
 			} catch (Exception e) {

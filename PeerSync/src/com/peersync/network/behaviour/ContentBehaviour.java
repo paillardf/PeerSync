@@ -13,6 +13,8 @@ import net.jxta.content.ContentID;
 import net.jxta.content.ContentService;
 import net.jxta.content.ContentShare;
 import net.jxta.content.ContentTransfer;
+import net.jxta.content.ContentTransferEvent;
+import net.jxta.content.ContentTransferListener;
 import net.jxta.content.ContentTransferState;
 import net.jxta.discovery.DiscoveryService;
 import net.jxta.document.Advertisement;
@@ -41,7 +43,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 
 	private static final long UPDATE_CONTENT_DELAY = 8*60*1000;
 	private static final long VALIDITY_CONTENT_ADV = 9*60*1000;
-	
+
 
 	public ContentBehaviour(BasicPeerGroup peerGroup){
 		super(peerGroup);
@@ -65,7 +67,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 		for (SharedFolder sharedFolder : unsharedFolder) {
 			try{
 				service.unshareContent((ContentID)IDFactory.fromURI(new URI(sharedFolder.getUID())));
-				Log.d("ContentBehaviour", "remove "+sharedFolder.getUID()+"from publish");
+				Log.i("remove "+sharedFolder.getUID()+"from publish");
 			}catch(URISyntaxException e){
 
 			}
@@ -77,7 +79,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 				FolderDocument fileDoc = new FolderDocument(MimeMediaType.AOS);
 				Content content = new Content((ContentID)IDFactory.fromURI(new URI(sharedFolder.getUID())), null, fileDoc);
 				List<ContentShare> shares =((SyncPeerGroup)myPeerGroup).getContentProvider().shareContent(content);
-				
+
 				DiscoveryService discoService = myPeerGroup.getDiscoveryService();
 				for (ContentShare share : shares) {
 
@@ -91,7 +93,7 @@ public class ContentBehaviour extends AbstractBehaviour{
 						e.printStackTrace();
 					}
 				}
-				Log.d("ContentBehaviour", "add "+sharedFolder.getUID()+" to publish");
+				Log.i("add "+sharedFolder.getUID()+" to publish");
 			}catch(URISyntaxException e){
 
 			}
@@ -116,15 +118,46 @@ public class ContentBehaviour extends AbstractBehaviour{
 		for (SharedFolder sf : db.getSharedFolders(myPeerGroup.getPeerGroupID().toString())) {
 			if(db.getFilesToDownload(sf.getUID()).size()>0){
 				if(!currentTransfer.containsKey(sf.getUID())){
+					final String uid = sf.getUID();
 					ContentTransfer transfer;
 					try {
 						transfer = contentProvider.retrieveContent((ContentID)IDFactory.fromURI(new URI(sf.getUID())));
 						((SyncFolderTransfer)transfer).startSynchronization();
+						transfer.addContentTransferListener(new ContentTransferListener() {
+
+							@Override
+							public void contentTransferStateUpdated(ContentTransferEvent event) {
+								;
+								switch (event.getTransferState()) {
+								case CANCELLED :
+								case FAILED :
+									currentTransfer.remove(event.getContentTransfer());
+									Log.i("Transfert "+uid+" failed or cancelled");
+								case COMPLETED :
+									currentTransfer.remove(event.getContentTransfer());
+									Log.i("Transfert "+uid+" terminated");
+									break;
+								default:
+									Log.i("Transfert "+uid+" state changed to "+event.getTransferState());
+									break;
+								}
+							}
+
+							@Override
+							public void contentTransferProgress(ContentTransferEvent event) {
+							}
+
+							@Override
+							public void contentLocationStateUpdated(ContentTransferEvent event) {
+							}
+						});
 						currentTransfer.put(sf.getUID(), ((SyncFolderTransfer)transfer));
-						Log.d("ContentBehaviour", "synchronize "+sf.getUID());
+						Log.i("synchronize folder "+sf.getUID());
 					} catch (UnsupportedOperationException | URISyntaxException e) {
 						e.printStackTrace();
 					}
+				}else{
+					currentTransfer.get(sf.getUID()).isRunning();
 				}
 			}
 		}

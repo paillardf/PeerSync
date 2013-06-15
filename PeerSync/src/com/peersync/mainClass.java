@@ -1,23 +1,11 @@
 package com.peersync;
 
-import java.io.FileReader;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.net.InetAddress;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Security;
 
-import javax.crypto.Cipher;
-
-import net.jxta.document.AdvertisementFactory;
-import net.jxta.document.MimeMediaType;
-import net.jxta.document.StructuredDocumentFactory;
-import net.jxta.document.XMLDocument;
-import net.jxta.impl.membership.pse.PSEUtils;
-import net.jxta.protocol.PeerGroupAdvertisement;
-
+import com.peersync.network.UpnpManager;
 import com.peersync.network.content.ContentSecurity;
-import com.peersync.tools.Constants;
 import com.peersync.tools.KeyStoreManager;
 
 
@@ -31,8 +19,12 @@ public class mainClass {
 	
 
 		  public static void main(String[] unused) throws Exception {
-			  
-		    
+			  System.out.println(InetAddress.getLocalHost().getHostAddress()  );
+			  UpnpManager upnp = UpnpManager.getInstance();
+			  upnp.findGateway();
+			  int port = upnp.openPort(9788, 9788, 9790, "TCP", "PeerSync");
+			  System.out.println(port);	
+		    System.exit(-1);
 		    // Generate a key-pair
 		   // KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 		    //kpg.initialize(512); // 512 is the keysize.

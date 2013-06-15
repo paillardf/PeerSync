@@ -8,8 +8,8 @@ import net.jxta.discovery.DiscoveryEvent;
 import net.jxta.discovery.DiscoveryListener;
 import net.jxta.document.Advertisement;
 import net.jxta.document.XMLElement;
-import net.jxta.document.XMLSignature;
 import net.jxta.document.XMLSignatureInfo;
+import net.jxta.peer.PeerID;
 
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.group.BasicPeerGroup;
@@ -66,9 +66,9 @@ public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 				Advertisement foundAdv = advertisementsEnum.nextElement();
 				foundAdv.verify(myPeerGroup.getPSECredential(), true);
 				if(foundAdv.isAuthenticated()){
-					Log.d(getClass().getSimpleName(), "ADV authenticated "+ foundAdv.getAdvType());
+					PeerID peerid = null;
 					if(!foundAdv.isCorrectMembershipKey()){
-						Log.d(getClass().getSimpleName(), "ADV not CorrectMembershipKey "+ foundAdv.getAdvType());
+						Log.i( "ADV not CorrectMembershipKey "+ foundAdv.getAdvType());
 						XMLSignatureInfo xmlSignatureInfo = null;
 						XMLElement advertismentDocument = (XMLElement)foundAdv.getSignedDocument();
 						Enumeration eachElem = advertismentDocument.getChildren();
@@ -88,7 +88,7 @@ public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 						}
 						if(xmlSignatureInfo!=null&&xmlSignatureInfo.getPeerID()!=null){
 							try {
-								Log.d(getClass().getSimpleName(), "PEERID add "+ xmlSignatureInfo.getPeerID());
+								peerid = xmlSignatureInfo.getPeerID();
 								myPeerGroup.getPSEMembershipService().getPSEConfig().setTrustedCertificate(xmlSignatureInfo.getPeerID() , myPeerGroup.getPSECredential().getCertificate());
 							} catch (KeyStoreException | IOException e) {
 								e.printStackTrace();
@@ -98,9 +98,9 @@ public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 					}
 
 					if(foundAdv.isCorrectMembershipKey()){
-						Log.d(getClass().getSimpleName(), "ADV parse "+ foundAdv.getAdvType());
 						parseAdvertisement(foundAdv);
 					}else{
+						Log.w("PEER "+ peerid+ " advertisment refuse");
 						myPeerGroup.getDiscoveryService().remotePublish(foundAdv);
 					}
 

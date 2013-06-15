@@ -29,12 +29,11 @@ import com.peersync.events.ScanService;
 import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.network.behaviour.AbstractBehaviour;
-import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
+import com.peersync.tools.KeyStoreManager;
 
 public class BasicPeerGroup  implements Observer{
 
-	private final static String TAG ="BasicPeerGroup";
 	private String peerGroupName;
 	private PeerGroupID peerGroupId;
 	protected PeerGroup peerGroup;
@@ -69,6 +68,8 @@ public class BasicPeerGroup  implements Observer{
 		if(status == Thread.State.RUNNABLE){
 			status= Thread.State.TERMINATED;
 			thread.interrupt();
+			peerGroup.stopApp();
+			peerGroup = null;
 		}else if(status == Thread.State.BLOCKED){
 			throw new BasicPeerGroupException("Group thread is already stopped");
 		}else{
@@ -155,10 +156,10 @@ public class BasicPeerGroup  implements Observer{
 		memberAuthenticator.setAuth2Identity(myLocalGroup.getPeerGroupID());
 		memberAuthenticator.setAuth3_IdentityPassword(KeyStoreManager.MyKeyStorePassword);
 		if (!memberAuthenticator.isReadyForJoin()) {
-			Log.d(TAG,"Authenticator is not complete");
+			Log.s("Authenticator is not complete", getPeerGroupID().toString());
 		}
 		myCredential = (PSECredential) membership.join(memberAuthenticator);
-		Log.d(TAG,"Group has been joined");
+		Log.s("Group has been joined", getPeerGroupID().toString());
 		peerGroup = myLocalGroup;
 		initPeerGroupParameters();
 		
@@ -268,7 +269,7 @@ public class BasicPeerGroup  implements Observer{
 			} catch (InterruptedException e) {
 
 			}
-			Log.d(TAG, "Group "+peerGroupName+" Stop");
+			Log.d("Group "+peerGroupName+" Stop", getPeerGroupID().toString());
 			status = Thread.State.BLOCKED;
 			thread=null;
 			peerGroup.stopApp();

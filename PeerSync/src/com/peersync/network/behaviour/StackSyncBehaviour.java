@@ -54,7 +54,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Log.d(NAME, "--- Advertisement Send ---");
+		Log.d( "--- Advertisement Send ---", myPeerGroup.getPeerGroupID().toString());
 		lastStackVersionAdvertismentEvent = System.currentTimeMillis();
 	}
 
@@ -94,7 +94,7 @@ public class StackSyncBehaviour extends AbstractBehaviour{
 			StackAdvertisement stackVersionAdvertisement = (StackAdvertisement) TheAdv;
 			if(stackVersionAdvertisement.getPeerId().compareTo(myPeerGroup.getPeerGroup().getPeerID().toString())!=0){
 
-				Log.d(NAME, "---  Advertisement Receive ---" );
+				Log.d( "---  Advertisement Receive ---" , myPeerGroup.getPeerGroupID().toString());
 
 
 

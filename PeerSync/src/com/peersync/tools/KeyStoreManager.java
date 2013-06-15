@@ -76,9 +76,9 @@ public class KeyStoreManager {
 			MyFileKeyStoreManager.createKeyStore(MyKeyStorePassword.toCharArray());
 
 			if (!MyFileKeyStoreManager.isInitialized()) {
-				Log.d(this.getClass().getSimpleName(), "Keystore is NOT initialized");
+				Log.s("Keystore is NOT initialized");
 			} else {
-				Log.d(this.getClass().getSimpleName(),"Keystore is initialized");
+				Log.i("Keystore is initialized");
 			}
 		}
 		// Reloading the KeyStore
@@ -93,8 +93,8 @@ public class KeyStoreManager {
 		PSEUtils.IssuerInfo ForPSE = PSEUtils.genCert(ID, null);		
 		X509Certificate TheX509Certificate = ForPSE.cert;
 		PrivateKey ThePrivateKey = ForPSE.issuerPkey;
-		Log.d(this.getClass().getSimpleName(), ForPSE.cert.toString());
-		Log.d(this.getClass().getSimpleName(), ForPSE.issuerPkey.toString());
+		Log.i(ForPSE.cert.toString());
+		Log.i(ForPSE.issuerPkey.toString());
 		return this.addNewKeys(ID, TheX509Certificate, ThePrivateKey, key);
 	}
 
@@ -122,10 +122,10 @@ public class KeyStoreManager {
 		X509Certificate TheX509Certificate = (X509Certificate) MyKeyStore.getCertificate(ID);
 
 		if (TheX509Certificate==null) {
-			Log.d(this.getClass().getSimpleName(),"X509 Certificate CANNOT be retrieved");
+			Log.w("X509 Certificate CANNOT be retrieved");
 		} else {
-			Log.d(this.getClass().getSimpleName(),"X509 Certificate can be retrieved");
-			Log.d(this.getClass().getSimpleName(),TheX509Certificate.toString());
+			Log.i("X509 Certificate can be retrieved");
+			Log.i(TheX509Certificate.toString());
 		}
 		return TheX509Certificate;
 	}
@@ -138,10 +138,10 @@ public class KeyStoreManager {
 		PrivateKey MyPrivateKey = (PrivateKey) MyKeyStore.getKey(ID,key);
 
 		if (MyPrivateKey==null) {
-			Log.d(this.getClass().getSimpleName(),"Private key CANNOT be retrieved");
+			Log.w("Private key CANNOT be retrieved");
 		} else {
-			Log.d(this.getClass().getSimpleName(),"Private key can be retrieved");
-			Log.d(this.getClass().getSimpleName(),MyPrivateKey.toString());
+			Log.i("Private key can be retrieved");
+			Log.i(MyPrivateKey.toString());
 		}
 		return MyPrivateKey;
 	}

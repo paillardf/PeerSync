@@ -7,9 +7,6 @@ import java.io.RandomAccessFile;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
-
-import org.bouncycastle.crypto.tls.TlsInputStream;
-import org.bouncycastle.crypto.tls.TlsMac;
-import org.bouncycastle.crypto.tls.TlsUtils;
 
 import net.jxta.content.Content;
 import net.jxta.content.ContentID;
@@ -49,7 +42,6 @@ import net.jxta.exception.PeerGroupException;
 import net.jxta.id.ID;
 import net.jxta.id.IDFactory;
 import net.jxta.impl.content.defprovider.TooManyClientsException;
-import net.jxta.impl.endpoint.tls.TlsTransport;
 import net.jxta.logging.Logging;
 import net.jxta.peergroup.PeerGroup;
 import net.jxta.pipe.InputPipe;
@@ -64,7 +56,6 @@ import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PipeAdvertisement;
 
 import com.peersync.data.DataBaseManager;
-import com.peersync.models.SharedFileAvailability;
 import com.peersync.network.content.listener.ClientEvent;
 import com.peersync.network.content.listener.SyncContentProviderListener;
 import com.peersync.network.content.message.AbstractSyncMessage;
@@ -79,9 +70,8 @@ import com.peersync.network.content.transfer.SyncActiveTransfer;
 import com.peersync.network.content.transfer.SyncActiveTransferTracker;
 import com.peersync.network.content.transfer.SyncActiveTransferTrackerListener;
 import com.peersync.network.content.transfer.SyncFolderTransfer;
-import com.peersync.tools.Constants;
-import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
+import com.peersync.tools.KeyStoreManager;
 
 public class SyncContentProvider implements
 ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
@@ -453,7 +443,7 @@ ContentProviderSPI, PipeMsgListener, SyncActiveTransferTrackerListener{
 			//TODO share.fireShareAccessed(session, resp);
 
 			if(req.getQueryID()%10==0)
-				Log.d(getClass().getSimpleName(), "from " + req.getOffset() +" to "+ (int) req.getLength());
+				Log.d( "from " + req.getOffset() +" to "+ (int) req.getLength(), peerGroup.getPeerGroupID().toString());
 
 
 			sendResponse(resp, session, dataencrypted);

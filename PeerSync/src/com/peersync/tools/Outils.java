@@ -40,31 +40,15 @@
 
 package com.peersync.tools;
 
-import java.net.URI;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
 import java.util.Map;
-
-import javax.crypto.EncryptedPrivateKeyInfo;
 
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.Element;
 import net.jxta.document.MimeMediaType;
-import net.jxta.document.XMLDocument;
-import net.jxta.document.XMLElement;
-import net.jxta.id.ID;
-import net.jxta.impl.access.pse.PSEAccessService;
-import net.jxta.impl.content.ContentServiceImpl;
 import net.jxta.impl.membership.pse.PSEMembershipService;
-import net.jxta.impl.peergroup.CompatibilityUtils;
-import net.jxta.impl.peergroup.StdPeerGroup;
 import net.jxta.impl.peergroup.StdPeerGroupParamAdv;
-import net.jxta.impl.protocol.PSEConfigAdv;
 import net.jxta.peergroup.PeerGroup;
-import net.jxta.peergroup.PeerGroupID;
-import net.jxta.platform.ModuleSpecID;
 import net.jxta.protocol.ModuleImplAdvertisement;
-import net.jxta.protocol.PeerGroupAdvertisement;
 
 
 public class Outils {

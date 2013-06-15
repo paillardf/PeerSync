@@ -40,8 +40,9 @@ import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
-import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
+import com.peersync.tools.KeyStoreManager;
+
 
 public class PeerSync {
 
@@ -96,7 +97,7 @@ public class PeerSync {
 		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");
 		
 		File prefFolder = new File(Constants.getInstance().PREFERENCES_PATH()); 
-		if(Log.DEBUG){
+		if(Log.isDebug()){
 			NetworkManager.RecursiveDelete(prefFolder); 
 			NetworkManager.RecursiveDelete(confFile);
 		}

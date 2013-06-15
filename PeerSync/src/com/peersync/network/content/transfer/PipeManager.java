@@ -1,9 +1,6 @@
 package com.peersync.network.content.transfer;
 
 import java.io.IOException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -11,8 +8,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.net.ssl.KeyManager;
 
 import net.jxta.document.AdvertisementFactory;
 import net.jxta.document.MimeMediaType;
@@ -45,8 +40,8 @@ import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.message.DataResponseMessage;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.content.model.SegmentToDownload;
-import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
+import com.peersync.tools.KeyStoreManager;
 
 class PipeManager implements PipeMsgListener{
 

@@ -30,7 +30,6 @@ import com.peersync.models.EventsStack;
 import com.peersync.models.PeerGroupEvent;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
-import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.tools.Log;
 
@@ -104,7 +103,7 @@ public class StackVersionQuery implements QueryHandler{
 		query.setHandlerName(NAME);
 		query.setSrcPeer(myPeerGroup.getPeerGroup().getPeerID());
 		myPeerGroup.getPeerGroup().getResolverService().sendQuery(peerID, query);
-		Log.d(StackAdvertisement.Name, "envoi d'une requete");
+		Log.i("envoi d'une requete", myPeerGroup.getPeerGroupID().toString());
 
 	}
 
@@ -113,7 +112,7 @@ public class StackVersionQuery implements QueryHandler{
 	public int processQuery(ResolverQueryMsg query) {
 		ResolverResponse responseMsg;
 		
-		Log.d(StackAdvertisement.Name, "reception d'une requete");
+		Log.i("reception d'une requete", myPeerGroup.getPeerGroupID().toString());
 		try {
 			Reader q = new StringReader(query.getQuery());
 			//parse the query Message
@@ -190,7 +189,7 @@ public class StackVersionQuery implements QueryHandler{
 	@Override
 	public void processResponse(ResolverResponseMsg response) {
 		try {
-			Log.d(StackAdvertisement.Name, "réception d'une réponse");
+			Log.i("réception d'une réponse", myPeerGroup.getPeerGroupID().toString());
 			
 			for (Entry<String, QueryInfo> e : queryList.entrySet()) {
 				if(e.getValue().queryID==response.getQueryId()){
