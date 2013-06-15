@@ -35,7 +35,7 @@ public class UpnpManager {
 	{
 		GatewayDiscover discover = new GatewayDiscover();
     	try {
-			Map<InetAddress, GatewayDevice> map = discover.discover();
+			discover.discover();
 			setGateway(discover.getValidGateway());
 		} catch (IOException| SAXException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -72,7 +72,6 @@ public class UpnpManager {
 					}
 						
 				} catch (IOException | SAXException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				currentPort++;

@@ -17,6 +17,7 @@ import net.jxta.platform.NetworkManager;
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 import Examples.Z_Tools_And_Others.DelayedJxtaNetworkStopper;
 
+import com.peersync.network.UpnpManager;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
 import com.peersync.tools.Outils;
@@ -30,7 +31,7 @@ public class RendezVous_Mya {
 
     public static final String Name_RDV = "RENDEZVOUS";
     public static final PeerID PID_RDV = IDFactory.newPeerID(PeerGroupID.defaultNetPeerGroupID, Name_RDV.getBytes());
-    public static final int TcpPort_RDV = 9711;
+    public static final int TcpPort_RDV = 9788;
     public static final File ConfigurationFile_RDV = new File("." + System.getProperty("file.separator") + Name_RDV);
 
     /**
@@ -42,7 +43,10 @@ public class RendezVous_Mya {
 
             // Removing any existing configuration?
             NetworkManager.RecursiveDelete(ConfigurationFile_RDV);
-
+            UpnpManager upnp = UpnpManager.getInstance();
+            upnp.findGateway();
+    		int port = upnp.openPort(9788, 9788, 9790, "TCP", "PeerSync");
+    		System.out.println(port);
             // Creation of the network manager
             final NetworkManager MyNetworkManager = new NetworkManager(
                     NetworkManager.ConfigMode.RENDEZVOUS,

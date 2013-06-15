@@ -52,8 +52,8 @@ public class PeerSync {
 //	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
 
 //	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
-	private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.50" + ":9711");
-
+	//private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9788");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "127.0.0.1" + ":9788");
 
 
 	private int PORT = 9799;
