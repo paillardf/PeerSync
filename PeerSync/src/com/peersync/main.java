@@ -14,7 +14,7 @@ public class main {
 	
 	public static void main(String[] args) {
 
-		System.setProperty("net.jxta.endpoint.WireFormatMessageFactory.CBJX_DISABLE", "true");
+		
 		
 		//System.setProperty("java.util.logging.config.file", "C:\\PeerSyncTest\\Client1\\log.properties");
 //		System.setProperty("net.jxta.logging.Logging", "FINEST");
@@ -22,7 +22,7 @@ public class main {
 		Constants.getInstance().PEERNAME = "client1";
 		UpnpManager upnp = UpnpManager.getInstance();
 		upnp.findGateway();
-		int port = upnp.openPort(9788, 9788, 9790, "TCP", "PeerSync");
+		int port = upnp.openPort(9799, 9799, 9799, "TCP", "PeerSync");
 		System.out.println(port);
 		Constants.getInstance().PORT = 9799;
 //		
