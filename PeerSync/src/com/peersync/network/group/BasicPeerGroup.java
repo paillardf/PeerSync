@@ -25,6 +25,8 @@ import net.jxta.protocol.ModuleImplAdvertisement;
 import net.jxta.protocol.PeerGroupAdvertisement;
 import net.jxta.rendezvous.RendezVousService;
 
+import Examples.Z_Tools_And_Others.ConnectivityMonitor;
+
 import com.peersync.events.ScanService;
 import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.models.PeerGroupEvent;
@@ -161,6 +163,7 @@ public class BasicPeerGroup  implements Observer{
 		myCredential = (PSECredential) membership.join(memberAuthenticator);
 		Log.s("Group has been joined", getPeerGroupID().toString());
 		peerGroup = myLocalGroup;
+		new ConnectivityMonitor(peerGroup);
 		initPeerGroupParameters();
 		
 	}

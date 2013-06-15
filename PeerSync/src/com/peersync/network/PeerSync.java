@@ -30,6 +30,8 @@ import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 import net.jxta.protocol.PeerGroupAdvertisement;
 
+import Examples.Z_Tools_And_Others.ConnectivityMonitor;
+
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.ScanService;
 import com.peersync.models.SharedFolder;
@@ -53,7 +55,8 @@ public class PeerSync {
 
 //	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
 	//private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9788");
-	private URI RendezVousSeedURI = URI.create("tcp://" + "127.0.0.1" + ":9788");
+	private URI RendezVousSeedURI = URI.create("tcp://" + "82.246.83.39" + ":9788");
+	//private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.0.44" + ":9711");
 
 
 	private int PORT = 9799;
@@ -91,7 +94,7 @@ public class PeerSync {
 	}
 
 	public void initialize() throws IOException{
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		PORT =  Constants.getInstance().PORT;
 		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
 		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");
@@ -164,7 +167,7 @@ public class PeerSync {
 			//peerGroupManager.startPeerGroup(id);
 			//addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
 			//exportPeerGroup(id, "C:\\PeerSyncTest\\export", "password".toCharArray());
-		
+			//new ConnectivityMonitor(netPeerGroup);
 		
 			
 			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "password".toCharArray());

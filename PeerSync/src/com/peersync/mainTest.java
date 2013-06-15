@@ -9,14 +9,17 @@ import javax.security.cert.CertificateException;
 import net.jxta.exception.PeerGroupException;
 
 import com.peersync.data.DataBaseManager;
+import com.peersync.network.UpnpManager;
 import com.peersync.tools.Constants;
 
 public class mainTest {
 
-	
-	public static void main(String[] args) throws NoSuchProviderException, KeyStoreException, IOException, PeerGroupException, CertificateException {
 
-		
+	public static void main(String[] args) throws NoSuchProviderException, KeyStoreException, IOException, PeerGroupException, CertificateException, InterruptedException {
+		UpnpManager upnp = UpnpManager.getInstance();
+		upnp.findGateway();
+		int port = upnp.openPort(9788, 9788, 9790, "TCP", "PeerSync");
+	        System.exit(-1);
 		
 		
 		Constants.getInstance().PEERNAME = "client3";
