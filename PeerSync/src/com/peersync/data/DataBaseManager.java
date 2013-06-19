@@ -33,6 +33,7 @@ import com.peersync.models.SharedFileAvailability;
 import com.peersync.models.SharedFolder;
 import com.peersync.models.SharedFolderVersion;
 import com.peersync.models.StackVersion;
+import com.peersync.network.PeerSync;
 import com.peersync.network.content.model.FileAvailability;
 import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
@@ -44,7 +45,7 @@ public class DataBaseManager extends DbliteConnection{
 	public static Lock exclusiveAccess = new ReentrantLock();
 
 
-	private static String DBEVENTSPATH = "/dblite.db";
+	private static String DBEVENTSPATH = "dblite.db";
 	private static final String DBEVENTSTABLE = "events";
 	private static final String DATEFIELD = "date";
 	private static final String FILEPATHFIELD = "filepath";
@@ -98,7 +99,7 @@ public class DataBaseManager extends DbliteConnection{
 
 	private DataBaseManager()
 	{
-		super("./"+Constants.getInstance().PREFERENCES_PATH() + DBEVENTSPATH, VERSION);
+		super(PeerSync.getInstance().PREFERENCES_PATH + DBEVENTSPATH, VERSION);
 
 	}
 
@@ -939,7 +940,7 @@ public class DataBaseManager extends DbliteConnection{
 					Reader r = new StringReader(fileAvailabilitiy);
 					StructuredDocument doc = StructuredDocumentFactory.newStructuredDocument(MimeMediaType.XMLUTF8, r);
 					XMLElement e =(XMLElement)doc.getChildren().nextElement();
-					SharedFileAvailability res = new SharedFileAvailability(new FileAvailability(e),Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/"+hash+".tmp",rs.getLong("size"),-1);
+					SharedFileAvailability res = new SharedFileAvailability(new FileAvailability(e),PeerSync.getInstance().tempPath+hash+".tmp",rs.getLong("size"),-1);
 					return res;
 				} catch (IOException e) {
 					e.printStackTrace();

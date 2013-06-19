@@ -163,7 +163,8 @@ public class BasicPeerGroup  implements Observer{
 		myCredential = (PSECredential) membership.join(memberAuthenticator);
 		Log.s("Group has been joined", getPeerGroupID().toString());
 		peerGroup = myLocalGroup;
-		new ConnectivityMonitor(peerGroup);
+		if(Log.isDebug())
+			new ConnectivityMonitor(peerGroup);
 		initPeerGroupParameters();
 		
 	}

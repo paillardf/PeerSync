@@ -1,11 +1,8 @@
 package com.peersync.tools;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -16,29 +13,17 @@ import java.security.cert.X509Certificate;
 
 import javax.crypto.EncryptedPrivateKeyInfo;
 
-import net.jxta.document.AdvertisementFactory;
-import net.jxta.document.MimeMediaType;
-import net.jxta.document.StructuredDocumentFactory;
-import net.jxta.document.XMLDocument;
-import net.jxta.document.XMLElement;
-import net.jxta.id.ID;
 import net.jxta.impl.membership.pse.FileKeyStoreManager;
 import net.jxta.impl.membership.pse.PSEUtils;
-import net.jxta.impl.protocol.PSEConfigAdv;
-import net.jxta.peergroup.PeerGroup;
-import net.jxta.peergroup.PeerGroupID;
-import net.jxta.protocol.PeerGroupAdvertisement;
-
-import com.peersync.network.group.GroupUtils;
 
 public class KeyStoreManager {
 
 	//public static final String MyPrivateKeyPassword = "PrivateKey Password";
 
-	public static final String MyKeyStorePassword = "KeyStore Passwordddd";
+	public static String MyKeyStorePassword;
 	public static final String MyKeyStoreProvider = "KeyStore Provider";
 
-	public static final String MyKeyStoreLocation =  Constants.getInstance().PREFERENCES_PATH() + "/MyKeyStoreLocation/";
+//	public static final String MyKeyStoreLocation =  Constants.getInstance().PREFERENCES_PATH() + "/MyKeyStoreLocation/";
 
 
 	private KeyStore MyKeyStore;
@@ -52,38 +37,41 @@ public class KeyStoreManager {
 
 	public static KeyStoreManager getInstance(){
 		if(instance==null)
-			try {
 				instance=new KeyStoreManager();
-			} catch (NoSuchProviderException | KeyStoreException | IOException e) {
-				e.printStackTrace();
-			}
+			
 		return instance;
 	}
 
-	private KeyStoreManager() throws NoSuchProviderException, KeyStoreException, IOException {
+	public void init(String password, String path) throws NoSuchProviderException, KeyStoreException, IOException{
 		// Preparing data
-		final File MyKeyStoreDirectory = new File(MyKeyStoreLocation);
-		MyKeyStoreFile = new File(MyKeyStoreLocation+"keystore");
+				final File MyKeyStoreDirectory = new File(path);
+				MyKeyStoreFile = new File(path+"keystore");
 
-		MyKeyStoreDirectory.mkdirs();
+				MyKeyStoreDirectory.mkdirs();
 
+				
 
-		// Creating the key store
-		MyFileKeyStoreManager = new FileKeyStoreManager((String)null, MyKeyStoreProvider, MyKeyStoreFile);
+				// Creating the key store
+				MyFileKeyStoreManager = new FileKeyStoreManager((String)null, MyKeyStoreProvider, MyKeyStoreFile);
 
-		if(!MyKeyStoreFile.exists()){
+				if(!MyKeyStoreFile.exists()){
 
-			MyFileKeyStoreManager.createKeyStore(MyKeyStorePassword.toCharArray());
+					MyFileKeyStoreManager.createKeyStore(password.toCharArray());
 
-			if (!MyFileKeyStoreManager.isInitialized()) {
-				Log.s("Keystore is NOT initialized");
-			} else {
-				Log.i("Keystore is initialized");
-			}
-		}
-		// Reloading the KeyStore
-		MyKeyStore = MyFileKeyStoreManager.loadKeyStore(MyKeyStorePassword.toCharArray());
+					if (!MyFileKeyStoreManager.isInitialized()) {
+						Log.s("Keystore is NOT initialized");
+					} else {
+						Log.i("Keystore is initialized");
+					}
+				}
+				// Reloading the KeyStore
+				MyKeyStore = MyFileKeyStoreManager.loadKeyStore(password.toCharArray());
+				MyKeyStorePassword = password;
 
+	}
+	
+	private KeyStoreManager()  {
+		
 	}
 
 

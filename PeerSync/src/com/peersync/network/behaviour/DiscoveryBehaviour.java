@@ -88,7 +88,7 @@ public class DiscoveryBehaviour extends AbstractBehaviour{
 
 		myPeerGroup.getNetPeerGroup().getDiscoveryService().getRemoteAdvertisements( null,
 				DiscoveryService.ADV, RdvAdv.GroupIDTag, myPeerGroup.getPeerGroupID().toString(),
-				5, this );
+				10, this );
 	}
 
 

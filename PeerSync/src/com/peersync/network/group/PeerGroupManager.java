@@ -64,6 +64,13 @@ public class PeerGroupManager {
 		peerGroup.stop();
 	}
 	
+	public void stopPeerGroups() throws BasicPeerGroupException {
+		for (BasicPeerGroup peerGroup : peerGroupList) {
+			peerGroup.stop();
+		}
+		
+	}
+	
 	public ArrayList<BasicPeerGroup> getPeerGroupList() {
 		return peerGroupList;
 	}
@@ -87,6 +94,9 @@ public class PeerGroupManager {
 		}
 		return null;
 	}
+
+
+	
 
 
 }

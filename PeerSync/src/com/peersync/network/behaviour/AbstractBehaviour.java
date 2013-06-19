@@ -107,6 +107,7 @@ public abstract class AbstractBehaviour  implements DiscoveryListener, Runnable{
 
 				}else{
 					myPeerGroup.getDiscoveryService().remotePublish(foundAdv);
+					Log.w("Advertisment not secure - refuse");
 				}
 
 			}

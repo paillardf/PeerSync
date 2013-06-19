@@ -1,5 +1,6 @@
 package com.peersync.events;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Set;
@@ -105,7 +106,6 @@ public class ScanService extends Observable {
 						setChanged();
 						notifyObservers(peerGroupId);
 					}
-					
 					
 					DataBaseManager.exclusiveAccess.unlock();
 				}

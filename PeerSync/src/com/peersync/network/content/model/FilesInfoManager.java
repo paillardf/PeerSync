@@ -14,6 +14,7 @@ import com.peersync.data.DataBaseManager;
 import com.peersync.models.ClassicFile;
 import com.peersync.models.Event;
 import com.peersync.models.SharedFileAvailability;
+import com.peersync.network.PeerSync;
 import com.peersync.network.content.message.DataRequestMessage;
 import com.peersync.network.content.transfer.SyncFolderTransfer;
 import com.peersync.tools.Constants;
@@ -82,7 +83,7 @@ public class FilesInfoManager {
 					if(files.size()==0)
 						return;
 					
-					File myFile = new File (Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"\\"+hash+".tmp");
+					File myFile = new File (PeerSync.getInstance().tempPath+"/"+hash+".tmp");
 					//Create the accessor with read-write access.
 					RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
 					

@@ -10,6 +10,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
+import com.peersync.network.PeerSync;
+
 public class Log {
 
 	//	public static boolean DEBUG = true;
@@ -98,7 +100,7 @@ public class Log {
 		private JTabbedPane Onglets;
 
 		private DebugWindows(){
-			super(Constants.getInstance().PEERNAME);
+			super(System.getProperty(PeerSync.class.getName()+".NAME", "CLIENT"));
 			windows=this;
 
 			windows.setSize(400, 400);

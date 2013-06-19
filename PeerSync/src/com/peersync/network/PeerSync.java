@@ -8,8 +8,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
@@ -28,12 +28,14 @@ import net.jxta.peergroup.PeerGroup;
 import net.jxta.peergroup.PeerGroupID;
 import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
+import net.jxta.platform.NetworkManager.ConfigMode;
 import net.jxta.protocol.PeerGroupAdvertisement;
 
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 
 import com.peersync.data.DataBaseManager;
 import com.peersync.events.ScanService;
+import com.peersync.exceptions.BasicPeerGroupException;
 import com.peersync.models.SharedFolder;
 import com.peersync.network.advertisment.RendezVousAdvertisement;
 import com.peersync.network.advertisment.StackAdvertisement;
@@ -42,21 +44,23 @@ import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
 import com.peersync.tools.Constants;
-import com.peersync.tools.Log;
 import com.peersync.tools.KeyStoreManager;
+import com.peersync.tools.Log;
 
 
 public class PeerSync {
 
-	//DEBUG VAL //TODO
 
 
-//	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
+	//	private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9711");
 
-//	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
+	
+
+
+	//	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
 	//private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9788");
-	private URI RendezVousSeedURI = URI.create("tcp://" + "82.246.83.39" + ":9788");
-	//private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.0.44" + ":9711");
+	//private URI RendezVousSeedURI = URI.create("tcp://" + "82.246.83.39" + ":9788");
+	//private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.46" + ":9788");
 
 
 	private int PORT = 9799;
@@ -74,6 +78,9 @@ public class PeerSync {
 	private ScanService scanService;
 
 
+	public String tempPath;
+	public  String PREFERENCES_PATH ;
+
 	private static PeerSync instance;
 
 
@@ -87,26 +94,28 @@ public class PeerSync {
 
 	private PeerSync(){
 
-		
-		
-	
+
+
+
 
 	}
 
-	public void initialize() throws IOException{
+	public void initialize(boolean rdv, String name, String password, int port, String configPath, String rdvadress) throws IOException, NoSuchProviderException, KeyStoreException{
 		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		PORT =  Constants.getInstance().PORT;
-		NAME = Constants.getInstance().PEERNAME; //TODO RETIRER
-		File confFile = new File(Constants.TEMP_PATH+Constants.getInstance().PEERNAME+"/");
-		
-		File prefFolder = new File(Constants.getInstance().PREFERENCES_PATH()); 
+		PORT = port;
+		NAME = name;
+		System.setProperty(PeerSync.class.getName()+".NAME", NAME);
+		File confFile = new File(configPath);
+		PREFERENCES_PATH = configPath+"pref/";
+		File prefFolder = new File(PREFERENCES_PATH); 
+		tempPath = configPath+"tmp/";
 		if(Log.isDebug()){
 			NetworkManager.RecursiveDelete(prefFolder); 
 			NetworkManager.RecursiveDelete(confFile);
 		}
 		prefFolder.mkdirs();
 		confFile.mkdirs();
-		
+
 
 		//ksm.createNewKeys(Constants.PsePeerGroupID.toString(), Constants.PeerGroupKey.toCharArray());
 		//		ksm.addNewKeys(Constants.PsePeerGroupID.toString(), Constants.PSE_SAMPLE_GROUP_ROOT_CERT,
@@ -114,31 +123,44 @@ public class PeerSync {
 		//				, Constants.PeerGroupKey.toCharArray());
 		// Start the JXTA network
 
+		ConfigMode mode =NetworkManager.ConfigMode.EDGE;
+		if( rdv)
+			mode  = NetworkManager.ConfigMode.RENDEZVOUS;
 		KeyStoreManager ksm = KeyStoreManager.getInstance();
+		ksm.init(password, configPath);
 		networkManager = new NetworkManager(
-				NetworkManager.ConfigMode.EDGE, NAME,
+				mode, NAME,
 				prefFolder.toURI());
 		//networkManager.setPeerID(PID_EDGE);
 		conf = networkManager.getConfigurator();
-		conf.setUseOnlyRendezvousSeeds(false);
-		conf.addSeedRendezvous(RendezVousSeedURI);
-		
-		conf.setUseMulticast(true);
-		
-		conf.setTcpEnabled(true);
-		conf.setTcpIncoming(true);
-		conf.setTcpOutgoing(true);
-		conf.setTcpPort(PORT);
-		
-//		conf.setHttp2Enabled(true);
-//		conf.setHttp2Incoming(true);
-//		conf.setHttp2Outgoing(true);
-//		conf.setHttp2Port(80);
-		
-		conf.setKeyStoreLocation(ksm.getKeyStoreLocation());
-		conf.setPassword(KeyStoreManager.MyKeyStorePassword);
-		conf.setPrincipal(NAME+System.currentTimeMillis());
-		conf.setName(NAME);
+		if (!conf.exists()||Log.isDebug()) {
+			conf.setUseOnlyRendezvousSeeds(false);
+			
+			if(rdvadress!=null){
+				URI RendezVousSeedURI = URI.create(rdvadress);
+				conf.addSeedRendezvous(RendezVousSeedURI);
+			}
+			
+			
+
+			conf.setUseMulticast(false);
+			conf.setHttpEnabled(false);
+			conf.setHttp2Enabled(false);
+			conf.setTcpEnabled(true);
+			conf.setTcpIncoming(true);
+			conf.setTcpOutgoing(true);
+			conf.setTcpPort(PORT);
+
+			//		conf.setHttp2Enabled(true);
+			//		conf.setHttp2Incoming(true);
+			//		conf.setHttp2Outgoing(true);
+			//		conf.setHttp2Port(80);
+
+			conf.setKeyStoreLocation(ksm.getKeyStoreLocation());
+			conf.setPassword(KeyStoreManager.MyKeyStorePassword);
+			conf.setPrincipal(NAME+System.currentTimeMillis());
+			conf.setName(NAME);
+		}
 	}
 	public void start(){
 
@@ -159,45 +181,48 @@ public class PeerSync {
 					RendezVousAdvertisement.getAdvertisementType(),
 					new RendezVousAdvertisement.Instantiator()
 					);
+			
+			if(netPeerGroup.isRendezvous()&&Log.isDebug())
+				new ConnectivityMonitor(netPeerGroup);
 			scanService = ScanService.getInstance();
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
-			
-		//PeerGroupID peerID = createPeerGroup("group", "SyncGroup");
+
+			//PeerGroupID peerID = createPeerGroup("group", "SyncGroup");
 			//peerGroupManager.startPeerGroup(id);
 			//addShareFolder(id, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
 			//exportPeerGroup(id, "C:\\PeerSyncTest\\export", "password".toCharArray());
 			//new ConnectivityMonitor(netPeerGroup);
-		
-			
-			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "password".toCharArray());
-			peerGroupManager.startPeerGroup(peerID);
-			addShareFolder(peerID, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
-			
+
+
+//			PeerGroupID peerID = PeerSync.getInstance().importPeerGroup("C:\\PeerSyncTest\\export", "password".toCharArray());
+//			peerGroupManager.startPeerGroup(peerID);
+//			addShareFolder(peerID, "C:\\PeerSyncTest\\"+Constants.getInstance().PEERNAME, "mon dossier");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		} 
-		
+
 
 
 
 	}
 
-	
 
-	
-	
+
+
+
 	public SharedFolder addShareFolder(PeerGroupID peerGroupID, String path, String name){
 		ContentID id = IDFactory.newContentID(peerGroupID, false, (path+System.currentTimeMillis()).getBytes());
 		SharedFolder sf = new SharedFolder(id.toString(), peerGroupID.toString(), path, name);
 		DataBaseManager.getInstance().saveSharedFolder(sf);
 		return sf;
 	}
-	
+
 	public PeerGroupID createPeerGroup(String name, String description){
 		KeyStoreManager ks = KeyStoreManager.getInstance();
-		PeerGroupID peerGroupID = Constants.PsePeerGroupID;//TODO pour les tests IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, (name+System.currentTimeMillis()).getBytes());
+		PeerGroupID peerGroupID = IDFactory.newPeerGroupID(PeerGroupID.defaultNetPeerGroupID, (name+System.currentTimeMillis()).getBytes());
 		ks.createNewKeys(peerGroupID.toString(), KeyStoreManager.MyKeyStorePassword.toCharArray());
 		DataBaseManager db = DataBaseManager.getInstance();
 		SyncPeerGroup peerGroup= new SyncPeerGroup(peerGroupID, name, description);
@@ -205,8 +230,8 @@ public class PeerSync {
 		peerGroupManager.addPeerGroup(peerGroup);
 		return peerGroupID;
 	}
-	
-	
+
+
 	public void exportPeerGroup(PeerGroupID peerGroupID, String outPath, char[] encryptedKey) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, URISyntaxException, IOException {
 		PeerGroupAdvertisement pse_pga = null;
 		KeyStoreManager ks = KeyStoreManager.getInstance();
@@ -236,11 +261,11 @@ public class PeerSync {
 		PrivateKey private_key = PSEUtils.pkcs5_Decrypt_pbePrivateKey(encryptedKey, pseConf.getEncryptedPrivateKeyAlgo(),  pseConf.getEncryptedPrivateKey());//Encrypt_pbePrivateKey(encryptedKey, newPriv, 500);
 		ks.addNewKeys(pseGroupAdv.getPeerGroupID().toString(),  pseConf.getCertificateChain()[0], private_key, KeyStoreManager.MyKeyStorePassword.toCharArray());
 		SyncPeerGroup peerGroup = new SyncPeerGroup(pseGroupAdv.getPeerGroupID(), pseGroupAdv.getName(), pseGroupAdv.getDescription());
-		
+
 		DataBaseManager db = DataBaseManager.getInstance();
 		db.savePeerGroup(peerGroup);
 		peerGroupManager.addPeerGroup(peerGroup);
-		
+
 		return pseGroupAdv.getPeerGroupID();
 	}
 
@@ -261,7 +286,11 @@ public class PeerSync {
 
 
 	public void exit() {
-		//TODO : necessité de parcourir tous les peer groups pour arreter un à un ?
+		try {
+			peerGroupManager.stopPeerGroups();
+		} catch (BasicPeerGroupException e) {
+			e.printStackTrace();
+		}
 		networkManager.stopNetwork();
 		System.exit(0);
 	}
