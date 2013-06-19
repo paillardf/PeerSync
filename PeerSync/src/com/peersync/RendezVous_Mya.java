@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import com.peersync.network.UpnpManager;
+
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 import Examples.Z_Tools_And_Others.DelayedJxtaNetworkStopper;
 import net.jxta.exception.PeerGroupException;
@@ -33,6 +35,10 @@ public class RendezVous_Mya {
     public static void main(String[] args) {
 
         try {
+        	UpnpManager upnp = UpnpManager.getInstance();
+    		upnp.findGateway();
+    		int port = upnp.openPort(9788, 9788, 9788, "TCP", "PeerSync");
+    		System.out.println(port);
 
             // Removing any existing configuration?
             NetworkManager.RecursiveDelete(ConfigurationFile_RDV);
@@ -52,6 +58,14 @@ public class RendezVous_Mya {
             MyNetworkConfigurator.setTcpEnabled(true);
             MyNetworkConfigurator.setTcpIncoming(true);
             MyNetworkConfigurator.setTcpOutgoing(true);
+            
+            MyNetworkConfigurator.setHttp2Enabled(false);
+            MyNetworkConfigurator.setHttp2Incoming(false);
+            MyNetworkConfigurator.setHttp2Outgoing(false);
+    	
+            MyNetworkConfigurator.setHttpEnabled(false);
+            MyNetworkConfigurator.setHttpIncoming(false);
+            MyNetworkConfigurator.setHttpOutgoing(false);
 
             // Setting the Peer ID
             //MyNetworkConfigurator.setPeerID(PID_RDV);

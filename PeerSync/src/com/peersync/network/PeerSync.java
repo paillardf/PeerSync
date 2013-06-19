@@ -30,7 +30,6 @@ import net.jxta.platform.NetworkConfigurator;
 import net.jxta.platform.NetworkManager;
 import net.jxta.platform.NetworkManager.ConfigMode;
 import net.jxta.protocol.PeerGroupAdvertisement;
-
 import Examples.Z_Tools_And_Others.ConnectivityMonitor;
 
 import com.peersync.data.DataBaseManager;
@@ -43,7 +42,6 @@ import com.peersync.network.group.BasicPeerGroup;
 import com.peersync.network.group.GroupUtils;
 import com.peersync.network.group.PeerGroupManager;
 import com.peersync.network.group.SyncPeerGroup;
-import com.peersync.tools.Constants;
 import com.peersync.tools.KeyStoreManager;
 import com.peersync.tools.Log;
 
@@ -59,8 +57,6 @@ public class PeerSync {
 
 	//	private URI RendezVousSeedURI = URI.create("tcp://" + "37.161.221.188" + ":9711");
 	//private URI RendezVousSeedURI = URI.create("tcp://" + "78.240.35.201" + ":9788");
-	//private URI RendezVousSeedURI = URI.create("tcp://" + "82.246.83.39" + ":9788");
-	//private URI RendezVousSeedURI = URI.create("tcp://" + "192.168.1.46" + ":9788");
 
 
 	private int PORT = 9799;
@@ -161,6 +157,7 @@ public class PeerSync {
 			conf.setPrincipal(NAME+System.currentTimeMillis());
 			conf.setName(NAME);
 		}
+
 	}
 	public void start(){
 

@@ -250,14 +250,16 @@ public class DirectoryReader {
 			{
 				for (File file : content)
 				{
-					String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(file.getAbsolutePath(), DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
+					String absFilePath=SharedFolder.reformatFilePath(file.getAbsolutePath());
+					String relFilePathFile = SharedFolder.RelativeFromAbsolutePath(absFilePath, DataBaseManager.getInstance().getSharedFolderRootPath(currentShareFolder.getUID()));
 
-					if(!file.isDirectory() && m_oldMap.containsKey(file.getAbsolutePath()) && m_oldMap.get(file.getAbsolutePath()).getUpdateDate()==file.lastModified())
+
+					if(!file.isDirectory() && m_oldMap.containsKey(absFilePath) && m_oldMap.get(absFilePath).getUpdateDate()==file.lastModified())
 					{
 						//							if(file.isDirectory())
 						//								m_directoriesOk.add(file.getAbsolutePath());
 						//							else
-						m_filesOk.add(file.getAbsolutePath());
+						m_filesOk.add(absFilePath);
 					}
 					else
 					{
@@ -265,36 +267,36 @@ public class DirectoryReader {
 						if(file.isDirectory())
 						{
 							for (SharedFolder sf : shareFolders) {
-								if(file.getAbsolutePath().compareTo(sf.getAbsFolderRootPath())==0)
+								if(absFilePath.compareTo(sf.getAbsFolderRootPath())==0)
 									isShareFolder = true;
 							}
 
 							if(!isShareFolder){
 
-								if(!m_oldMap.containsKey(file.getAbsolutePath()))
+								if(!m_oldMap.containsKey(absFilePath))
 								{
 
-									FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),null);
+									FileInfo fi = new FileInfo(absFilePath,file.lastModified(),null);
 									fi.save();
-									m_newFiles.put(file.getAbsolutePath(),"");
+									m_newFiles.put(absFilePath,"");
 									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(),  relFilePathFile,file.isFile()?file.length():-1,file.isFile()? 1 : 0,null,null,Event.ACTION_CREATE,peerID, Event.STATUS_LOCAL_OK));
 									//toScan = true;
 								}
 								else
-									m_filesOk.add(file.getAbsolutePath());
+									m_filesOk.add(absFilePath);
 								files.add(file);
-								files.addAll(listAllFilesInADir(file.getAbsolutePath()));
+								files.addAll(listAllFilesInADir(absFilePath));
 							}
 						}
 						else
 						{
 							files.add(file);
-							Log.d("CALCULATE HASH: "+file.getAbsolutePath());
+							Log.d("CALCULATE HASH: "+absFilePath);
 							String hash = new String();
 							try {
 								hash = DirectoryReader.calculateHash(file);
 							} catch (NoSuchAlgorithmException | IOException e) {
-								m_filesOk.add(file.getAbsolutePath());
+								m_filesOk.add(absFilePath);
 								continue;
 							}
 				
@@ -303,23 +305,23 @@ public class DirectoryReader {
 							//									m_filesOk.add(file.getAbsolutePath());
 
 
-							if(!m_oldMap.containsKey(file.getAbsolutePath()))
+							if(!m_oldMap.containsKey(absFilePath))
 							{
-								FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
+								FileInfo fi = new FileInfo(absFilePath,file.lastModified(),hash);
 								fi.save();
-								m_newFiles.put(file.getAbsolutePath(),hash);
+								m_newFiles.put(absFilePath,hash);
 								m_EventsStack.addEvent(new Event(currentShareFolder.getUID(), System.currentTimeMillis(), relFilePathFile,file.isFile()?file.length():-1,file.isFile()? 1 : 0,hash,null,Event.ACTION_CREATE, peerID,Event.STATUS_LOCAL_OK));
 							}
 							else
 							{
-								FileInfo fi = new FileInfo(file.getAbsolutePath(),file.lastModified(),hash);
+								FileInfo fi = new FileInfo(absFilePath,file.lastModified(),hash);
 								fi.save();
-								if(m_oldMap.get(file.getAbsolutePath()).getHash().equals(hash) || (m_oldMap.get(file.getAbsolutePath()).getHash()=="null" && hash==null) ){
-									m_filesOk.add(file.getAbsolutePath());
+								if(m_oldMap.get(absFilePath).getHash().equals(hash) || (m_oldMap.get(absFilePath).getHash()=="null" && hash==null) ){
+									m_filesOk.add(absFilePath);
 								}else
 								{
-									m_updatedFiles.put(file.getAbsolutePath(),hash);
-									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(), relFilePathFile,file.isFile()?file.length():-1,file.isFile()? 1 : 0,hash,m_oldMap.get(file.getAbsolutePath()).getHash(),Event.ACTION_UPDATE,peerID, Event.STATUS_LOCAL_OK));
+									m_updatedFiles.put(absFilePath,hash);
+									m_EventsStack.addEvent(new Event(currentShareFolder.getUID(),System.currentTimeMillis(), relFilePathFile,file.isFile()?file.length():-1,file.isFile()? 1 : 0,hash,m_oldMap.get(absFilePath).getHash(),Event.ACTION_UPDATE,peerID, Event.STATUS_LOCAL_OK));
 								}
 							}
 						}

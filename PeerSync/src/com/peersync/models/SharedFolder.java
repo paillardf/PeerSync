@@ -6,7 +6,7 @@ public class SharedFolder {
 
 	private final String UID;
 	private final String peerGroupUID;
-	private final String asbolutePath;
+	private String asbolutePath;
 	private final String name;
 
 
@@ -16,7 +16,9 @@ public class SharedFolder {
 	public SharedFolder(String UID,String peerGroupUID, String absDirPath,String name) {
 		this.UID = UID;
 		this.peerGroupUID = peerGroupUID;
+		
 		asbolutePath = absDirPath;
+		asbolutePath=reformatFilePath(asbolutePath);
 		this.name=name;
 	}
 
@@ -28,24 +30,30 @@ public class SharedFolder {
 	{
 		if(relative == null || baseDir == null || relative.isEmpty() || baseDir.isEmpty()	)
 			return null;
-		if(relative.equals("\\"))
+		if(relative.equals("/"))
 			return baseDir;
 		return baseDir.concat(relative);
 	}
 
+	public static String reformatFilePath(String source)
+	{
+		return source.replace("\\", "/");
+	}
+	
 	public static String RelativeFromAbsolutePath(String absolute,String baseDir)
 	{
+		absolute=reformatFilePath(absolute);
+		baseDir=reformatFilePath(baseDir);
 		if(absolute == null || baseDir == null || absolute.isEmpty() || baseDir.isEmpty()	)
 			return null;
 		String res = absolute.replace(baseDir, "");
 		if(res.length()==0)
-			res="\\";
+			res="/";
 		return res;
 	}
 
 	public String getAbsFolderRootPath()
 	{
-
 		return asbolutePath;
 	}
 
