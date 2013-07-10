@@ -84,6 +84,8 @@ public class FilesInfoManager {
 						return;
 					
 					File myFile = new File (PeerSync.getInstance().tempPath+"/"+hash+".tmp");
+					
+					
 					//Create the accessor with read-write access.
 					RandomAccessFile accessor = new RandomAccessFile (myFile, "rws");
 					

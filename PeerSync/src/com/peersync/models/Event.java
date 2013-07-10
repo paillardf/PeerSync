@@ -28,9 +28,10 @@ public class Event {
 	
 	// > 9 evenements non encore synchronisé physiquement
 	public static final int MIN_STATUS_UNSYNC = 10;
-	public static final int MAX_STATUS_UNSYNC = 11;
+	public static final int MAX_STATUS_UNSYNC = 12;
 	public static final int STATUS_UNSYNC = 10;
-	public static final int STATUS_UNSYNC_CONFLICT = 11;
+	public static final int STATUS_FORCE_UNSYNC = 11;
+	public static final int STATUS_UNSYNC_CONFLICT = 12;
 
 	public static final int ACTION_CREATE = 1;
 	public static final int ACTION_UPDATE = 2;
@@ -48,38 +49,6 @@ public class Event {
 	public static final String FILESIZE_TAG = "filesize";
 
 
-	//	public Event(String shareFolderUID, String relFilePath,int is_file,  String newHash,String oldHash,int action,int status) 
-	//	{
-	//		this(shareFolderUID, )
-	//		setDate(System.currentTimeMillis());
-	//		setFilepath(relFilePath);
-	//		setAction(action);
-	//		setOwner(Constants.getInstance().PEERID.toString());
-	//		m_sharedFolderUID = shareFolderUID;
-	//		setNewHash(newHash);
-	//		setOldHash(oldHash);
-	//		setStatus(status);
-	//		m_isFile = is_file;
-	//
-	//
-	//
-	//	}
-	// UTILE???
-	//	public Event(String filepath,String newHash,String oldHash,int action,String owner,int status) 
-	//	{
-	//
-	//		setDate(System.currentTimeMillis());
-	//		setFilepath(filepath);
-	//		setAction(action);
-	//		setOwner(owner);
-	//		m_sharedFolder = new SharedFolder(DataBaseManager.getDataBaseManager().getSharedFolderOfAFile(filepath));
-	//		setNewHash(newHash);
-	//		setOldHash(oldHash);
-	//		setStatus(status);
-	//		m_file = new File(getFilepath());
-	//		m_isFile = m_file.isFile()? 1 : 0;
-	//
-	//	}
 
 	public Event(String shareFolderUID,long date, String relFilePath,long length,int isFile,String newHash,String oldHash,int action,String owner,int status) 
 	{
@@ -125,8 +94,7 @@ public class Event {
 
 			Event e = DataBaseManager.getInstance().getLastEventOfAFile(m_relFilePath,m_sharedFolderUID);
 
-			//TODO : vérifier le bien fondée de la propagation des conflits ( || e.getStatus()==STATUS_CONFLICT )
-			if(e!=null && e.getStatus()!=STATUS_LOCAL_FORCEOK)
+			if(e!=null && e.getStatus()!=STATUS_LOCAL_FORCEOK && e.getStatus()!=STATUS_FORCE_UNSYNC)
 			{
 				if( (e.getNewHash().compareTo(getOldHash())!=0 || e.getStatus()==STATUS_LOCAL_CONFLICT))
 				{

@@ -217,13 +217,16 @@ public class ConflictCommand extends AbstractCommand {
 	/**	
 	 * 
 	 * 
-	 * @return L'event a insere en BDD pour resoudre le conflit (en se basant sur @param e)
+	 * @return L'event a inserer en BDD pour resoudre le conflit (en se basant sur @param e)
 	 */
 	private Event getSolveur(Event e)
 	{
 		Event res = new Event(e);
 		res.setDate(System.currentTimeMillis());
-		res.setStatus(Event.STATUS_LOCAL_FORCEOK);
+		if(res.getOwner().equals(PeerSync.getInstance().getConf().getPeerID().toString()))
+			res.setStatus(Event.STATUS_LOCAL_FORCEOK);
+		else
+			res.setStatus(Event.STATUS_FORCE_UNSYNC);
 		return res;
 
 

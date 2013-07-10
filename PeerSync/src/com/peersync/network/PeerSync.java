@@ -10,6 +10,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
@@ -97,7 +98,7 @@ public class PeerSync {
 	}
 
 	public void initialize(boolean rdv, String name, String password, int port, String configPath, String rdvadress) throws IOException, NoSuchProviderException, KeyStoreException{
-		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		PORT = port;
 		NAME = name;
 		System.setProperty(PeerSync.class.getName()+".NAME", NAME);
@@ -109,6 +110,8 @@ public class PeerSync {
 			NetworkManager.RecursiveDelete(prefFolder); 
 			NetworkManager.RecursiveDelete(confFile);
 		}
+		File f = new File(tempPath);
+		f.mkdirs();
 		prefFolder.mkdirs();
 		confFile.mkdirs();
 
@@ -121,7 +124,7 @@ public class PeerSync {
 
 		ConfigMode mode =NetworkManager.ConfigMode.EDGE;
 		if( rdv)
-			mode  = NetworkManager.ConfigMode.RENDEZVOUS;
+			mode  = NetworkManager.ConfigMode.RENDEZVOUS_RELAY;
 		KeyStoreManager ksm = KeyStoreManager.getInstance();
 		ksm.init(password, configPath);
 		networkManager = new NetworkManager(
@@ -181,6 +184,7 @@ public class PeerSync {
 			
 			if(netPeerGroup.isRendezvous()&&Log.isDebug())
 				new ConnectivityMonitor(netPeerGroup);
+				
 			scanService = ScanService.getInstance();
 			scanService.startService();
 			peerGroupManager = new PeerGroupManager(this, netPeerGroup);
